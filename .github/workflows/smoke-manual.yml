@@ -1,0 +1,55 @@
+# Manual smoke checks — requires a running API and data services (not runnable on default GitHub-hosted runners alone).
+name: Smoke (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute_smokes:
+        description: >
+          Run backend smoke scripts. Only enable on a self-hosted runner (or equivalent) where Postgres, Redis,
+          migrations, and the API are available on http://localhost:3001 as expected by the scripts.
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Smoke (manual)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Document requirements
+        run: |
+          echo "::notice::Smoke scripts (smoke:learner, smoke:moderation) call http://localhost:3001 and need a migrated database and Redis."
+          echo "Typical local flow: from backend/, docker compose up, prisma migrate, start API on port 3001, then npm run smoke:learner and npm run smoke:moderation."
+          echo "GitHub-hosted runners have no stack on localhost:3001; use this workflow to print steps, or set execute_smokes on a self-hosted runner with services running."
+
+      - name: Checkout
+        if: ${{ github.event.inputs.execute_smokes == 'true' }}
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: ${{ github.event.inputs.execute_smokes == 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        if: ${{ github.event.inputs.execute_smokes == 'true' }}
+        run: npm ci
+
+      - name: Smoke learner flow
+        if: ${{ github.event.inputs.execute_smokes == 'true' }}
+        run: npm run smoke:learner
+
+      - name: Smoke moderation flow
+        if: ${{ github.event.inputs.execute_smokes == 'true' }}
+        run: npm run smoke:moderation

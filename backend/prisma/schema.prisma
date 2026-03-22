@@ -1,0 +1,362 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LessonType {
+  VIDEO
+  TEXT
+  QUIZ
+}
+
+enum FriendRelationStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+enum AssignmentSubmissionStatus {
+  SUBMITTED
+  GRADED
+}
+
+enum ChatRoomType {
+  DIRECT
+  COURSE
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  MOCK
+}
+
+enum MediaAssetType {
+  VIDEO
+  FILE
+}
+
+enum AchievementKey {
+  FIRST_ENROLLMENT
+  FIRST_LESSON_COMPLETION
+  STREAK_3_DAYS
+  STREAK_7_DAYS
+  COURSE_COMPLETED
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String
+  firstName    String?
+  lastName     String?
+  role         Role         @default(STUDENT)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  courses      Course[]     @relation("CourseOwner")
+  enrollments  Enrollment[]
+  progress     Progress[]
+  sessions     RefreshSession[]
+  friendOut    FriendRelation[] @relation("FriendRequester")
+  friendIn     FriendRelation[] @relation("FriendAddressee")
+  assignmentSubmissions AssignmentSubmission[]
+  certificates Certificate[]
+  chatRoomMembers ChatRoomMember[]
+  chatMessages    ChatMessage[]
+  payments        Payment[]
+  uploadedMedia   MediaAsset[]
+  gamificationProfile UserGamificationProfile?
+  achievementAwards UserAchievement[]
+  gamificationEvents GamificationEvent[]
+}
+
+model FriendRelation {
+  id          String               @id @default(cuid())
+  requesterId String
+  addresseeId String
+  status      FriendRelationStatus
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  requester   User                 @relation("FriendRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee   User                 @relation("FriendAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@index([requesterId])
+  @@index([addresseeId])
+  @@index([status])
+}
+
+model Course {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  title       String
+  description String?
+  category    String?
+  level       String?
+  language    String?
+  priceCents  Int          @default(0)
+  status      CourseStatus @default(DRAFT)
+  moderationReason String?
+  ownerId     String
+  owner       User         @relation("CourseOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  modules     Module[]
+  enrollments Enrollment[]
+  certificates Certificate[]
+  chatRooms   ChatRoom[]
+  payments    Payment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model ChatRoom {
+  id        String       @id @default(cuid())
+  name      String
+  type      ChatRoomType
+  courseId  String?
+  course    Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+  members   ChatRoomMember[]
+  messages  ChatMessage[]
+
+  @@index([courseId])
+}
+
+model ChatRoomMember {
+  roomId   String
+  userId   String
+  joinedAt DateTime @default(now())
+  room     ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, userId])
+  @@index([userId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
+}
+
+model Module {
+  id        String   @id @default(cuid())
+  title     String
+  order     Int
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons   Lesson[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([courseId, order])
+}
+
+model Lesson {
+  id         String    @id @default(cuid())
+  title      String
+  type       LessonType
+  contentUrl String?
+  content    String?
+  mediaAssetId String?
+  order      Int
+  moduleId   String
+  module     Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  mediaAsset MediaAsset? @relation(fields: [mediaAssetId], references: [id], onDelete: SetNull)
+  progress   Progress[]
+  assignment Assignment?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([moduleId, order])
+  @@index([mediaAssetId])
+}
+
+model MediaAsset {
+  id           String         @id @default(cuid())
+  type         MediaAssetType
+  storageKey   String         @unique
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  uploadedById String
+  uploadedBy   User           @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  lessons      Lesson[]
+  createdAt    DateTime       @default(now())
+
+  @@index([uploadedById])
+  @@index([type])
+}
+
+model Payment {
+  id          String          @id @default(cuid())
+  userId      String
+  courseId    String
+  amountCents Int
+  currency    String          @default("USD")
+  provider    PaymentProvider @default(MOCK)
+  status      PaymentStatus
+  externalRef String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course      Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+}
+
+model UserGamificationProfile {
+  userId         String   @id
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  xp             Int      @default(0)
+  level          Int      @default(1)
+  streakDays     Int      @default(0)
+  longestStreak  Int      @default(0)
+  lastActiveDate DateTime?
+  updatedAt      DateTime @updatedAt
+}
+
+model AchievementDefinition {
+  id          String         @id @default(cuid())
+  key         AchievementKey @unique
+  title       String
+  description String
+  xpReward    Int            @default(0)
+  createdAt   DateTime       @default(now())
+  awards      UserAchievement[]
+}
+
+model UserAchievement {
+  id            String                @id @default(cuid())
+  userId        String
+  achievementId String
+  awardedAt     DateTime              @default(now())
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   AchievementDefinition @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+}
+
+model GamificationEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  eventType String
+  points    Int
+  courseId  String?
+  lessonId  String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@unique([userId, eventType, lessonId], map: "user_event_lesson_unique")
+}
+
+model Assignment {
+  id          String   @id @default(cuid())
+  lessonId    String   @unique
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  maxScore    Float
+  dueAt       DateTime?
+  createdAt   DateTime @default(now())
+  submissions AssignmentSubmission[]
+}
+
+model AssignmentSubmission {
+  id           String                     @id @default(cuid())
+  assignmentId String
+  assignment   Assignment                 @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content      String
+  score        Float?
+  status       AssignmentSubmissionStatus
+  submittedAt  DateTime                   @default(now())
+  gradedAt     DateTime?
+
+  @@unique([assignmentId, userId])
+}
+
+model Certificate {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId String
+  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  issuedAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+}
+
+model Enrollment {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  progress   Float    @default(0)
+  enrolledAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model Progress {
+  id              String   @id @default(cuid())
+  userId          String
+  lessonId        String
+  watchedDuration Int      @default(0)
+  completed       Boolean  @default(false)
+  quizScore       Float?
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson          Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+model RefreshSession {
+  id           String    @id @default(cuid())
+  userId       String
+  tokenId      String    @unique
+  tokenHash    String
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
