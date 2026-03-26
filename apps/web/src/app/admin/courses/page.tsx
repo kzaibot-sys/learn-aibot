@@ -1,0 +1,236 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
+import { useAuthStore } from '@/lib/auth';
+import { apiRequest } from '@/lib/api';
+
+interface AdminCourse {
+  id: string;
+  slug: string;
+  title: string;
+  price: string;
+  currency: string;
+  isPublished: boolean;
+  isFree: boolean;
+  createdAt: string;
+  _count: { enrollments: number };
+}
+
+export default function AdminCoursesPage() {
+  const token = useAuthStore(s => s.token);
+  const [courses, setCourses] = useState<AdminCourse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+
+  const loadCourses = useCallback(async () => {
+    try {
+      const data = await apiRequest<AdminCourse[]>('/api/admin/courses', {}, token);
+      setCourses(data);
+    } catch (err) {
+      console.error('Failed to load courses:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => { loadCourses(); }, [loadCourses]);
+
+  async function handleDelete(id: string) {
+    if (!confirm('Удалить курс? Это действие необратимо.')) return;
+    try {
+      await apiRequest(`/api/admin/courses/${id}`, { method: 'DELETE' }, token);
+      setCourses(prev => prev.filter(c => c.id !== id));
+    } catch (err) {
+      console.error('Delete failed:', err);
+    }
+  }
+
+  async function handleTogglePublish(course: AdminCourse) {
+    try {
+      await apiRequest(`/api/admin/courses/${course.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isPublished: !course.isPublished }),
+      }, token);
+      setCourses(prev => prev.map(c =>
+        c.id === course.id ? { ...c, isPublished: !c.isPublished } : c
+      ));
+    } catch (err) {
+      console.error('Toggle publish failed:', err);
+    }
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-white">Курсы</h1>
+        <button
+          onClick={() => setShowCreate(true)}
+          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover transition-colors"
+        >
+          Создать курс
+        </button>
+      </div>
+
+      {showCreate && (
+        <CreateCourseForm
+          token={token}
+          onCreated={() => { setShowCreate(false); loadCourses(); }}
+          onCancel={() => setShowCreate(false)}
+        />
+      )}
+
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <div className="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full" />
+        </div>
+      ) : courses.length === 0 ? (
+        <p className="text-zinc-400 text-center py-12">Нет курсов</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-dark-border text-left text-zinc-500">
+                <th className="pb-3 font-medium">Название</th>
+                <th className="pb-3 font-medium">Slug</th>
+                <th className="pb-3 font-medium">Цена</th>
+                <th className="pb-3 font-medium">Студенты</th>
+                <th className="pb-3 font-medium">Статус</th>
+                <th className="pb-3 font-medium">Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              {courses.map(course => (
+                <tr key={course.id} className="border-b border-dark-border/50">
+                  <td className="py-3 text-white font-medium">{course.title}</td>
+                  <td className="py-3 text-zinc-400">{course.slug}</td>
+                  <td className="py-3 text-zinc-400">
+                    {course.isFree ? 'Бесплатно' : `${course.price} ${course.currency}`}
+                  </td>
+                  <td className="py-3 text-zinc-400">{course._count.enrollments}</td>
+                  <td className="py-3">
+                    <button
+                      onClick={() => handleTogglePublish(course)}
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        course.isPublished
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-dark-hover text-zinc-400'
+                      }`}
+                    >
+                      {course.isPublished ? 'Опубликован' : 'Черновик'}
+                    </button>
+                  </td>
+                  <td className="py-3">
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/admin/courses/${course.id}/modules`}
+                        className="text-brand hover:underline text-xs"
+                      >
+                        Модули
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(course.id)}
+                        className="text-red-500 hover:underline text-xs"
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CreateCourseForm({
+  token,
+  onCreated,
+  onCancel,
+}: {
+  token: string | null;
+  onCreated: () => void;
+  onCancel: () => void;
+}) {
+  const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
+  const [price, setPrice] = useState('0');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+    try {
+      await apiRequest('/api/admin/courses', {
+        method: 'POST',
+        body: JSON.stringify({ title, slug, price: Number(price) }),
+      }, token);
+      onCreated();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="rounded-xl border border-dark-border bg-dark-card p-6 mb-6">
+      <h2 className="text-lg font-semibold text-white mb-4">Новый курс</h2>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div>
+          <label className="mb-1 block text-sm text-zinc-400">Название</label>
+          <input
+            required
+            value={title}
+            onChange={e => {
+              setTitle(e.target.value);
+              setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9а-яё]+/g, '-').replace(/(^-|-$)/g, ''));
+            }}
+            className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm text-zinc-400">Slug</label>
+          <input
+            required
+            value={slug}
+            onChange={e => setSlug(e.target.value)}
+            className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm text-zinc-400">Цена (RUB)</label>
+          <input
+            type="number"
+            required
+            value={price}
+            onChange={e => setPrice(e.target.value)}
+            className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
+          />
+        </div>
+      </div>
+      {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+      <div className="mt-4 flex gap-3">
+        <button
+          type="submit"
+          disabled={saving}
+          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover disabled:opacity-50 transition-colors"
+        >
+          {saving ? 'Создание...' : 'Создать'}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-lg border border-dark-border px-4 py-2 text-sm text-zinc-400 hover:bg-dark-hover transition-colors"
+        >
+          Отмена
+        </button>
+      </div>
+    </form>
+  );
+}

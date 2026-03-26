@@ -1,0 +1,23 @@
+{
+  "name": "bot",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@lms/database": "*",
+    "@lms/shared": "*",
+    "grammy": "^1.31.0",
+    "@anthropic-ai/sdk": "^0.39.0",
+    "ioredis": "^5.4.0",
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "lms-platform",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "db:migrate": "turbo run db:migrate --filter=@lms/database",
+    "db:generate": "turbo run db:generate --filter=@lms/database"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.0",
+    "typescript": "^5.7.0",
+    "prettier": "^3.4.0"
+  },
+  "packageManager": "npm@11.12.0",
+  "engines": {
+    "node": ">=20"
+  }
+}
