@@ -8,13 +8,20 @@
     "build": "tsc",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
+    "db:seed": "npx tsx prisma/seed.ts",
     "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.4.0"
   },
   "devDependencies": {
+    "bcryptjs": "^2.4.3",
+    "@types/bcryptjs": "^2.4.6",
     "prisma": "^6.4.0",
+    "tsx": "^4.7.0",
     "typescript": "^5.7.0"
   }
 }
