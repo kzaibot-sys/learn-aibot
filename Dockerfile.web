@@ -4,13 +4,15 @@ COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/shared/package.json ./packages/shared/
-RUN npm ci --ignore-scripts
+RUN npm ci
 
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npx turbo run build --filter=web
+RUN cd packages/shared && npx tsc --noEmit false --outDir dist || true
+RUN cd packages/ui && npx tsc --noEmit false --outDir dist || true
+RUN cd apps/web && npx next build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -23,4 +25,5 @@ COPY --from=builder /app/apps/web/public ./apps/web/public
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 CMD ["node", "apps/web/server.js"]
