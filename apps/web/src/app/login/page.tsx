@@ -18,8 +18,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isRegister, setIsRegister] = useState(false);
-  const [firstName, setFirstName] = useState('');
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -27,14 +25,9 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
-      const body = isRegister
-        ? { email, password, firstName: firstName || undefined }
-        : { email, password };
-
-      const data = await apiRequest<AuthResponse>(endpoint, {
+      const data = await apiRequest<AuthResponse>('/api/auth/login', {
         method: 'POST',
-        body: JSON.stringify(body),
+        body: JSON.stringify({ email, password }),
       });
 
       setAuth(data.user, data.accessToken);
@@ -47,52 +40,37 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 bg-[#0A0A0B]">
+    <div className="flex min-h-screen items-center justify-center px-4 bg-background">
       <div className="w-full max-w-sm">
-        <Link href="/" className="mb-8 block text-center text-2xl font-bold text-white">
-          LMS Platform
+        <Link href="/" className="mb-8 block text-center text-2xl font-bold text-foreground">
+          LearnHub Pro
         </Link>
 
-        <div className="rounded-2xl border border-dark-border bg-dark-card p-8">
-          <h1 className="mb-6 text-xl font-bold text-center text-white">
-            {isRegister ? 'Регистрация' : 'Вход'}
-          </h1>
+        <div className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-8">
+          <h1 className="mb-6 text-xl font-bold text-center text-foreground">Вход</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {isRegister && (
-              <div>
-                <label className="mb-1 block text-sm text-zinc-400">Имя</label>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={e => setFirstName(e.target.value)}
-                  className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
-                  placeholder="Ваше имя"
-                />
-              </div>
-            )}
-
             <div>
-              <label className="mb-1 block text-sm text-zinc-400">Email</label>
+              <label className="mb-1 block text-sm text-muted-foreground">Email</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
+                className="w-full rounded-2xl border border-border/50 bg-secondary/50 backdrop-blur-sm px-4 py-3 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none placeholder:text-muted-foreground/70"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-zinc-400">Пароль</label>
+              <label className="mb-1 block text-sm text-muted-foreground">Пароль</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
-                placeholder="Минимум 6 символов"
+                className="w-full rounded-2xl border border-border/50 bg-secondary/50 backdrop-blur-sm px-4 py-3 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none placeholder:text-muted-foreground/70"
+                placeholder="Введите пароль"
               />
             </div>
 
@@ -101,21 +79,11 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-brand py-2.5 text-sm font-medium text-white hover:bg-brand-hover disabled:opacity-50 transition-colors"
+              className="w-full rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 py-3 text-sm font-bold text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 disabled:opacity-50 transition-all"
             >
-              {loading ? 'Загрузка...' : isRegister ? 'Зарегистрироваться' : 'Войти'}
+              {loading ? 'Загрузка...' : 'Войти'}
             </button>
           </form>
-
-          <p className="mt-4 text-center text-sm text-zinc-500">
-            {isRegister ? 'Уже есть аккаунт?' : 'Нет аккаунта?'}{' '}
-            <button
-              onClick={() => { setIsRegister(!isRegister); setError(''); }}
-              className="text-brand hover:underline"
-            >
-              {isRegister ? 'Войти' : 'Зарегистрироваться'}
-            </button>
-          </p>
         </div>
       </div>
     </div>
