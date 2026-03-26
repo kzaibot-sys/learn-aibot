@@ -49,7 +49,7 @@ export function UserLevel({ compact = false }: Props) {
         <div className="flex items-center justify-between gap-2">
           {/* Level badge */}
           <div className="flex items-center gap-1.5">
-            <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-primary via-accent to-orange-400 flex items-center justify-center shadow-md shadow-primary/25 shrink-0">
+            <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400 flex items-center justify-center shadow-md shadow-orange-500/25 shrink-0">
               <span className="text-[10px] font-bold text-white">{stats.level}</span>
             </div>
             <span className="text-xs font-semibold text-foreground">Lvl {stats.level}</span>
@@ -63,7 +63,7 @@ export function UserLevel({ compact = false }: Props) {
         {/* XP bar */}
         <div className="w-full h-1.5 rounded-full bg-border/50 overflow-hidden">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-orange-400 transition-all duration-700"
+            className="h-full rounded-full bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 transition-all duration-700"
             style={{ width: `${stats.percent}%` }}
           />
         </div>
@@ -79,7 +79,7 @@ export function UserLevel({ compact = false }: Props) {
     <div className="glass-card rounded-3xl p-5 space-y-4">
       <div className="flex items-center gap-4">
         {/* Level circle */}
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary via-accent to-orange-400 flex flex-col items-center justify-center shadow-lg shadow-primary/25 shrink-0">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400 flex flex-col items-center justify-center shadow-lg shadow-orange-500/25 shrink-0">
           <span className="text-[10px] font-semibold text-white/80 leading-none">LVL</span>
           <span className="text-lg font-bold text-white leading-none">{stats.level}</span>
         </div>
@@ -107,7 +107,7 @@ export function UserLevel({ compact = false }: Props) {
         </div>
         <div className="w-full h-2.5 rounded-full bg-border/50 overflow-hidden">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-orange-400 transition-all duration-700"
+            className="h-full rounded-full bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 transition-all duration-700"
             style={{ width: `${stats.percent}%` }}
           />
         </div>

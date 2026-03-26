@@ -35,7 +35,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Начнит�
       <button
         type="button"
         onClick={onClick}
-        className={`p-1.5 rounded-lg transition-colors ${active ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
+        className={`p-1.5 rounded-lg transition-colors ${active ? 'bg-orange-500/20 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
       >
         {children}
       </button>

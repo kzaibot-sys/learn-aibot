@@ -11,33 +11,33 @@
   --color-accent: #ffaa66;
   --color-orange-400: #ff9944;
   --color-ring: #ff8533;
-  --color-destructive: #ff4444;
+  --color-destructive: #ef4444;
 
   /* Light theme */
-  --color-background: #f8f9fa;
-  --color-foreground: #1a1a2e;
-  --color-card: #ffffff;
-  --color-card-foreground: #1a1a2e;
+  --color-background: #ffffff;
+  --color-foreground: #1a1a1f;
+  --color-card: #f5f5f7;
+  --color-card-foreground: #1a1a1f;
   --color-popover: #ffffff;
-  --color-secondary: #f0f0f5;
-  --color-muted: #e8e8ed;
-  --color-muted-foreground: #6b7280;
-  --color-border: #e0e0e8;
-  --color-input: #f5f5f8;
+  --color-secondary: #ededf0;
+  --color-muted: #ededf0;
+  --color-muted-foreground: #6b6b78;
+  --color-border: #e5e5ea;
+  --color-input: #e5e5ea;
 }
 
 .dark {
-  /* Dark theme */
+  /* Dark theme — Figma design */
   --color-background: #0a0a0f;
   --color-foreground: #f0f0f3;
-  --color-card: #141419;
+  --color-card: #14141a;
   --color-card-foreground: #f0f0f3;
   --color-popover: #1a1a1f;
   --color-secondary: #1a1a1f;
-  --color-muted: #1f1f26;
+  --color-muted: #1a1a1f;
   --color-muted-foreground: #9a9aa5;
   --color-border: #2a2a35;
-  --color-input: #1a1a1f;
+  --color-input: #2a2a35;
 }
 
 @layer base {
@@ -98,8 +98,8 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); }
+  0%, 100% { box-shadow: 0 0 5px rgba(255, 133, 51, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 133, 51, 0.6); }
 }
 
 @keyframes float {
@@ -165,7 +165,7 @@
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  background: linear-gradient(135deg, rgb(99, 102, 241), rgb(139, 92, 246), rgb(251, 146, 60));
+  background: linear-gradient(135deg, rgb(255, 133, 51), rgb(255, 153, 68), rgb(251, 191, 36));
   z-index: -1;
   opacity: 0;
   transition: opacity 0.3s;
@@ -187,7 +187,7 @@
 
 /* === Gradient Text === */
 .gradient-text {
-  background: linear-gradient(135deg, rgb(99, 102, 241), rgb(139, 92, 246), rgb(251, 146, 60));
+  background: linear-gradient(135deg, rgb(255, 133, 51), rgb(255, 153, 68), rgb(251, 191, 36));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

@@ -60,7 +60,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full rounded-2xl border border-border/50 bg-secondary/50 backdrop-blur-sm px-4 py-3 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none placeholder:text-muted-foreground/70"
+                className="w-full rounded-2xl border border-border/50 bg-secondary/50 backdrop-blur-sm px-4 py-3 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-orange-500/50 focus:outline-none placeholder:text-muted-foreground/70"
                 placeholder="you@example.com"
                 autoComplete="email"
               />
@@ -73,7 +73,7 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full rounded-2xl border border-border/50 bg-secondary/50 backdrop-blur-sm px-4 py-3 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none placeholder:text-muted-foreground/70"
+                className="w-full rounded-2xl border border-border/50 bg-secondary/50 backdrop-blur-sm px-4 py-3 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-orange-500/50 focus:outline-none placeholder:text-muted-foreground/70"
                 placeholder={t('auth.enterPassword')}
                 autoComplete="current-password"
               />
@@ -84,7 +84,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 py-3 text-sm font-bold text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 disabled:opacity-50 transition-all"
+              className="w-full rounded-2xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 py-3 text-sm font-bold text-white shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 disabled:opacity-50 transition-all"
             >
               {loading ? t('auth.loading') : t('auth.submit')}
             </button>

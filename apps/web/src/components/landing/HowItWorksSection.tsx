@@ -35,16 +35,16 @@ export function HowItWorksSection() {
               className="glass-card rounded-2xl p-6 text-center relative group"
             >
               {/* Step number badge */}
-              <div className="w-10 h-10 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-black text-sm shadow-lg shadow-primary/30 relative z-10">
+              <div className="w-10 h-10 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-orange-500/30 relative z-10">
                 {i + 1}
               </div>
 
               {/* Vertical line for mobile between steps */}
               {i < steps.length - 1 && (
-                <div className="lg:hidden absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-px h-8 bg-gradient-to-b from-primary/30 to-transparent" />
+                <div className="lg:hidden absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-px h-8 bg-gradient-to-b from-orange-500/30 to-transparent" />
               )}
 
-              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-primary/15 to-accent/15 border border-primary/10 flex items-center justify-center group-hover:from-primary/25 group-hover:to-accent/25 transition-all">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-orange-500/15 to-amber-400/15 border border-orange-500/10 flex items-center justify-center group-hover:from-orange-500/25 group-hover:to-amber-400/25 transition-all">
                 <step.icon className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-base font-bold text-foreground mb-2">{t(step.titleKey)}</h3>

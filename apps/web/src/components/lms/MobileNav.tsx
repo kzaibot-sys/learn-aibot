@@ -90,15 +90,15 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
 
       {/* Sidebar panel */}
       <aside
-        className={`fixed left-0 top-0 h-full w-72 max-w-[85vw] bg-background border-r border-border/50 z-50 flex flex-col transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed left-0 top-0 h-full w-72 max-w-[85vw] bg-background dark:bg-[#14141A] border-r border-border/50 z-50 flex flex-col transition-transform duration-300 ease-out md:hidden ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 h-16 border-b border-border/50 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-accent to-orange-400 flex items-center justify-center shadow-xl shadow-primary/25 shrink-0 overflow-hidden">
-              <GraduationCap className="w-5 h-5 text-white relative z-10" />
+            <div className="w-10 h-10 rounded-2xl bg-orange-500 flex items-center justify-center shadow-xl shadow-orange-500/25 shrink-0">
+              <GraduationCap className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0">
               <h1 className="text-sm font-bold text-foreground truncate">AiBot</h1>
@@ -127,7 +127,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-3 rounded-2xl text-sm transition-all min-h-[44px] ${
                     active
-                      ? 'bg-gradient-to-r from-primary via-accent to-orange-400 text-white shadow-xl shadow-primary/30 font-medium'
+                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30 font-medium'
                       : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                   }`}
                 >
@@ -155,7 +155,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
               </div>
               <div className="w-full h-1.5 rounded-full bg-border/50 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-orange-400"
+                  className="h-full rounded-full bg-orange-500"
                   style={{ width: '68%' }}
                 />
               </div>
@@ -179,7 +179,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
                       href={item.href}
                       className={`flex items-center gap-3 px-3 py-3 rounded-2xl text-sm transition-all min-h-[44px] ${
                         active
-                          ? 'bg-gradient-to-r from-primary via-accent to-orange-400 text-white shadow-xl shadow-primary/30 font-medium'
+                          ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30 font-medium'
                           : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                       }`}
                     >
@@ -213,7 +213,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-sm font-bold shrink-0">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center text-white text-sm font-bold shrink-0">
               {(user?.firstName?.[0] || user?.email?.[0] || 'U').toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">

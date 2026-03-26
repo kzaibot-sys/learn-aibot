@@ -4,12 +4,19 @@ import { authenticate } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { getUserStats } from '../services/gamification';
 import { ACHIEVEMENTS, xpForNextLevel } from '../config/gamification';
+import { cacheGet, cacheSet } from '../services/redis';
 
 const router = Router();
 router.use(authenticate);
 
 // GET /api/leaderboard
 router.get('/leaderboard', asyncHandler(async (req, res) => {
+  const cached = await cacheGet<{ success: boolean; data: unknown[] }>('leaderboard');
+  if (cached) {
+    res.json(cached);
+    return;
+  }
+
   const users = await prisma.user.findMany({
     where: { isActive: true },
     select: {
@@ -25,7 +32,10 @@ router.get('/leaderboard', asyncHandler(async (req, res) => {
     orderBy: { totalXp: 'desc' },
     take: 50,
   });
-  res.json({ success: true, data: users.map((u, i) => ({ ...u, rank: i + 1 })) });
+
+  const response = { success: true, data: users.map((u, i) => ({ ...u, rank: i + 1 })) };
+  await cacheSet('leaderboard', response, 60); // 1 min cache
+  res.json(response);
 }));
 
 // GET /api/user/stats

@@ -34,7 +34,7 @@ export function AboutSection() {
               delay={i * 100}
               className="glass-card hover-lift rounded-2xl p-7 text-center group"
             >
-              <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/10 flex items-center justify-center shadow-inner group-hover:from-primary/30 group-hover:to-accent/30 transition-all">
+              <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-orange-500/20 to-amber-400/20 border border-orange-500/10 flex items-center justify-center shadow-inner group-hover:from-orange-500/30 group-hover:to-amber-400/30 transition-all">
                 <feature.icon className="w-7 h-7 text-primary" />
               </div>
               <h3 className="text-base font-bold text-foreground mb-2">{t(feature.titleKey)}</h3>

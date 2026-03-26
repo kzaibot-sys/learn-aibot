@@ -21,7 +21,7 @@ export function FAQSection() {
         <ScrollReveal>
           <h2 className="mb-16 text-center text-4xl font-black sm:text-5xl">
             {t('landing.faq.title1')}{' '}
-            <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 bg-clip-text text-transparent">
               {t('landing.faq.title2')}
             </span>
           </h2>
@@ -34,7 +34,7 @@ export function FAQSection() {
             >
               <div
                 className={`glass-card rounded-2xl overflow-hidden transition-all duration-300 ${
-                  openIndex === i ? 'border-l-4 border-l-primary shadow-lg shadow-primary/10' : 'border-l-4 border-l-transparent'
+                  openIndex === i ? 'border-l-4 border-l-primary shadow-lg shadow-orange-500/10' : 'border-l-4 border-l-transparent'
                 }`}
               >
                 <button

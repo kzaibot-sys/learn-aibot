@@ -64,13 +64,13 @@ export function CoursesSection() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
                 ) : (
-                  <div className="aspect-video bg-gradient-to-br from-primary/15 to-accent/15 flex items-center justify-center relative overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-orange-500/15 to-amber-400/15 flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-0 bg-[linear-gradient(rgba(99,102,241,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.05)_1px,transparent_1px)] bg-[size:30px_30px]" />
                     <BookOpen className="w-14 h-14 text-primary/50 relative z-10" />
                   </div>
                 )}
                 <div className="p-6">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-semibold text-primary mb-3">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 px-3 py-1 text-xs font-semibold text-primary mb-3">
                     <BookOpen className="w-3 h-3" />
                     {t('landing.courses.view')}
                   </div>

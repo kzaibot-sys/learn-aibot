@@ -25,7 +25,7 @@ export function ReviewsSection() {
         <ScrollReveal>
           <h2 className="mb-16 text-center text-4xl font-black sm:text-5xl">
             {t('landing.reviews.title1')}{' '}
-            <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 bg-clip-text text-transparent">
               {t('landing.reviews.title2')}
             </span>
           </h2>
@@ -48,8 +48,8 @@ export function ReviewsSection() {
               <p className="mb-6 text-foreground/80 leading-relaxed relative z-10">{review.text}</p>
               <div className="flex items-center gap-3">
                 {/* Avatar with gradient ring */}
-                <div className="p-0.5 rounded-full bg-gradient-to-br from-primary to-accent shadow-md shadow-primary/20">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold text-sm">
+                <div className="p-0.5 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 shadow-md shadow-orange-500/20">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center text-white font-bold text-sm">
                     {review.name[0]}
                   </div>
                 </div>

@@ -17,7 +17,7 @@ export function ResultsSection() {
         <ScrollReveal>
           <h2 className="mb-16 text-center text-4xl font-black sm:text-5xl">
             {t('landing.results.title1')}{' '}
-            <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 bg-clip-text text-transparent">
               {t('landing.results.title2')}
             </span>
           </h2>
@@ -27,9 +27,9 @@ export function ResultsSection() {
             <ScrollReveal
               key={i}
               delay={i * 50}
-              className="flex items-start gap-4 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:border-primary/50 transition-all"
+              className="flex items-start gap-4 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:border-orange-500/50 transition-all"
             >
-              <div className="mt-0.5 shrink-0 p-1.5 rounded-full bg-primary/10 border border-primary/20">
+              <div className="mt-0.5 shrink-0 p-1.5 rounded-full bg-orange-500/10 border border-orange-500/20">
                 <CheckCircle2 className="w-4 h-4 text-primary" />
               </div>
               <span className="text-foreground/90">{result}</span>

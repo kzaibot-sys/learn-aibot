@@ -8,7 +8,7 @@ export function CTASection() {
   return (
     <section className="py-24 px-4 sm:px-6 lg:px-8">
       <ScrollReveal>
-        <div className="mx-auto max-w-4xl rounded-3xl bg-gradient-to-r from-primary via-accent to-orange-400 p-10 sm:p-12 text-center relative overflow-hidden">
+        <div className="mx-auto max-w-4xl rounded-3xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 p-10 sm:p-12 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:40px_40px]" />
           {/* Decorative blobs inside CTA */}
           <div className="absolute -top-16 -right-16 w-64 h-64 bg-white/10 rounded-full blur-3xl" />

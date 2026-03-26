@@ -75,7 +75,7 @@ export function CompleteLessonButton({ lessonId, onComplete, alreadyCompleted }:
           className={`hover-lift inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold transition-all min-h-[44px] ${
             done
               ? 'bg-green-500/10 text-green-500 border border-green-500/30 cursor-default'
-              : 'bg-gradient-to-r from-primary via-accent to-orange-400 text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed'
+              : 'bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 text-white shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed'
           }`}
         >
           {loading ? (
@@ -94,7 +94,7 @@ export function CompleteLessonButton({ lessonId, onComplete, alreadyCompleted }:
             className="absolute -top-10 left-1/2 -translate-x-1/2 animate-fade-in-up pointer-events-none"
             style={{ animation: 'fadeInUp 0.4s ease-out forwards' }}
           >
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-primary via-accent to-orange-400 text-white text-sm font-bold shadow-lg shadow-primary/30 whitespace-nowrap">
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 text-white text-sm font-bold shadow-lg shadow-orange-500/30 whitespace-nowrap">
               <Zap className="w-3 h-3" />
               +{xpPopup} XP
             </span>
@@ -105,7 +105,7 @@ export function CompleteLessonButton({ lessonId, onComplete, alreadyCompleted }:
       {/* Level up message */}
       {levelUp && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-fade-in-up">
-          <div className="glass-card px-6 py-4 rounded-3xl border border-primary/30 shadow-2xl shadow-primary/20 text-center">
+          <div className="glass-card px-6 py-4 rounded-3xl border border-orange-500/30 shadow-2xl shadow-orange-500/20 text-center">
             <p className="text-lg font-bold gradient-text">🎉 Новый уровень!</p>
             <p className="text-sm text-muted-foreground mt-1">Вы повысили свой уровень!</p>
           </div>

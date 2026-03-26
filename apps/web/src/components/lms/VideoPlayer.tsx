@@ -397,7 +397,7 @@ export function VideoPlayer({ src, initialTime = 0, onTimeUpdate, onComplete }: 
                     key={s}
                     onClick={() => changeSpeed(s)}
                     className={`block w-full text-left px-3 py-2.5 sm:py-1.5 text-xs rounded-lg transition-colors ${
-                      speed === s ? 'bg-primary/20 text-primary' : 'text-foreground hover:bg-secondary/50'
+                      speed === s ? 'bg-orange-500/20 text-primary' : 'text-foreground hover:bg-secondary/50'
                     }`}
                   >
                     {s}x

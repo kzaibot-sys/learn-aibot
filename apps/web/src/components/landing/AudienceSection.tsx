@@ -19,7 +19,7 @@ export function AudienceSection() {
         <ScrollReveal>
           <h2 className="mb-16 text-center text-4xl font-black sm:text-5xl">
             {t('landing.audience.title1')}{' '}
-            <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 bg-clip-text text-transparent">
               {t('landing.audience.title2')}
             </span>
           </h2>
@@ -31,9 +31,9 @@ export function AudienceSection() {
               <ScrollReveal
                 key={i}
                 delay={i * 100}
-                className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-8 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/20 transition-all"
+                className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-8 hover:border-orange-500/50 hover:shadow-2xl hover:shadow-orange-500/20 transition-all"
               >
-                <div className="mb-4 p-4 rounded-2xl bg-gradient-to-br from-primary/20 via-accent/15 to-orange-400/10 border border-primary/20 w-fit">
+                <div className="mb-4 p-4 rounded-2xl bg-gradient-to-br from-orange-500/20 via-orange-400/15 to-orange-400/10 border border-orange-500/20 w-fit">
                   <Icon className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="mb-2 text-xl font-bold text-foreground">{item.title}</h3>

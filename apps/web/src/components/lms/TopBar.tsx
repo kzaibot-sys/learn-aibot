@@ -65,7 +65,7 @@ export function TopBar() {
                   }
                 }}
                 placeholder={t('search.placeholder')}
-                className="w-full rounded-xl bg-secondary/50 border border-border/50 pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors"
+                className="w-full rounded-xl bg-secondary/50 border border-border/50 pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-primary/20 transition-colors"
               />
             </div>
           </div>

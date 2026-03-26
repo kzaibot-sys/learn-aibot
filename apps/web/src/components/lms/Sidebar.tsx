@@ -50,12 +50,11 @@ export function Sidebar() {
   }
 
   return (
-    <aside className={`fixed left-0 top-0 h-screen bg-background border-r border-border/50 hidden md:flex flex-col transition-all duration-300 z-40 ${collapsed ? 'w-16' : 'w-72'}`}>
+    <aside className={`fixed left-0 top-0 h-screen bg-background dark:bg-[#14141A] border-r border-border/50 hidden md:flex flex-col transition-all duration-300 z-40 ${collapsed ? 'w-16' : 'w-72'}`}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-border/50 shrink-0">
-        <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-accent to-orange-400 flex items-center justify-center shadow-xl shadow-primary/25 shrink-0 overflow-hidden">
-          <GraduationCap className="w-5 h-5 text-white relative z-10" />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+        <div className="w-10 h-10 rounded-2xl bg-orange-500 flex items-center justify-center shadow-xl shadow-orange-500/25 shrink-0">
+          <GraduationCap className="w-5 h-5 text-white" />
         </div>
         {!collapsed && (
           <div className="min-w-0">
@@ -86,7 +85,7 @@ export function Sidebar() {
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm transition-all ${
                   active
-                    ? 'bg-gradient-to-r from-primary via-accent to-orange-400 text-white shadow-xl shadow-primary/30 font-medium'
+                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30 font-medium'
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
                 title={collapsed ? label : undefined}
@@ -119,7 +118,7 @@ export function Sidebar() {
                     href={item.href}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm transition-all ${
                       active
-                        ? 'bg-gradient-to-r from-primary via-accent to-orange-400 text-white shadow-xl shadow-primary/30 font-medium'
+                        ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30 font-medium'
                         : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                     }`}
                     title={collapsed ? label : undefined}
@@ -160,7 +159,7 @@ export function Sidebar() {
 
         {/* User profile */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-sm font-bold shrink-0">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center text-white text-sm font-bold shrink-0">
             {(user?.firstName?.[0] || user?.email?.[0] || 'U').toUpperCase()}
           </div>
           {!collapsed && (

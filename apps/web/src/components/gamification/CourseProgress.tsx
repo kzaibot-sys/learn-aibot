@@ -59,7 +59,7 @@ export function CourseProgress({ courseId, showModules = false, className = '' }
         </div>
         <div className="w-full h-2.5 rounded-full bg-border/50 overflow-hidden">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-orange-400 transition-all duration-700"
+            className="h-full rounded-full bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 transition-all duration-700"
             style={{ width: `${percent}%` }}
           />
         </div>

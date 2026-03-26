@@ -1,11 +1,14 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import { prisma } from '@lms/database';
 import { authenticate } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { AppError } from '../middleware/errorHandler';
 import { generateCertificatePDF } from '../services/certificate';
 import { uploadFile, getSignedUrl } from '../services/storage';
+import { config } from '../config';
+import type { JwtPayload } from '@lms/shared';
 
 const router = Router();
 
@@ -52,10 +55,14 @@ router.post('/request/:courseId', authenticate, asyncHandler(async (req: Request
     throw new AppError(403, 'COURSE_NOT_COMPLETED', `Course not completed. ${completedCount}/${lessons.length} lessons done.`);
   }
 
-  // Generate certificate
+  // Generate certificate number: AIBOT-XXXXX-XXXX (uppercase alphanumeric)
+  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const randomSegment = (len: number) =>
+    Array.from(crypto.randomBytes(len))
+      .map(b => charset[b % charset.length])
+      .join('');
+  const number = `AIBOT-${randomSegment(5)}-${randomSegment(4)}`;
   const now = new Date();
-  const hex = crypto.randomBytes(3).toString('hex').toUpperCase();
-  const number = `CERT-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${hex}`;
 
   const fullName = `${firstName} ${lastName}`;
   const pdfBuffer = await generateCertificatePDF({
@@ -90,21 +97,17 @@ router.get('/my', authenticate, asyncHandler(async (req: Request, res: Response)
     where: { userId },
     orderBy: { issuedAt: 'desc' },
     include: {
-      user: { select: { firstName: true, lastName: true } },
+      course: { select: { id: true, title: true } },
     },
   });
 
-  // Get course titles
-  const courseIds = certificates.map(c => c.courseId);
-  const courses = await prisma.course.findMany({
-    where: { id: { in: courseIds } },
-    select: { id: true, title: true },
-  });
-  const courseMap = new Map(courses.map(c => [c.id, c.title]));
-
   const data = certificates.map(cert => ({
-    ...cert,
-    courseTitle: courseMap.get(cert.courseId) || 'Unknown',
+    id: cert.id,
+    courseId: cert.courseId,
+    courseTitle: cert.course.title,
+    number: cert.number,
+    fileUrl: cert.fileUrl,
+    issuedAt: cert.issuedAt,
   }));
 
   res.json({ success: true, data });
@@ -141,9 +144,21 @@ router.get('/verify/:number', asyncHandler(async (req: Request, res: Response) =
   });
 }));
 
-// GET /api/certificates/:id/download — download certificate PDF (authenticated)
-router.get('/:id/download', authenticate, asyncHandler(async (req: Request, res: Response) => {
-  const userId = req.user!.sub;
+// GET /api/certificates/:id/download — download certificate PDF (authenticated via Bearer or ?token= query)
+router.get('/:id/download', asyncHandler(async (req: Request, res: Response) => {
+  // Support token passed as query param for direct browser downloads
+  if (!req.user && req.query.token) {
+    try {
+      const payload = jwt.verify(req.query.token as string, config.jwt.secret) as JwtPayload;
+      req.user = payload;
+    } catch {
+      throw new AppError(401, 'UNAUTHORIZED', 'Invalid or expired token');
+    }
+  }
+  if (!req.user) {
+    throw new AppError(401, 'UNAUTHORIZED', 'Authentication required');
+  }
+  const userId = req.user.sub;
 
   const certificate = await prisma.certificate.findUnique({
     where: { id: req.params.id },

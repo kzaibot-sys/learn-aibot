@@ -38,7 +38,7 @@ export function AchievementToast({ achievement, onClose }: Props) {
     >
       <div className="flex items-start gap-3">
         {/* Icon */}
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary via-accent to-orange-400 flex items-center justify-center text-xl shrink-0 shadow-lg shadow-primary/25">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400 flex items-center justify-center text-xl shrink-0 shadow-lg shadow-orange-500/25">
           {achievement.icon || '🏆'}
         </div>
 
@@ -63,7 +63,7 @@ export function AchievementToast({ achievement, onClose }: Props) {
           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
             {achievement.description}
           </p>
-          <span className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold">
+          <span className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full bg-orange-500/10 text-primary text-xs font-bold">
             <Zap className="w-3 h-3" />
             +{achievement.xpReward} XP
           </span>
@@ -73,7 +73,7 @@ export function AchievementToast({ achievement, onClose }: Props) {
       {/* Progress bar auto-dismiss */}
       <div className="mt-3 h-0.5 rounded-full bg-border/50 overflow-hidden">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-orange-400"
+          className="h-full rounded-full bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400"
           style={{
             width: visible ? '0%' : '100%',
             transition: visible ? 'width 5s linear' : 'none',

@@ -13,7 +13,7 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-card/30 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-accent to-orange-400 flex items-center justify-center shadow-xl shadow-primary/25 overflow-hidden">
+          <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400 flex items-center justify-center shadow-xl shadow-orange-500/25 overflow-hidden">
             <GraduationCap className="w-5 h-5 text-white relative z-10" />
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
           </div>
@@ -36,7 +36,7 @@ export function Header() {
           </a>
           <Link
             href="/login"
-            className="rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all"
+            className="rounded-2xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 transition-all"
           >
             {t('landing.header.cta')}
           </Link>
@@ -46,7 +46,7 @@ export function Header() {
         <div className="flex items-center gap-2 sm:hidden">
           <Link
             href="/login"
-            className="rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-primary/30"
+            className="rounded-2xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-orange-500/30"
           >
             {t('landing.header.cta')}
           </Link>

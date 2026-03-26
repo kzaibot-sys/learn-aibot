@@ -14,7 +14,7 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-accent to-orange-400 flex items-center justify-center shadow-lg shadow-primary/25">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400 flex items-center justify-center shadow-lg shadow-orange-500/25">
                 <GraduationCap className="w-5 h-5 text-white" />
               </div>
               <span className="text-lg font-bold text-foreground">AiBot</span>
@@ -81,7 +81,7 @@ export function Footer() {
                 href="https://t.me/aibot_edu"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
+                className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-primary hover:bg-orange-500/20 transition-colors"
                 aria-label="Telegram"
               >
                 <Send className="w-4 h-4" />
@@ -90,7 +90,7 @@ export function Footer() {
                 href="https://wa.me/77001234567"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
+                className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-primary hover:bg-orange-500/20 transition-colors"
                 aria-label="WhatsApp"
               >
                 <MessageCircle className="w-4 h-4" />
