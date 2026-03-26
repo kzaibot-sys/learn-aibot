@@ -23,18 +23,18 @@ export function PricingSection() {
           className="relative rounded-3xl border-2 border-primary bg-gradient-to-br from-primary/20 to-accent/20 p-8 text-center shadow-2xl shadow-primary/20 overflow-hidden"
         >
           {/* Promo badge */}
-          <div className="absolute -top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="mb-6">
             <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-primary to-accent text-white text-sm font-bold rounded-full px-5 py-1.5">
               <Zap className="w-4 h-4" />
               Полный доступ
             </span>
           </div>
 
-          <div className="mt-4 mb-2 flex items-baseline justify-center gap-1">
+          <div className="mb-2 flex items-baseline justify-center gap-2">
             <span className="text-6xl font-black bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
               4 990
             </span>
-            <span className="text-2xl text-muted-foreground">&#8381;</span>
+            <span className="text-2xl text-muted-foreground">₸</span>
           </div>
           <p className="mb-8 text-sm text-muted-foreground">единоразовый платёж, доступ навсегда</p>
 
