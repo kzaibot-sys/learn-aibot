@@ -3,37 +3,67 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #F97316;
-  --color-primary-hover: #EA580C;
-  --color-primary-light: #FDBA74;
-  --color-accent: #F97316;
-  --color-bg-dark: #0A0A0B;
-  --color-bg-card: #141416;
-  --color-bg-sidebar: #111113;
-  --color-bg-input: #1C1C1F;
-  --color-border: #27272A;
-  --color-text: #FAFAFA;
-  --color-text-secondary: #A1A1AA;
-  --color-text-muted: #71717A;
+  --font-size: 16px;
+  --radius: 1rem;
+
+  /* Primary orange system */
+  --color-primary: #ff8533;
+  --color-accent: #ffaa66;
+  --color-orange-400: #ff9944;
+
+  /* Dark theme */
+  --color-background: #0a0a0f;
+  --color-foreground: #f0f0f3;
+  --color-card: #141419;
+  --color-card-foreground: #f0f0f3;
+  --color-popover: #1a1a1f;
+  --color-secondary: #1a1a1f;
+  --color-muted: #1f1f26;
+  --color-muted-foreground: #9a9aa5;
+  --color-border: #2a2a35;
+  --color-input: #1a1a1f;
+  --color-ring: #ff8533;
+  --color-destructive: #ff4444;
 }
 
 @layer base {
   body {
-    @apply bg-[var(--color-bg-dark)] text-[var(--color-text)];
+    @apply bg-[var(--color-background)] text-[var(--color-foreground)];
+    font-size: var(--font-size);
+  }
+
+  h1 { @apply text-2xl font-medium leading-relaxed; }
+  h2 { @apply text-xl font-medium leading-relaxed; }
+  h3 { @apply text-lg font-medium leading-relaxed; }
+  h4 { @apply text-base font-medium leading-relaxed; }
+
+  ::selection {
+    background: var(--color-primary);
+    color: white;
   }
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-dark);
+  background: var(--color-background);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--color-border);
-  border-radius: 3px;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
+  background: var(--color-muted-foreground);
+}
+
+/* Shimmer animation */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
 }
