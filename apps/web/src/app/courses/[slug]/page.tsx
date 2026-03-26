@@ -78,7 +78,7 @@ export default function CoursePage() {
         <div className="ml-64">
           <TopBar />
           <div className="flex items-center justify-center py-20">
-            <div className="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full" />
+            <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
           </div>
         </div>
       </AuthGuard>
@@ -91,7 +91,7 @@ export default function CoursePage() {
         <Sidebar />
         <div className="ml-64">
           <TopBar />
-          <div className="text-center py-20 text-zinc-400">Курс не найден</div>
+          <div className="text-center py-20 text-muted-foreground">Курс не найден</div>
         </div>
       </AuthGuard>
     );
@@ -103,39 +103,39 @@ export default function CoursePage() {
       <div className="ml-64">
         <TopBar />
         <main className="p-6">
-          <Link href="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             &larr; Назад к курсам
           </Link>
 
-          <h1 className="mt-4 text-2xl font-bold text-white">{course.title}</h1>
+          <h1 className="mt-4 text-2xl font-bold text-foreground">{course.title}</h1>
           {course.description && (
-            <p className="mt-2 text-zinc-400">{course.description}</p>
+            <p className="mt-2 text-muted-foreground">{course.description}</p>
           )}
 
           <div className="mt-8 space-y-6">
             {course.modules.map(mod => (
               <div key={mod.id}>
-                <h2 className="text-lg font-semibold text-white mb-3">{mod.title}</h2>
-                {mod.description && <p className="text-sm text-zinc-500 mb-3">{mod.description}</p>}
+                <h2 className="text-lg font-semibold text-foreground mb-3">{mod.title}</h2>
+                {mod.description && <p className="text-sm text-muted-foreground mb-3">{mod.description}</p>}
                 <div className="space-y-2">
                   {mod.lessons.map(lesson => (
                     <Link
                       key={lesson.id}
                       href={`/courses/${slug}/lessons/${lesson.id}`}
-                      className="flex items-center gap-3 rounded-xl border border-dark-border bg-dark-card p-4 hover:border-brand/50 transition-colors"
+                      className="flex items-center gap-3 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-4 hover:border-primary/30 transition-colors"
                     >
                       <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs ${
                         completedLessons.has(lesson.id)
                           ? 'bg-green-500/20 text-green-400'
-                          : 'bg-dark-hover text-zinc-500'
+                          : 'bg-secondary/50 text-muted-foreground'
                       }`}>
                         {completedLessons.has(lesson.id) ? '&#10003;' : lesson.type === 'VIDEO' ? '&#9654;' : '#'}
                       </span>
                       <div className="flex-1">
-                        <span className="text-sm text-white">{lesson.title}</span>
+                        <span className="text-sm text-foreground">{lesson.title}</span>
                       </div>
                       {lesson.duration && (
-                        <span className="text-xs text-zinc-500">{Math.floor(lesson.duration / 60)} мин</span>
+                        <span className="text-xs text-muted-foreground">{Math.floor(lesson.duration / 60)} мин</span>
                       )}
                     </Link>
                   ))}

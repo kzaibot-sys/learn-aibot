@@ -172,7 +172,7 @@ export default function DashboardPage() {
               custom={1}
               className="text-3xl font-bold tracking-tight text-foreground"
             >
-              Продолжай развиваться 🚀
+              Продолжай развиваться
             </motion.h1>
 
             <motion.p
@@ -245,7 +245,7 @@ export default function DashboardPage() {
                     Твой прогресс
                   </h2>
                   <Link
-                    href="/my-courses"
+                    href="/courses"
                     className="text-sm text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1"
                   >
                     Смотреть все
@@ -263,7 +263,7 @@ export default function DashboardPage() {
                       У тебя пока нет активных курсов
                     </p>
                     <Link
-                      href="/catalog"
+                      href="/courses"
                       className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary via-accent to-orange-400 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow"
                     >
                       Перейти к каталогу

@@ -123,22 +123,22 @@ export default function AdminModulesPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full" />
+        <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
 
   if (!course) {
-    return <p className="text-zinc-400">Курс не найден</p>;
+    return <p className="text-muted-foreground">Курс не найден</p>;
   }
 
   return (
     <div>
-      <Link href="/admin/courses" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+      <Link href="/admin/courses" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
         &larr; К списку курсов
       </Link>
 
-      <h1 className="mt-4 mb-6 text-2xl font-bold text-white">{course.title} — Модули и уроки</h1>
+      <h1 className="mt-4 mb-6 text-2xl font-bold text-foreground">{course.title} — Модули и уроки</h1>
 
       {/* Add module */}
       <div className="flex gap-2 mb-6">
@@ -146,12 +146,12 @@ export default function AdminModulesPage() {
           value={newModuleTitle}
           onChange={e => setNewModuleTitle(e.target.value)}
           placeholder="Название нового модуля"
-          className="flex-1 rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
+          className="flex-1 rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
           onKeyDown={e => e.key === 'Enter' && handleAddModule()}
         />
         <button
           onClick={handleAddModule}
-          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover transition-colors"
+          className="rounded-lg bg-gradient-to-r from-primary via-accent to-orange-400 px-4 py-2 text-sm font-medium text-white hover:shadow-lg hover:shadow-primary/25 transition-all"
         >
           Добавить модуль
         </button>
@@ -160,14 +160,14 @@ export default function AdminModulesPage() {
       {/* Modules list */}
       <div className="space-y-4">
         {course.modules.map(mod => (
-          <div key={mod.id} className="rounded-xl border border-dark-border bg-dark-card p-5">
+          <div key={mod.id} className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-white">{mod.title}</h2>
+              <h2 className="text-lg font-semibold text-foreground">{mod.title}</h2>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleTogglePublish('module', mod.id, mod.isPublished)}
                   className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    mod.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-dark-hover text-zinc-400'
+                    mod.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-secondary/50 text-muted-foreground'
                   }`}
                 >
                   {mod.isPublished ? 'Опубликован' : 'Черновик'}
@@ -181,16 +181,16 @@ export default function AdminModulesPage() {
             {/* Lessons */}
             <div className="space-y-2 mb-3">
               {mod.lessons.map(lesson => (
-                <div key={lesson.id} className="flex items-center justify-between rounded-lg bg-dark-hover px-4 py-2.5">
+                <div key={lesson.id} className="flex items-center justify-between rounded-lg bg-secondary/50 px-4 py-2.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-zinc-500">{lesson.type}</span>
-                    <span className="text-sm text-white">{lesson.title}</span>
+                    <span className="text-xs text-muted-foreground">{lesson.type}</span>
+                    <span className="text-sm text-foreground">{lesson.title}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleTogglePublish('lesson', lesson.id, lesson.isPublished)}
                       className={`rounded-full px-2 py-0.5 text-xs ${
-                        lesson.isPublished ? 'text-green-400' : 'text-zinc-500'
+                        lesson.isPublished ? 'text-green-400' : 'text-muted-foreground'
                       }`}
                     >
                       {lesson.isPublished ? 'Опубл.' : 'Черн.'}
@@ -210,21 +210,21 @@ export default function AdminModulesPage() {
                   value={newLessonTitle}
                   onChange={e => setNewLessonTitle(e.target.value)}
                   placeholder="Название урока"
-                  className="flex-1 rounded-lg border border-dark-border bg-dark-input px-3 py-1.5 text-sm text-white focus:border-brand focus:outline-none"
+                  className="flex-1 rounded-lg border border-border/50 bg-secondary/50 px-3 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none"
                   onKeyDown={e => e.key === 'Enter' && handleAddLesson(mod.id)}
                   autoFocus
                 />
-                <button onClick={() => handleAddLesson(mod.id)} className="text-brand text-sm hover:underline">
+                <button onClick={() => handleAddLesson(mod.id)} className="text-primary text-sm hover:underline">
                   Добавить
                 </button>
-                <button onClick={() => setAddingToModule(null)} className="text-zinc-500 text-sm hover:underline">
+                <button onClick={() => setAddingToModule(null)} className="text-muted-foreground text-sm hover:underline">
                   Отмена
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => { setAddingToModule(mod.id); setNewLessonTitle(''); }}
-                className="text-sm text-brand hover:underline"
+                className="text-sm text-primary hover:underline"
               >
                 + Добавить урок
               </button>

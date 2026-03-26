@@ -70,39 +70,39 @@ export default function ProfilePage() {
       <div className="ml-64">
         <TopBar />
         <main className="p-6 max-w-xl">
-          <h1 className="mb-6 text-2xl font-bold text-white">Профиль</h1>
+          <h1 className="mb-6 text-2xl font-bold text-foreground">Профиль</h1>
 
           {/* Profile info */}
-          <form onSubmit={handleProfileSubmit} className="rounded-xl border border-dark-border bg-dark-card p-6 mb-6">
-            <h2 className="text-lg font-semibold text-white mb-4">Личные данные</h2>
+          <form onSubmit={handleProfileSubmit} className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 mb-6">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Личные данные</h2>
 
             <div className="mb-3">
-              <label className="mb-1 block text-sm text-zinc-400">Email</label>
+              <label className="mb-1 block text-sm text-muted-foreground">Email</label>
               <input
                 type="email"
                 disabled
                 value={user?.email || ''}
-                className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-zinc-500"
+                className="w-full rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-muted-foreground"
               />
             </div>
 
             <div className="mb-3">
-              <label className="mb-1 block text-sm text-zinc-400">Имя</label>
+              <label className="mb-1 block text-sm text-muted-foreground">Имя</label>
               <input
                 type="text"
                 value={firstName}
                 onChange={e => setFirstName(e.target.value)}
-                className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
+                className="w-full rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
               />
             </div>
 
             <div className="mb-4">
-              <label className="mb-1 block text-sm text-zinc-400">Фамилия</label>
+              <label className="mb-1 block text-sm text-muted-foreground">Фамилия</label>
               <input
                 type="text"
                 value={lastName}
                 onChange={e => setLastName(e.target.value)}
-                className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
+                className="w-full rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
               />
             </div>
 
@@ -111,35 +111,35 @@ export default function ProfilePage() {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-brand px-6 py-2 text-sm font-medium text-white hover:bg-brand-hover disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-gradient-to-r from-primary via-accent to-orange-400 px-6 py-2 text-sm font-medium text-white hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50 transition-all"
             >
               {saving ? 'Сохранение...' : 'Сохранить'}
             </button>
           </form>
 
           {/* Password change */}
-          <form onSubmit={handlePasswordSubmit} className="rounded-xl border border-dark-border bg-dark-card p-6">
-            <h2 className="text-lg font-semibold text-white mb-4">Сменить пароль</h2>
+          <form onSubmit={handlePasswordSubmit} className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-6">
+            <h2 className="text-lg font-semibold text-foreground mb-4">Сменить пароль</h2>
 
             <div className="mb-3">
-              <label className="mb-1 block text-sm text-zinc-400">Текущий пароль</label>
+              <label className="mb-1 block text-sm text-muted-foreground">Текущий пароль</label>
               <input
                 type="password"
                 value={currentPassword}
                 onChange={e => setCurrentPassword(e.target.value)}
                 required
-                className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
+                className="w-full rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
               />
             </div>
 
             <div className="mb-4">
-              <label className="mb-1 block text-sm text-zinc-400">Новый пароль</label>
+              <label className="mb-1 block text-sm text-muted-foreground">Новый пароль</label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
                 required
-                className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
+                className="w-full rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
               />
             </div>
 
@@ -152,7 +152,7 @@ export default function ProfilePage() {
             <button
               type="submit"
               disabled={savingPassword}
-              className="rounded-lg bg-brand px-6 py-2 text-sm font-medium text-white hover:bg-brand-hover disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-gradient-to-r from-primary via-accent to-orange-400 px-6 py-2 text-sm font-medium text-white hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50 transition-all"
             >
               {savingPassword ? 'Сохранение...' : 'Сменить пароль'}
             </button>

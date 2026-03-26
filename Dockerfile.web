@@ -11,6 +11,8 @@ WORKDIR /app
 ENV NEXT_PUBLIC_API_URL=https://api-production-d64b.up.railway.app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Remove packageManager field that confuses Next.js into using yarn
+RUN sed -i '/"packageManager"/d' package.json
 RUN cd packages/shared && npx tsc --noEmit false --outDir dist || true
 RUN cd packages/ui && npx tsc --noEmit false --outDir dist || true
 RUN cd apps/web && npx next build

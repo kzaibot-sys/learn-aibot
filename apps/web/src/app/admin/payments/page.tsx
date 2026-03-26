@@ -24,8 +24,10 @@ const statusColors: Record<string, string> = {
   PENDING: 'bg-yellow-500/20 text-yellow-400',
   CONFIRMED: 'bg-green-500/20 text-green-400',
   CANCELLED: 'bg-red-500/20 text-red-400',
-  REFUNDED: 'bg-zinc-500/20 text-zinc-400',
+  REFUNDED: 'bg-muted/50 text-muted-foreground',
 };
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export default function AdminPaymentsPage() {
   const token = useAuthStore(s => s.token);
@@ -42,7 +44,7 @@ export default function AdminPaymentsPage() {
       if (statusFilter) params.set('status', statusFilter);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/admin/payments?${params}`,
+        `${API_URL}/api/admin/payments?${params}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       const data = await response.json();
@@ -59,7 +61,7 @@ export default function AdminPaymentsPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-white">Платежи</h1>
+      <h1 className="mb-6 text-2xl font-bold text-foreground">Платежи</h1>
 
       {/* Filters */}
       <div className="mb-6 flex gap-2">
@@ -68,7 +70,7 @@ export default function AdminPaymentsPage() {
             key={s}
             onClick={() => { setStatusFilter(s); setPage(1); }}
             className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-              statusFilter === s ? 'bg-brand text-white' : 'bg-dark-hover text-zinc-400 hover:bg-dark-border'
+              statusFilter === s ? 'bg-primary text-white' : 'bg-secondary/50 text-muted-foreground hover:bg-border/50'
             }`}
           >
             {s || 'Все'}
@@ -78,16 +80,16 @@ export default function AdminPaymentsPage() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full" />
+          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
         </div>
       ) : payments.length === 0 ? (
-        <p className="text-zinc-400 text-center py-12">Нет платежей</p>
+        <p className="text-muted-foreground text-center py-12">Нет платежей</p>
       ) : (
         <>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-dark-border text-left text-zinc-500">
+                <tr className="border-b border-border/50 text-left text-muted-foreground">
                   <th className="pb-3 font-medium">Дата</th>
                   <th className="pb-3 font-medium">Пользователь</th>
                   <th className="pb-3 font-medium">Курс</th>
@@ -98,16 +100,16 @@ export default function AdminPaymentsPage() {
               </thead>
               <tbody>
                 {payments.map(p => (
-                  <tr key={p.id} className="border-b border-dark-border/50">
-                    <td className="py-3 text-zinc-400 text-xs">
+                  <tr key={p.id} className="border-b border-border/30">
+                    <td className="py-3 text-muted-foreground text-xs">
                       {new Date(p.createdAt).toLocaleString('ru', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     </td>
-                    <td className="py-3 text-white">{p.user.email || p.user.firstName || p.user.id.slice(0, 8)}</td>
-                    <td className="py-3 text-zinc-400">{p.course.title}</td>
-                    <td className="py-3 text-white font-medium">{p.amount} {p.currency}</td>
-                    <td className="py-3 text-zinc-500 text-xs">{p.provider}</td>
+                    <td className="py-3 text-foreground">{p.user.email || p.user.firstName || p.user.id.slice(0, 8)}</td>
+                    <td className="py-3 text-muted-foreground">{p.course.title}</td>
+                    <td className="py-3 text-foreground font-medium">{p.amount} {p.currency}</td>
+                    <td className="py-3 text-muted-foreground text-xs">{p.provider}</td>
                     <td className="py-3">
-                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[p.status] || 'bg-dark-hover text-zinc-400'}`}>
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[p.status] || 'bg-secondary/50 text-muted-foreground'}`}>
                         {p.status}
                       </span>
                     </td>
@@ -122,15 +124,15 @@ export default function AdminPaymentsPage() {
               <button
                 disabled={page <= 1}
                 onClick={() => setPage(p => p - 1)}
-                className="rounded-lg border border-dark-border px-3 py-1 text-sm text-zinc-400 hover:bg-dark-hover disabled:opacity-50 transition-colors"
+                className="rounded-lg border border-border/50 px-3 py-1 text-sm text-muted-foreground hover:bg-secondary/50 disabled:opacity-50 transition-colors"
               >
                 Назад
               </button>
-              <span className="text-sm text-zinc-500">{page} / {meta.totalPages}</span>
+              <span className="text-sm text-muted-foreground">{page} / {meta.totalPages}</span>
               <button
                 disabled={page >= meta.totalPages}
                 onClick={() => setPage(p => p + 1)}
-                className="rounded-lg border border-dark-border px-3 py-1 text-sm text-zinc-400 hover:bg-dark-hover disabled:opacity-50 transition-colors"
+                className="rounded-lg border border-border/50 px-3 py-1 text-sm text-muted-foreground hover:bg-secondary/50 disabled:opacity-50 transition-colors"
               >
                 Вперёд
               </button>

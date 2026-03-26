@@ -63,10 +63,10 @@ export default function AdminCoursesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Курсы</h1>
+        <h1 className="text-2xl font-bold text-foreground">Курсы</h1>
         <button
           onClick={() => setShowCreate(true)}
-          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover transition-colors"
+          className="rounded-lg bg-gradient-to-r from-primary via-accent to-orange-400 px-4 py-2 text-sm font-medium text-white hover:shadow-lg hover:shadow-primary/25 transition-all"
         >
           Создать курс
         </button>
@@ -82,15 +82,15 @@ export default function AdminCoursesPage() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin h-8 w-8 border-2 border-brand border-t-transparent rounded-full" />
+          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
         </div>
       ) : courses.length === 0 ? (
-        <p className="text-zinc-400 text-center py-12">Нет курсов</p>
+        <p className="text-muted-foreground text-center py-12">Нет курсов</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-dark-border text-left text-zinc-500">
+              <tr className="border-b border-border/50 text-left text-muted-foreground">
                 <th className="pb-3 font-medium">Название</th>
                 <th className="pb-3 font-medium">Slug</th>
                 <th className="pb-3 font-medium">Цена</th>
@@ -101,20 +101,20 @@ export default function AdminCoursesPage() {
             </thead>
             <tbody>
               {courses.map(course => (
-                <tr key={course.id} className="border-b border-dark-border/50">
-                  <td className="py-3 text-white font-medium">{course.title}</td>
-                  <td className="py-3 text-zinc-400">{course.slug}</td>
-                  <td className="py-3 text-zinc-400">
+                <tr key={course.id} className="border-b border-border/30">
+                  <td className="py-3 text-foreground font-medium">{course.title}</td>
+                  <td className="py-3 text-muted-foreground">{course.slug}</td>
+                  <td className="py-3 text-muted-foreground">
                     {course.isFree ? 'Бесплатно' : `${course.price} ${course.currency}`}
                   </td>
-                  <td className="py-3 text-zinc-400">{course._count.enrollments}</td>
+                  <td className="py-3 text-muted-foreground">{course._count.enrollments}</td>
                   <td className="py-3">
                     <button
                       onClick={() => handleTogglePublish(course)}
                       className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                         course.isPublished
                           ? 'bg-green-500/20 text-green-400'
-                          : 'bg-dark-hover text-zinc-400'
+                          : 'bg-secondary/50 text-muted-foreground'
                       }`}
                     >
                       {course.isPublished ? 'Опубликован' : 'Черновик'}
@@ -124,7 +124,7 @@ export default function AdminCoursesPage() {
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/admin/courses/${course.id}/modules`}
-                        className="text-brand hover:underline text-xs"
+                        className="text-primary hover:underline text-xs"
                       >
                         Модули
                       </Link>
@@ -179,11 +179,11 @@ function CreateCourseForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-dark-border bg-dark-card p-6 mb-6">
-      <h2 className="text-lg font-semibold text-white mb-4">Новый курс</h2>
+    <form onSubmit={handleSubmit} className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 mb-6">
+      <h2 className="text-lg font-semibold text-foreground mb-4">Новый курс</h2>
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <label className="mb-1 block text-sm text-zinc-400">Название</label>
+          <label className="mb-1 block text-sm text-muted-foreground">Название</label>
           <input
             required
             value={title}
@@ -191,26 +191,26 @@ function CreateCourseForm({
               setTitle(e.target.value);
               setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9а-яё]+/g, '-').replace(/(^-|-$)/g, ''));
             }}
-            className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
+            className="w-full rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-zinc-400">Slug</label>
+          <label className="mb-1 block text-sm text-muted-foreground">Slug</label>
           <input
             required
             value={slug}
             onChange={e => setSlug(e.target.value)}
-            className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
+            className="w-full rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-zinc-400">Цена (RUB)</label>
+          <label className="mb-1 block text-sm text-muted-foreground">Цена (RUB)</label>
           <input
             type="number"
             required
             value={price}
             onChange={e => setPrice(e.target.value)}
-            className="w-full rounded-lg border border-dark-border bg-dark-input px-3 py-2 text-sm text-white focus:border-brand focus:outline-none"
+            className="w-full rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
           />
         </div>
       </div>
@@ -219,14 +219,14 @@ function CreateCourseForm({
         <button
           type="submit"
           disabled={saving}
-          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover disabled:opacity-50 transition-colors"
+          className="rounded-lg bg-gradient-to-r from-primary via-accent to-orange-400 px-4 py-2 text-sm font-medium text-white hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50 transition-all"
         >
           {saving ? 'Создание...' : 'Создать'}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg border border-dark-border px-4 py-2 text-sm text-zinc-400 hover:bg-dark-hover transition-colors"
+          className="rounded-lg border border-border/50 px-4 py-2 text-sm text-muted-foreground hover:bg-secondary/50 transition-colors"
         >
           Отмена
         </button>

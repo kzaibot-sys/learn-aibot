@@ -8,14 +8,15 @@ import {
   Home, BookOpen, LayoutGrid, Award, User,
   BookMarked, Users, CreditCard, BarChart3,
   LogOut, ChevronLeft, ChevronRight, GraduationCap,
-  Sun, Moon,
+  Sun, Moon, Calendar, Trophy, Settings, Flame,
 } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Главная', icon: Home },
-  { href: '/courses', label: 'Каталог', icon: LayoutGrid },
-  { href: '/certificates', label: 'Сертификаты', icon: Award },
-  { href: '/profile', label: 'Профиль', icon: User },
+  { href: '/courses', label: 'Курсы', icon: LayoutGrid },
+  { href: '/calendar', label: 'Календарь', icon: Calendar },
+  { href: '/achievements', label: 'Достижения', icon: Trophy },
+  { href: '/settings', label: 'Настройки', icon: Settings },
 ];
 
 const adminItems = [
@@ -91,6 +92,47 @@ export function Sidebar() {
             );
           })}
         </div>
+
+        {/* Gamification Widget */}
+        {!collapsed && (
+          <div className="mx-1 mt-5 mb-2 rounded-2xl bg-card/50 border border-border/50 p-3 space-y-3">
+            {/* Streak */}
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-xl bg-orange-500/10">
+                <Flame className="w-4 h-4 text-orange-400" />
+              </div>
+              <span className="text-xs font-medium text-foreground">
+                Серия обучения 7 дней
+              </span>
+            </div>
+
+            {/* Level + XP */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-semibold text-muted-foreground">
+                  Level 5
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  68% — 320 XP
+                </span>
+              </div>
+              <div className="w-full h-1.5 rounded-full bg-border/50 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-orange-400"
+                  style={{ width: '68%' }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {collapsed && (
+          <div className="flex justify-center mt-4 mb-2">
+            <div className="p-1.5 rounded-xl bg-orange-500/10" title="Серия обучения: 7 дней">
+              <Flame className="w-4 h-4 text-orange-400" />
+            </div>
+          </div>
+        )}
 
         {isAdmin && (
           <>
