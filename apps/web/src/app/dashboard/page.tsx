@@ -14,6 +14,7 @@ import {
 import { AuthGuard } from '@/components/lms/AuthGuard';
 import { Sidebar } from '@/components/lms/Sidebar';
 import { TopBar } from '@/components/lms/TopBar';
+import { SkeletonStatCard, SkeletonCourseRow } from '@/components/ui/Skeleton';
 import { useAuthStore } from '@/lib/auth';
 import { apiRequest } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/context';
@@ -151,9 +152,9 @@ export default function DashboardPage() {
   return (
     <AuthGuard>
       <Sidebar />
-      <div className="ml-64">
+      <div className="md:ml-72 ml-0">
         <TopBar />
-        <main className="p-6 lg:p-8 space-y-8">
+        <main className="p-3 sm:p-6 lg:p-8 space-y-8">
           {/* -------- welcome section -------- */}
           <motion.div
             initial="hidden"
@@ -188,9 +189,18 @@ export default function DashboardPage() {
 
           {/* -------- stats cards -------- */}
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
-            </div>
+            <>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {[1, 2, 3, 4].map(i => (
+                  <SkeletonStatCard key={i} />
+                ))}
+              </div>
+              <div className="space-y-3 mt-8">
+                <SkeletonCourseRow />
+                <SkeletonCourseRow />
+                <SkeletonCourseRow />
+              </div>
+            </>
           ) : (
             <>
               <motion.div

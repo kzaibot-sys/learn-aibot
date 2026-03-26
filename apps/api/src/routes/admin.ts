@@ -1,9 +1,38 @@
 import { Router, Request, Response } from 'express';
+import multer from 'multer';
 import { prisma } from '@lms/database';
 import { authenticate, requireAdmin } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { AppError } from '../middleware/errorHandler';
 import { grantCourseAccess, revokeCourseAccess } from '../services/enrollment';
+import { uploadFile } from '../services/storage';
+import { cacheInvalidatePattern } from '../services/redis';
+
+const videoUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = ['video/mp4', 'video/webm', 'video/quicktime'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new AppError(400, 'INVALID_FILE_TYPE', 'Only mp4, webm, mov files are allowed'));
+    }
+  },
+});
+
+const imageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new AppError(400, 'INVALID_FILE_TYPE', 'Only jpeg, png, webp files are allowed'));
+    }
+  },
+});
 
 const router = Router();
 
@@ -54,6 +83,7 @@ router.post('/courses', asyncHandler(async (req: Request, res: Response) => {
     },
   });
 
+  await cacheInvalidatePattern('courses:*');
   res.status(201).json({ success: true, data: { ...course, price: course.price.toString() } });
 }));
 
@@ -76,12 +106,14 @@ router.patch('/courses/:id', asyncHandler(async (req: Request, res: Response) =>
     },
   });
 
+  await cacheInvalidatePattern('courses:*');
   res.json({ success: true, data: { ...course, price: course.price.toString() } });
 }));
 
 // DELETE /api/admin/courses/:id
 router.delete('/courses/:id', asyncHandler(async (req: Request, res: Response) => {
   await prisma.course.delete({ where: { id: req.params.id } });
+  await cacheInvalidatePattern('courses:*');
   res.json({ success: true });
 }));
 
@@ -153,6 +185,20 @@ router.post('/modules/:moduleId/lessons', asyncHandler(async (req: Request, res:
   });
 
   res.status(201).json({ success: true, data: lesson });
+}));
+
+// GET /api/admin/lessons/:id
+router.get('/lessons/:id', asyncHandler(async (req: Request, res: Response) => {
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: req.params.id },
+    include: { module: { select: { courseId: true, title: true } } },
+  });
+
+  if (!lesson) {
+    throw new AppError(404, 'LESSON_NOT_FOUND', 'Lesson not found');
+  }
+
+  res.json({ success: true, data: lesson });
 }));
 
 // PATCH /api/admin/lessons/:id
@@ -306,6 +352,113 @@ router.post('/notifications', asyncHandler(async (req: Request, res: Response) =
   });
 
   res.json({ success: true, data: { sentTo: users.length } });
+}));
+
+// ===== FILE UPLOADS =====
+
+// POST /api/admin/lessons/:lessonId/upload-video
+router.post('/lessons/:lessonId/upload-video', videoUpload.single('video'), asyncHandler(async (req: Request, res: Response) => {
+  const { lessonId } = req.params;
+  const file = req.file;
+
+  if (!file) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'Video file is required');
+  }
+
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId },
+    include: { module: { select: { courseId: true } } },
+  });
+
+  if (!lesson) {
+    throw new AppError(404, 'LESSON_NOT_FOUND', 'Lesson not found');
+  }
+
+  const ext = file.originalname.split('.').pop() || 'mp4';
+  const key = `videos/${lesson.module.courseId}/${lessonId}/${Date.now()}.${ext}`;
+  const videoUrl = await uploadFile(file.buffer, key, file.mimetype);
+
+  const updated = await prisma.lesson.update({
+    where: { id: lessonId },
+    data: { videoUrl, videoKey: key },
+  });
+
+  res.json({ success: true, data: updated });
+}));
+
+// POST /api/admin/upload-image
+router.post('/upload-image', imageUpload.single('image'), asyncHandler(async (req: Request, res: Response) => {
+  const file = req.file;
+
+  if (!file) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'Image file is required');
+  }
+
+  const ext = file.originalname.split('.').pop() || 'jpg';
+  const key = `images/${Date.now()}.${ext}`;
+  const url = await uploadFile(file.buffer, key, file.mimetype);
+
+  res.json({ success: true, data: { url } });
+}));
+
+// ===== REORDER =====
+
+// PATCH /api/admin/modules/reorder
+router.patch('/modules/reorder', asyncHandler(async (req: Request, res: Response) => {
+  const { items } = req.body as { items: { id: string; order: number }[] };
+
+  if (!items || !Array.isArray(items)) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'items array is required');
+  }
+
+  await prisma.$transaction(
+    items.map(item => prisma.module.update({ where: { id: item.id }, data: { order: item.order } }))
+  );
+
+  res.json({ success: true });
+}));
+
+// PATCH /api/admin/lessons/reorder
+router.patch('/lessons/reorder', asyncHandler(async (req: Request, res: Response) => {
+  const { items } = req.body as { items: { id: string; order: number }[] };
+
+  if (!items || !Array.isArray(items)) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'items array is required');
+  }
+
+  await prisma.$transaction(
+    items.map(item => prisma.lesson.update({ where: { id: item.id }, data: { order: item.order } }))
+  );
+
+  res.json({ success: true });
+}));
+
+// ===== COURSE ENROLLMENTS =====
+
+// GET /api/admin/courses/:courseId/enrollments
+router.get('/courses/:courseId/enrollments', asyncHandler(async (req: Request, res: Response) => {
+  const { courseId } = req.params;
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const perPage = Math.min(50, Math.max(1, Number(req.query.perPage) || 20));
+
+  const [enrollments, total] = await Promise.all([
+    prisma.enrollment.findMany({
+      where: { courseId },
+      skip: (page - 1) * perPage,
+      take: perPage,
+      orderBy: { enrolledAt: 'desc' },
+      include: {
+        user: { select: { id: true, email: true, firstName: true, lastName: true } },
+      },
+    }),
+    prisma.enrollment.count({ where: { courseId } }),
+  ]);
+
+  res.json({
+    success: true,
+    data: enrollments,
+    meta: { page, perPage, total, totalPages: Math.ceil(total / perPage) },
+  });
 }));
 
 export { router as adminRouter };

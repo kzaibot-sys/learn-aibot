@@ -16,22 +16,22 @@ interface Notification {
   createdAt: string;
 }
 
-function timeAgo(dateStr: string, locale: string): string {
+function timeAgo(dateStr: string, t: (key: string) => string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return locale === 'ru' ? 'только что' : 'жаңа ғана';
-  if (mins < 60) return `${mins} ${locale === 'ru' ? 'мин' : 'мин'}`;
+  if (mins < 1) return t('notifications.timeJustNow');
+  if (mins < 60) return `${mins} ${t('notifications.timeMinutes')}`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} ${locale === 'ru' ? 'ч' : 'сағ'}`;
+  if (hours < 24) return `${hours} ${t('notifications.timeHours')}`;
   const days = Math.floor(hours / 24);
-  return `${days} ${locale === 'ru' ? 'д' : 'к'}`;
+  return `${days} ${t('notifications.timeDays')}`;
 }
 
 export function NotificationDropdown() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const token = useAuthStore(s => s.token);
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const prevCountRef = useRef(0);
 
@@ -114,7 +114,7 @@ export function NotificationDropdown() {
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
             <h3 className="text-sm font-semibold text-foreground">
-              {t('settings.notifications')}
+              {t('notifications.title')}
             </h3>
             {unreadCount > 0 && (
               <button
@@ -122,7 +122,7 @@ export function NotificationDropdown() {
                 className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
               >
                 <CheckCheck className="w-3 h-3" />
-                {locale === 'ru' ? 'Прочитать все' : 'Барлығын оқу'}
+                {t('notifications.markAllRead')}
               </button>
             )}
           </div>
@@ -131,7 +131,7 @@ export function NotificationDropdown() {
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
               <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                {locale === 'ru' ? 'Нет уведомлений' : 'Хабарландырулар жоқ'}
+                {t('notifications.empty')}
               </div>
             ) : (
               notifications.map(n => (
@@ -153,7 +153,7 @@ export function NotificationDropdown() {
                       <p className="text-sm font-medium text-foreground truncate">{n.title}</p>
                       <p className="text-xs text-muted-foreground line-clamp-2">{n.message}</p>
                       <p className="text-[10px] text-muted-foreground mt-1">
-                        {timeAgo(n.createdAt, locale)}
+                        {timeAgo(n.createdAt, t as (key: string) => string)}
                       </p>
                     </div>
                   </div>

@@ -53,6 +53,11 @@ const config: Config = {
         'lg': '1rem',
         'xl': 'calc(1rem + 4px)',
       },
+      keyframes: {
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
+      },
     },
   },
   plugins: [],

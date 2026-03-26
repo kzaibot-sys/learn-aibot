@@ -10,7 +10,7 @@ import {
   Home, BookOpen, LayoutGrid, Award, User,
   BookMarked, Users, CreditCard, BarChart3,
   LogOut, ChevronLeft, ChevronRight, GraduationCap,
-  Sun, Moon, Calendar, Trophy, Settings, Flame, Globe,
+  Sun, Moon, Calendar, Trophy, Settings, Globe,
 } from 'lucide-react';
 import type { TranslationKey } from '@/lib/i18n/translations';
 
@@ -49,7 +49,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className={`fixed left-0 top-0 h-screen bg-background border-r border-border/50 flex flex-col transition-all duration-300 z-40 ${collapsed ? 'w-16' : 'w-72'}`}>
+    <aside className={`fixed left-0 top-0 h-screen bg-background border-r border-border/50 hidden md:flex flex-col transition-all duration-300 z-40 ${collapsed ? 'w-16' : 'w-72'}`}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-border/50 shrink-0">
         <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-accent to-orange-400 flex items-center justify-center shadow-xl shadow-primary/25 shrink-0 overflow-hidden">
@@ -97,46 +97,7 @@ export function Sidebar() {
           })}
         </div>
 
-        {/* Gamification Widget */}
-        {!collapsed && (
-          <div className="mx-1 mt-5 mb-2 rounded-2xl bg-card/50 border border-border/50 p-3 space-y-3">
-            {/* Streak */}
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-xl bg-orange-500/10">
-                <Flame className="w-4 h-4 text-orange-400" />
-              </div>
-              <span className="text-xs font-medium text-foreground">
-                {t('common.streak')} 7 {t('common.days')}
-              </span>
-            </div>
-
-            {/* Level + XP */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold text-muted-foreground">
-                  Level 5
-                </span>
-                <span className="text-[10px] text-muted-foreground">
-                  68% — 320 XP
-                </span>
-              </div>
-              <div className="w-full h-1.5 rounded-full bg-border/50 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-orange-400"
-                  style={{ width: '68%' }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {collapsed && (
-          <div className="flex justify-center mt-4 mb-2">
-            <div className="p-1.5 rounded-xl bg-orange-500/10" title={`${t('common.streak')}: 7 ${t('common.days')}`}>
-              <Flame className="w-4 h-4 text-orange-400" />
-            </div>
-          </div>
-        )}
+        {/* Gamification widget — hidden until real API data is available */}
 
         {isAdmin && (
           <>
@@ -206,7 +167,9 @@ export function Sidebar() {
               <p className="text-sm font-medium text-foreground truncate">
                 {user?.firstName || user?.email || 'User'}
               </p>
-              <p className="text-[10px] text-primary">Premium</p>
+              <p className="text-[10px] text-muted-foreground capitalize">
+                {user?.role?.toLowerCase() || 'student'}
+              </p>
             </div>
           )}
           {!collapsed && (

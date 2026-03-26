@@ -147,6 +147,25 @@ export const translations = {
     'certificates.completedStatus': 'Завершён',
     'certificates.emptyDesc': 'Завершите курс, чтобы получить сертификат. Он будет доступен для скачивания здесь.',
     'certificates.noCertificates': 'Пока нет сертификатов',
+    'certificates.ready': 'Сертификат готов!',
+    'certificates.numberLabel': 'Номер',
+    'certificates.allCertificates': 'Все сертификаты',
+    'certificates.getCertificate': 'Получить сертификат',
+    'certificates.courseComplete': 'Курс пройден на 100%',
+    'certificates.firstName': 'Имя',
+    'certificates.lastName': 'Фамилия',
+    'certificates.namePlaceholder': 'Как на сертификате',
+    'certificates.courseNotComplete': 'Курс ещё не завершён',
+    'certificates.completeForCert': 'Завершите курс для получения сертификата.',
+    'certificates.progressLabel': 'Прогресс',
+    'certificates.lessonsOf': 'уроков',
+    'certificates.verified': 'Сертификат подтверждён',
+    'certificates.owner': 'Владелец',
+    'certificates.courseLabel': 'Курс',
+    'certificates.issueDateLabel': 'Дата выдачи',
+    'certificates.issuedBy': 'Выдан платформой AiBot',
+    'certificates.notFoundTitle': 'Сертификат не найден',
+    'certificates.notFoundDesc': 'Сертификат с данным номером не найден в системе.',
 
     // Common
     'common.loading': 'Загрузка...',
@@ -168,6 +187,7 @@ export const translations = {
     'common.published': 'Опубликован',
     'common.draft': 'Черновик',
     'common.add': 'Добавить',
+    'common.edit': 'Изменить',
     'common.notFound': 'Не найдено',
 
     // Auth
@@ -185,6 +205,30 @@ export const translations = {
     // Theme
     'theme.light': 'Светлая тема',
     'theme.dark': 'Тёмная тема',
+
+    // Notifications
+    'notifications.title': 'Уведомления',
+    'notifications.markAllRead': 'Прочитать все',
+    'notifications.empty': 'Нет уведомлений',
+    'notifications.timeJustNow': 'только что',
+    'notifications.timeMinutes': 'мин',
+    'notifications.timeHours': 'ч',
+    'notifications.timeDays': 'д',
+
+    // Courses - extra
+    'courses.enrolled': 'Вы записаны',
+    'courses.sortByName': 'По названию',
+    'courses.sortByPrice': 'По цене',
+    'courses.sortByPopularity': 'По популярности',
+    'courses.allCourses': 'Все курсы',
+    'courses.freeCourses': 'Бесплатные',
+    'courses.paidCourses': 'Платные',
+
+    // Error
+    'error.title': 'Что-то пошло не так',
+    'error.description': 'Произошла непредвиденная ошибка. Попробуйте обновить страницу.',
+    'error.retry': 'Попробовать снова',
+    'error.home': 'На главную',
 
     // Profile
     'profile.title': 'Профиль',
@@ -261,6 +305,34 @@ export const translations = {
     'landing.header.program': 'Программа',
     'landing.header.reviews': 'Отзывы',
     'landing.header.cta': 'Начать обучение',
+
+    // Landing - About
+    'landing.about.title': 'Почему выбирают нас',
+    'landing.about.subtitle': 'Мы создали платформу, которая делает обучение эффективным и удобным',
+    'landing.about.ai': 'ИИ-помощник',
+    'landing.about.aiDesc': 'Персональный AI-помощник в Telegram отвечает на вопросы 24/7 и помогает разобраться в материале',
+    'landing.about.video': 'Видеоуроки',
+    'landing.about.videoDesc': 'Качественные видеоуроки с примерами и практическими заданиями для закрепления',
+    'landing.about.cert': 'Сертификаты',
+    'landing.about.certDesc': 'Получите официальный сертификат о прохождении курса для вашего портфолио',
+    'landing.about.mobile': 'Мобильный доступ',
+    'landing.about.mobileDesc': 'Учитесь с любого устройства — через веб-браузер или Telegram Mini App',
+
+    // Landing - Courses
+    'landing.courses.title': 'Наши курсы',
+    'landing.courses.subtitle': 'Выберите курс и начните обучение уже сегодня',
+    'landing.courses.view': 'Подробнее',
+
+    // Landing - How It Works
+    'landing.how.title': 'Как это работает',
+    'landing.how.step1': 'Регистрация',
+    'landing.how.step1Desc': 'Создайте аккаунт за 30 секунд через сайт или Telegram бот',
+    'landing.how.step2': 'Выберите курс',
+    'landing.how.step2Desc': 'Ознакомьтесь с программой и выберите подходящий курс',
+    'landing.how.step3': 'Проходите уроки',
+    'landing.how.step3Desc': 'Смотрите видео, выполняйте задания и задавайте вопросы ИИ',
+    'landing.how.step4': 'Получите сертификат',
+    'landing.how.step4Desc': 'Завершите курс и получите сертификат о прохождении',
 
     // Landing - Program
     'landing.program.title1': 'Программа',
@@ -340,6 +412,17 @@ export const translations = {
     'landing.footer.rights': 'Все права защищены.',
     'landing.footer.privacy': 'Политика конфиденциальности',
     'landing.footer.terms': 'Условия использования',
+    'landing.footer.description': 'Образовательная платформа с ИИ-помощником для эффективного онлайн-обучения.',
+    'landing.footer.navTitle': 'Навигация',
+    'landing.footer.about': 'О платформе',
+    'landing.footer.courses': 'Курсы',
+    'landing.footer.reviews': 'Отзывы',
+    'landing.footer.howItWorks': 'Как это работает',
+    'landing.footer.legalTitle': 'Документы',
+    'landing.footer.offer': 'Публичная оферта',
+    'landing.footer.socialTitle': 'Мы в соцсетях',
+    'landing.footer.contact': 'support@aibot.kz',
+    'landing.footer.company': 'ТОО AiBot',
   },
   kz: {
     // Navigation
@@ -489,6 +572,25 @@ export const translations = {
     'certificates.completedStatus': 'Аяқталды',
     'certificates.emptyDesc': 'Сертификат алу үшін курсты аяқтаңыз. Ол мұнда жүктеуге қолжетімді болады.',
     'certificates.noCertificates': 'Әзірге сертификаттар жоқ',
+    'certificates.ready': 'Сертификат дайын!',
+    'certificates.numberLabel': 'Нөмірі',
+    'certificates.allCertificates': 'Барлық сертификаттар',
+    'certificates.getCertificate': 'Сертификат алу',
+    'certificates.courseComplete': 'Курс 100% аяқталды',
+    'certificates.firstName': 'Аты',
+    'certificates.lastName': 'Тегі',
+    'certificates.namePlaceholder': 'Сертификаттағыдай',
+    'certificates.courseNotComplete': 'Курс әлі аяқталмады',
+    'certificates.completeForCert': 'Сертификат алу үшін курсты аяқтаңыз.',
+    'certificates.progressLabel': 'Прогресс',
+    'certificates.lessonsOf': 'сабақтар',
+    'certificates.verified': 'Сертификат расталды',
+    'certificates.owner': 'Иесі',
+    'certificates.courseLabel': 'Курс',
+    'certificates.issueDateLabel': 'Берілген күні',
+    'certificates.issuedBy': 'AiBot платформасы берді',
+    'certificates.notFoundTitle': 'Сертификат табылмады',
+    'certificates.notFoundDesc': 'Бұл нөмірмен сертификат жүйеде табылмады.',
 
     // Common
     'common.loading': 'Жүктелуде...',
@@ -510,6 +612,7 @@ export const translations = {
     'common.published': 'Жарияланған',
     'common.draft': 'Жоба',
     'common.add': 'Қосу',
+    'common.edit': 'Өзгерту',
     'common.notFound': 'Табылмады',
 
     // Auth
@@ -527,6 +630,30 @@ export const translations = {
     // Theme
     'theme.light': 'Жарық тақырып',
     'theme.dark': 'Қараңғы тақырып',
+
+    // Notifications
+    'notifications.title': 'Хабарландырулар',
+    'notifications.markAllRead': 'Барлығын оқу',
+    'notifications.empty': 'Хабарландырулар жоқ',
+    'notifications.timeJustNow': 'жаңа ғана',
+    'notifications.timeMinutes': 'мин',
+    'notifications.timeHours': 'сағ',
+    'notifications.timeDays': 'к',
+
+    // Courses - extra
+    'courses.enrolled': 'Сіз жазылдыңыз',
+    'courses.sortByName': 'Атауы бойынша',
+    'courses.sortByPrice': 'Бағасы бойынша',
+    'courses.sortByPopularity': 'Танымалдылығы бойынша',
+    'courses.allCourses': 'Барлық курстар',
+    'courses.freeCourses': 'Тегін',
+    'courses.paidCourses': 'Ақылы',
+
+    // Error
+    'error.title': 'Бірдеңе дұрыс болмады',
+    'error.description': 'Күтпеген қате орын алды. Бетті жаңартып көріңіз.',
+    'error.retry': 'Қайтадан байқап көру',
+    'error.home': 'Басты бетке',
 
     // Profile
     'profile.title': 'Профиль',
@@ -603,6 +730,34 @@ export const translations = {
     'landing.header.program': 'Бағдарлама',
     'landing.header.reviews': 'Пікірлер',
     'landing.header.cta': 'Оқуды бастау',
+
+    // Landing - About
+    'landing.about.title': 'Неге бізді таңдайды',
+    'landing.about.subtitle': 'Біз оқуды тиімді және ыңғайлы ететін платформа жасадық',
+    'landing.about.ai': 'AI-көмекші',
+    'landing.about.aiDesc': 'Telegram-дағы жеке AI-көмекші сұрақтарға 24/7 жауап береді және материалды түсінуге көмектеседі',
+    'landing.about.video': 'Бейнесабақтар',
+    'landing.about.videoDesc': 'Мысалдары мен бекіту тапсырмалары бар сапалы бейнесабақтар',
+    'landing.about.cert': 'Сертификаттар',
+    'landing.about.certDesc': 'Портфолиоңыз үшін курсты аяқтау туралы ресми сертификат алыңыз',
+    'landing.about.mobile': 'Мобильді қолжетімділік',
+    'landing.about.mobileDesc': 'Кез келген құрылғыдан оқыңыз — веб-браузер немесе Telegram Mini App арқылы',
+
+    // Landing - Courses
+    'landing.courses.title': 'Біздің курстар',
+    'landing.courses.subtitle': 'Курсты таңдап, бүгін оқуды бастаңыз',
+    'landing.courses.view': 'Толығырақ',
+
+    // Landing - How It Works
+    'landing.how.title': 'Қалай жұмыс істейді',
+    'landing.how.step1': 'Тіркелу',
+    'landing.how.step1Desc': 'Сайт немесе Telegram бот арқылы 30 секундта аккаунт жасаңыз',
+    'landing.how.step2': 'Курсты таңдаңыз',
+    'landing.how.step2Desc': 'Бағдарламамен танысып, сізге сәйкес курсты таңдаңыз',
+    'landing.how.step3': 'Сабақтарды өтіңіз',
+    'landing.how.step3Desc': 'Бейне көріңіз, тапсырмалар орындаңыз және AI-ға сұрақтар қойыңыз',
+    'landing.how.step4': 'Сертификат алыңыз',
+    'landing.how.step4Desc': 'Курсты аяқтап, аяқтау сертификатын алыңыз',
 
     // Landing - Program
     'landing.program.title1': 'Курс',
@@ -682,6 +837,17 @@ export const translations = {
     'landing.footer.rights': 'Барлық құқықтар қорғалған.',
     'landing.footer.privacy': 'Құпиялық саясаты',
     'landing.footer.terms': 'Қолдану шарттары',
+    'landing.footer.description': 'Тиімді онлайн-оқу үшін AI-көмекшісі бар білім беру платформасы.',
+    'landing.footer.navTitle': 'Навигация',
+    'landing.footer.about': 'Платформа туралы',
+    'landing.footer.courses': 'Курстар',
+    'landing.footer.reviews': 'Пікірлер',
+    'landing.footer.howItWorks': 'Қалай жұмыс істейді',
+    'landing.footer.legalTitle': 'Құжаттар',
+    'landing.footer.offer': 'Жария оферта',
+    'landing.footer.socialTitle': 'Біз әлеуметтік желілерде',
+    'landing.footer.contact': 'support@aibot.kz',
+    'landing.footer.company': 'ТОО AiBot',
   },
 } as const;
 

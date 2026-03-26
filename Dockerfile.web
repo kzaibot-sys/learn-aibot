@@ -8,7 +8,8 @@ RUN npm ci
 
 FROM node:20-alpine AS builder
 WORKDIR /app
-ENV NEXT_PUBLIC_API_URL=https://api-production-d64b.up.railway.app
+ARG NEXT_PUBLIC_API_URL=https://api-production-d64b.up.railway.app
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # Remove packageManager field that confuses Next.js into using yarn

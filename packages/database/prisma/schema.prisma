@@ -114,6 +114,7 @@ model Module {
   course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessons Lesson[]
 
+  @@index([courseId, order])
   @@map("modules")
 }
 
@@ -136,6 +137,7 @@ model Lesson {
   progress LessonProgress[]
   tasks    Task[]
 
+  @@index([moduleId, order])
   @@map("lessons")
 }
 

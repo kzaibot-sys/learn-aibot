@@ -35,8 +35,12 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/${APP_NAME}/dist ./apps/${APP_NAME}/dist
 COPY --from=builder /app/apps/${APP_NAME}/package.json ./apps/${APP_NAME}/package.json
+# Copy src/assets if present (fonts for PDF generation, etc.)
+# Using wildcard so it doesn't fail if the directory doesn't exist
+COPY --from=builder /app/apps/${APP_NAME}/src/asset[s] ./apps/${APP_NAME}/src/assets
 
 USER appuser
-EXPOSE 3001
+ENV PORT=3001
+EXPOSE ${PORT}
 WORKDIR /app/apps/${APP_NAME}
 CMD ["node", "dist/index.js"]

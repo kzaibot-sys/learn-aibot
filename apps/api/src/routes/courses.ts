@@ -3,13 +3,35 @@ import { prisma } from '@lms/database';
 import { authenticate } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { AppError } from '../middleware/errorHandler';
+import { config } from '../config';
+import { cacheGet, cacheSet } from '../services/redis';
 
 const router = Router();
 
-// GET /api/courses — published courses list
-router.get('/', asyncHandler(async (_req: Request, res: Response) => {
+// GET /api/courses — published courses list (optional ?search=term)
+router.get('/', asyncHandler(async (req: Request, res: Response) => {
+  const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
+
+  // Use cache only when there is no search query
+  if (!search) {
+    const cached = await cacheGet<unknown>('courses:list');
+    if (cached) {
+      res.json(cached);
+      return;
+    }
+  }
+
+  const whereClause: Record<string, unknown> = { isPublished: true };
+
+  if (search) {
+    whereClause.OR = [
+      { title: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
   const courses = await prisma.course.findMany({
-    where: { isPublished: true },
+    where: whereClause,
     select: {
       id: true,
       slug: true,
@@ -23,10 +45,18 @@ router.get('/', asyncHandler(async (_req: Request, res: Response) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  res.json({
+  const paymentEnabled = config.payment.enabled;
+  const response = {
     success: true,
-    data: courses.map(c => ({ ...c, price: c.price.toString() })),
-  });
+    data: courses.map(c => ({ ...c, price: c.price.toString(), paymentEnabled })),
+  };
+
+  // Only cache the full (non-filtered) list
+  if (!search) {
+    await cacheSet('courses:list', response, 300); // 5 min
+  }
+
+  res.json(response);
 }));
 
 // GET /api/courses/:slug — course details with modules and lessons
@@ -56,7 +86,7 @@ router.get('/:slug', asyncHandler(async (req: Request, res: Response) => {
   });
 
   if (!course) {
-    throw new AppError(404, 'COURSE_NOT_FOUND', 'Course not found');
+    throw new AppError(404, 'COURSE_NOT_FOUND', 'Курс не найден');
   }
 
   res.json({
@@ -64,6 +94,7 @@ router.get('/:slug', asyncHandler(async (req: Request, res: Response) => {
     data: {
       ...course,
       price: course.price.toString(),
+      paymentEnabled: config.payment.enabled,
     },
   });
 }));
@@ -79,7 +110,7 @@ router.get('/:slug/lessons/:lessonId', authenticate, asyncHandler(async (req: Re
   });
 
   if (!course) {
-    throw new AppError(404, 'COURSE_NOT_FOUND', 'Course not found');
+    throw new AppError(404, 'COURSE_NOT_FOUND', 'Курс не найден');
   }
 
   // Check enrollment (unless course is free)
@@ -89,7 +120,7 @@ router.get('/:slug/lessons/:lessonId', authenticate, asyncHandler(async (req: Re
     });
 
     if (!enrollment || enrollment.status !== 'ACTIVE') {
-      throw new AppError(403, 'NOT_ENROLLED', 'You are not enrolled in this course');
+      throw new AppError(403, 'NOT_ENROLLED', 'У вас нет доступа к этому курсу');
     }
   }
 
@@ -109,7 +140,7 @@ router.get('/:slug/lessons/:lessonId', authenticate, asyncHandler(async (req: Re
   });
 
   if (!lesson) {
-    throw new AppError(404, 'LESSON_NOT_FOUND', 'Lesson not found');
+    throw new AppError(404, 'LESSON_NOT_FOUND', 'Урок не найден');
   }
 
   // Get user progress for this lesson

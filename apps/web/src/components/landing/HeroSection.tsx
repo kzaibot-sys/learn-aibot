@@ -58,7 +58,7 @@ export function HeroSection() {
           className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
         >
           <motion.a
-            href="#pricing"
+            href="/login"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 px-8 py-5 text-lg font-bold text-white shadow-2xl shadow-primary/50 hover:shadow-primary/70 transition-shadow"

@@ -104,7 +104,11 @@ export default function AdminCoursesPage() {
             <tbody>
               {courses.map(course => (
                 <tr key={course.id} className="border-b border-border/30">
-                  <td className="py-3 text-foreground font-medium">{course.title}</td>
+                  <td className="py-3 text-foreground font-medium">
+                    <Link href={`/admin/courses/${course.id}`} className="hover:text-primary transition-colors">
+                      {course.title}
+                    </Link>
+                  </td>
                   <td className="py-3 text-muted-foreground">{course.slug}</td>
                   <td className="py-3 text-muted-foreground">
                     {course.isFree ? t('courses.free') : `${course.price} ${course.currency}`}

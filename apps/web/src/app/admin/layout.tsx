@@ -17,9 +17,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <AuthGuard>
       <Sidebar />
-      <div className="ml-64">
+      <div className="md:ml-72 ml-0">
         <TopBar />
-        <main className="p-6">{children}</main>
+        <main className="p-3 sm:p-6">{children}</main>
       </div>
     </AuthGuard>
   );

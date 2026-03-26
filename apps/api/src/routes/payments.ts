@@ -12,6 +12,10 @@ const router = Router();
 
 // POST /api/payments/create
 router.post('/create', authenticate, asyncHandler(async (req: Request, res: Response) => {
+  if (!config.payment.enabled) {
+    throw new AppError(403, 'PAYMENTS_DISABLED', 'Payments are currently disabled');
+  }
+
   const userId = req.user!.sub;
   const { courseId, provider } = req.body;
 

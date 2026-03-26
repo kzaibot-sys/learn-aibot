@@ -20,17 +20,17 @@ export function DashboardNav() {
   }
 
   return (
-    <header className="border-b border-gray-800 bg-gray-950">
+    <header className="border-b border-border bg-background">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="text-lg font-bold text-white">LMS</Link>
+          <Link href="/dashboard" className="text-lg font-bold text-foreground">LMS</Link>
           <nav className="hidden sm:flex items-center gap-4">
             {links.map(link => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={`text-sm transition-colors ${
-                  pathname.startsWith(link.href) ? 'text-white' : 'text-gray-400 hover:text-gray-200'
+                  pathname.startsWith(link.href) ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {link.label}
@@ -39,12 +39,12 @@ export function DashboardNav() {
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-400 hidden sm:block">
+          <span className="text-sm text-muted-foreground hidden sm:block">
             {user?.firstName || user?.email}
           </span>
           <button
             onClick={logout}
-            className="text-sm text-gray-500 hover:text-white transition-colors"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             {t('common.logout')}
           </button>

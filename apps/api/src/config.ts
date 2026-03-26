@@ -11,7 +11,7 @@ function optionalEnv(name: string, fallback: string): string {
 }
 
 export const config = {
-  port: Number(optionalEnv('API_PORT', '3001')),
+  port: Number(optionalEnv('PORT', '') || optionalEnv('API_PORT', '3001')),
   nodeEnv: optionalEnv('NODE_ENV', 'development'),
 
   jwt: {
@@ -47,6 +47,10 @@ export const config = {
 
   redis: {
     url: optionalEnv('REDIS_URL', 'redis://localhost:6379'),
+  },
+
+  payment: {
+    enabled: optionalEnv('PAYMENT_ENABLED', 'false') === 'true',
   },
 
   app: {

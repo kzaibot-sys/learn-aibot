@@ -18,6 +18,7 @@ import {
 import { AuthGuard } from '@/components/lms/AuthGuard';
 import { Sidebar } from '@/components/lms/Sidebar';
 import { TopBar } from '@/components/lms/TopBar';
+import { SkeletonCourseDetail } from '@/components/ui/Skeleton';
 import { useAuthStore } from '@/lib/auth';
 import { apiRequest } from '@/lib/api';
 import { useI18n } from '@/lib/i18n/context';
@@ -149,11 +150,11 @@ export default function CoursePage() {
     return (
       <AuthGuard>
         <Sidebar />
-        <div className="ml-64">
+        <div className="md:ml-72 ml-0">
           <TopBar />
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
-          </div>
+          <main className="p-3 sm:p-6 max-w-5xl">
+            <SkeletonCourseDetail />
+          </main>
         </div>
       </AuthGuard>
     );
@@ -164,7 +165,7 @@ export default function CoursePage() {
     return (
       <AuthGuard>
         <Sidebar />
-        <div className="ml-64">
+        <div className="md:ml-72 ml-0">
           <TopBar />
           <div className="text-center py-20 text-muted-foreground">
             {t('lesson.courseNotFound')}
@@ -180,10 +181,10 @@ export default function CoursePage() {
   return (
     <AuthGuard>
       <Sidebar />
-      <div className="ml-64">
+      <div className="md:ml-72 ml-0">
         <TopBar />
 
-        <main className="p-6 max-w-5xl">
+        <main className="p-4 sm:p-6 max-w-5xl">
           {/* Back link */}
           <motion.div
             initial={{ opacity: 0, x: -10 }}
@@ -205,11 +206,11 @@ export default function CoursePage() {
             initial="hidden"
             animate="visible"
             custom={0}
-            className="mt-6 rounded-3xl border border-border/50 bg-gradient-to-br from-primary/5 via-accent/5 to-orange-400/5 backdrop-blur-sm p-8"
+            className="mt-6 rounded-3xl border border-border/50 bg-gradient-to-br from-primary/5 via-accent/5 to-orange-400/5 backdrop-blur-sm p-4 sm:p-8"
           >
-            <div className="flex items-start justify-between gap-6">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex flex-wrap items-center gap-2 mb-3">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
                     <GraduationCap className="h-3.5 w-3.5" />
                     {course.modules.length} {course.modules.length === 1 ? t('courses.moduleWord') : course.modules.length < 5 ? t('courses.modulesWord2') : t('courses.modulesWord5')}
@@ -266,24 +267,13 @@ export default function CoursePage() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-4">
-                      {course.price != null && course.price > 0 ? (
-                        <>
-                          <span className="text-2xl font-bold text-foreground">
-                            {Number(course.price).toLocaleString('ru-RU')} &#8381;
-                          </span>
-                          <button className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 px-8 py-3 text-sm font-semibold text-white hover:shadow-lg hover:shadow-primary/25 transition-all">
-                            {t('courses.buy')}
-                          </button>
-                        </>
-                      ) : (
-                        <Link
-                          href={`/courses/${slug}/lessons/${findFirstLesson(sortedModules)}`}
-                          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 px-8 py-3 text-sm font-semibold text-white hover:shadow-lg hover:shadow-primary/25 transition-all"
-                        >
-                          <Play className="h-4 w-4" />
-                          {t('courses.startLearning')}
-                        </Link>
-                      )}
+                      <Link
+                        href={`/courses/${slug}/lessons/${findFirstLesson(sortedModules)}`}
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 px-8 py-3 text-sm font-semibold text-white hover:shadow-lg hover:shadow-primary/25 transition-all"
+                      >
+                        <Play className="h-4 w-4" />
+                        {t('courses.startLearning')}
+                      </Link>
                     </div>
                   )}
                 </div>

@@ -10,10 +10,7 @@ import {
   Sun,
   Globe,
   Bell,
-  Shield,
-  CreditCard,
   Trash2,
-  ChevronRight,
 } from 'lucide-react';
 import { AuthGuard } from '@/components/lms/AuthGuard';
 import { Sidebar } from '@/components/lms/Sidebar';
@@ -44,7 +41,6 @@ export default function SettingsPage() {
   const { t, locale, setLocale } = useI18n();
   const { dark: darkMode, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
-  const [twoFactor, setTwoFactor] = useState(false);
 
   function toggleLocale() {
     setLocale(locale === 'ru' ? 'kz' : 'ru');
@@ -54,9 +50,9 @@ export default function SettingsPage() {
     <AuthGuard>
       <div className="flex min-h-screen bg-background">
         <Sidebar />
-        <div className="flex-1 ml-72">
+        <div className="flex-1 md:ml-72 ml-0">
           <TopBar />
-          <main className="p-6 lg:p-8 space-y-8 max-w-3xl">
+          <main className="p-3 sm:p-6 lg:p-8 space-y-8 max-w-3xl">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -238,73 +234,7 @@ export default function SettingsPage() {
                 </div>
               </motion.div>
 
-              {/* Subscription Section */}
-              <motion.div
-                variants={fadeUp}
-                custom={2}
-                className="rounded-3xl bg-card/50 backdrop-blur-sm border border-border/50 p-6 space-y-5"
-              >
-                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-primary" />
-                  {t('settings.subscription')}
-                </h2>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-white bg-gradient-to-r from-primary via-accent to-orange-400 px-3 py-1 rounded-full">
-                      {t('settings.premium')}
-                    </span>
-                    <p className="text-sm text-muted-foreground">
-                      {t('settings.validUntil')}
-                    </p>
-                  </div>
-                  <button className="text-xs text-primary hover:text-primary/80 transition-colors">
-                    {t('settings.manage')}
-                  </button>
-                </div>
-              </motion.div>
-
-              {/* Security Section */}
-              <motion.div
-                variants={fadeUp}
-                custom={3}
-                className="rounded-3xl bg-card/50 backdrop-blur-sm border border-border/50 p-6 space-y-5"
-              >
-                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-primary" />
-                  {t('settings.security')}
-                </h2>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-primary/10">
-                      <Shield className="w-4 h-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {t('settings.2fa')}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {twoFactor
-                          ? t('settings.2faEnabled')
-                          : t('settings.2faDisabled')}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setTwoFactor(!twoFactor)}
-                    className={`relative w-11 h-6 rounded-full transition-colors ${
-                      twoFactor ? 'bg-primary' : 'bg-border'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                        twoFactor ? 'translate-x-5' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                </div>
-              </motion.div>
+              {/* Security Section — 2FA removed (no backend support) */}
 
               {/* Danger Zone */}
               <motion.div

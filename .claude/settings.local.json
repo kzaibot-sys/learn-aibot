@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/aiman/OneDrive/Desktop/learn-aibot -type f -name schema.prisma -o -name *.prisma)",
+      "Bash(xargs grep:*)",
+      "Bash(npx prisma:*)",
+      "Bash(DATABASE_URL=\"postgresql://lms:lms_password@localhost:5433/lms_db\" npx prisma generate)",
+      "Bash(npx turbo:*)",
+      "Bash(grep -r \"POST\\\\|PUT\\\\|PATCH\\\\|DELETE\" C:/Users/aiman/OneDrive/Desktop/learn-aibot/apps/api/src/routes/*.ts -A 2)",
+      "Bash(npm install:*)",
+      "Bash(curl -sL -o Roboto-Regular.ttf \"https://github.com/google/fonts/raw/main/ofl/roboto/Roboto%5Bwdth%2Cwght%5D.ttf\")",
+      "Bash(curl -sL -o Roboto-Bold.ttf \"https://github.com/google/fonts/raw/main/ofl/roboto/Roboto%5Bwdth%2Cwght%5D.ttf\")",
+      "Bash(ls -la *.ttf)",
+      "Bash(curl -sL -o Roboto-Regular.ttf \"https://github.com/google/fonts/raw/main/ofl/roboto/static/Roboto-Regular.ttf\")",
+      "Bash(curl -sL -o Roboto-Bold.ttf \"https://github.com/google/fonts/raw/main/ofl/roboto/static/Roboto-Bold.ttf\")"
+    ]
+  }
+}

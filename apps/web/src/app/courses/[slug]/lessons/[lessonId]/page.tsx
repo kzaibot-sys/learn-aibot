@@ -236,7 +236,7 @@ export default function LessonPage() {
     return (
       <AuthGuard>
         <Sidebar />
-        <div className="ml-64">
+        <div className="md:ml-72 ml-0">
           <TopBar />
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
@@ -250,7 +250,7 @@ export default function LessonPage() {
     return (
       <AuthGuard>
         <Sidebar />
-        <div className="ml-64">
+        <div className="md:ml-72 ml-0">
           <TopBar />
           <div className="text-center py-20 text-muted-foreground">
             {t('lesson.notFound')}
@@ -270,10 +270,10 @@ export default function LessonPage() {
   return (
     <AuthGuard>
       <Sidebar />
-      <div className="ml-64">
+      <div className="md:ml-72 ml-0">
         <TopBar />
 
-        <main className="p-6">
+        <main className="p-3 sm:p-6">
           {/* Back link */}
           <Link
             href={`/courses/${slug}`}
@@ -283,15 +283,15 @@ export default function LessonPage() {
             {t('lesson.backToCourse')}
           </Link>
 
-          <div className="flex gap-6">
+          <div className="flex flex-col lg:flex-row gap-6">
             {/* ====== LEFT COLUMN ====== */}
-            <div className="flex-1 min-w-0" style={{ flex: '7' }}>
+            <div className="flex-1 min-w-0 lg:flex-[7]">
               {/* Video area */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4 }}
-                className="rounded-3xl overflow-hidden bg-black"
+                className="rounded-3xl overflow-hidden bg-card"
               >
                 {lesson.videoUrl ? (
                   <VideoPlayer
@@ -300,7 +300,7 @@ export default function LessonPage() {
                     onTimeUpdate={handleTimeUpdate}
                   />
                 ) : (
-                  <div className="w-full aspect-video flex flex-col items-center justify-center bg-zinc-900 text-muted-foreground">
+                  <div className="w-full aspect-video flex flex-col items-center justify-center bg-secondary text-muted-foreground">
                     <Play className="h-16 w-16 mb-3 opacity-30" />
                     <span className="text-sm opacity-50">
                       {t('lesson.videoUnavailable')}
@@ -350,7 +350,7 @@ export default function LessonPage() {
                   initial="hidden"
                   animate="visible"
                   custom={1}
-                  className="mt-4 prose prose-invert prose-sm max-w-none"
+                  className="mt-4 prose dark:prose-invert prose-sm max-w-none"
                   dangerouslySetInnerHTML={{ __html: lesson.content }}
                 />
               )}
@@ -361,7 +361,7 @@ export default function LessonPage() {
                 initial="hidden"
                 animate="visible"
                 custom={2}
-                className="mt-6 grid grid-cols-3 gap-4"
+                className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
               >
                 <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-4 flex items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
@@ -468,8 +468,7 @@ export default function LessonPage() {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.15 }}
-              className="shrink-0"
-              style={{ flex: '3' }}
+              className="shrink-0 w-full lg:flex-[3]"
             >
               <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-3xl p-5 sticky top-24">
                 <div className="flex items-center gap-2 mb-4">

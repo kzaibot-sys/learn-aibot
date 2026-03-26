@@ -69,9 +69,9 @@ export default function ProfilePage() {
   return (
     <AuthGuard>
       <Sidebar />
-      <div className="ml-64">
+      <div className="md:ml-72 ml-0">
         <TopBar />
-        <main className="p-6 max-w-xl">
+        <main className="p-3 sm:p-6 max-w-xl">
           <h1 className="mb-6 text-2xl font-bold text-foreground">{t('profile.title')}</h1>
 
           {/* Profile info */}

@@ -1,0 +1,14 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm-9_x"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = [
+  "npx prisma generate --schema=packages/database/prisma/schema.prisma",
+  "npx turbo run build --filter=api"
+]
+
+[start]
+cmd = "node apps/api/dist/index.js"

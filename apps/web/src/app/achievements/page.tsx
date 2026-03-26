@@ -133,9 +133,9 @@ export default function AchievementsPage() {
     <AuthGuard>
       <div className="flex min-h-screen bg-background">
         <Sidebar />
-        <div className="flex-1 ml-72">
+        <div className="flex-1 md:ml-72 ml-0">
           <TopBar />
-          <main className="p-6 lg:p-8 space-y-8">
+          <main className="p-3 sm:p-6 lg:p-8 space-y-8">
             {/* XP Progress Bar */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}

@@ -33,7 +33,7 @@ export function ReviewsSection() {
             {t('landing.reviews.title2')}
           </span>
         </motion.h2>
-        <div className="grid gap-6 sm:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           {reviews.map((review, i) => (
             <motion.div
               key={i}
