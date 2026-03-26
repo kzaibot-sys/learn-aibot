@@ -77,7 +77,7 @@ export function TopBar() {
           <button
             onClick={toggleLocale}
             className="hidden sm:flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors text-xs"
-            title={locale === 'ru' ? 'Переключить на казахский' : 'Орысшаға ауысу'}
+            title={t('common.switchLang')}
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />

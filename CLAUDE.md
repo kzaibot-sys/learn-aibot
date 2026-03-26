@@ -252,3 +252,42 @@ curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook" \
 ```
 
 CI: GitHub Actions — push to `main` triggers build check.
+
+## API Patterns
+
+### Error handling
+Use `AppError` (from `apps/api/src/utils/errors.ts`) for expected errors and `asyncHandler` wrapper for all async route handlers:
+```ts
+import { AppError } from '../utils/errors';
+import { asyncHandler } from '../middleware/asyncHandler';
+
+router.get('/route', asyncHandler(async (req, res) => {
+  if (!found) throw new AppError('Not found', 404, 'NOT_FOUND');
+  res.json({ success: true, data: result });
+}));
+```
+Error responses shape: `{ success: false, error: { code, message } }`. Success responses shape: `{ success: true, data: ... }`.
+
+### Auth middleware
+- `authenticate` — verifies JWT Bearer token, attaches `req.user` (JwtPayload: `{ userId, email, role }`)
+- `requireAdmin` — must follow `authenticate`; rejects if `role !== 'ADMIN'`
+
+## Frontend Auth Pattern
+
+No Next.js `middleware.ts` — auth is handled entirely client-side via Zustand `useAuthStore`. Protected pages use an `AuthGuard` component (in admin layout) that redirects unauthenticated/unauthorized users. Token refresh happens in the store when a 401 is received.
+
+## Prisma Enums
+
+Defined in `packages/database/prisma/schema.prisma`:
+- `UserRole`: STUDENT, TEACHER, ADMIN
+- `LessonType`: VIDEO, TEXT, QUIZ
+- `TaskType`: TEXT, CODE, FILE
+- `SubmissionStatus`: PENDING, APPROVED, REJECTED
+- `EnrollmentStatus`: ACTIVE, INACTIVE, EXPIRED
+- `PaymentStatus`: PENDING, CONFIRMED, CANCELLED, REFUNDED
+- `PaymentProvider`: YOOKASSA, STRIPE, MANUAL
+- `ChatMessageRole`: USER, ASSISTANT
+
+## Testing
+
+No test infrastructure exists in this project.

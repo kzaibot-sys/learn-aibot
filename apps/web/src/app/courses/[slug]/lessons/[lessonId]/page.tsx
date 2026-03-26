@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import DOMPurify from 'isomorphic-dompurify';
 import {
   Play,
   Clock,
@@ -351,7 +352,7 @@ export default function LessonPage() {
                   animate="visible"
                   custom={1}
                   className="mt-4 prose dark:prose-invert prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: lesson.content }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(lesson.content) }}
                 />
               )}
 

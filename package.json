@@ -15,12 +15,16 @@
     "start:web": "cd apps/web && npx next start -p ${PORT:-3000}"
   },
   "devDependencies": {
+    "prettier": "^3.4.0",
+    "shadcn": "^4.1.0",
     "turbo": "^2.4.0",
-    "typescript": "^5.7.0",
-    "prettier": "^3.4.0"
+    "typescript": "^5.7.0"
   },
   "packageManager": "npm@10.8.2",
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "skillfish": "^1.0.30"
   }
 }

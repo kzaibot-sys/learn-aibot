@@ -149,7 +149,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold text-muted-foreground">Level 5</span>
+                <span className="text-[10px] font-semibold text-muted-foreground">{t('common.level')} 5</span>
                 <span className="text-[10px] text-muted-foreground">68% — 320 XP</span>
               </div>
               <div className="w-full h-1.5 rounded-full bg-border/50 overflow-hidden">
@@ -219,7 +219,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
               <p className="text-sm font-medium text-foreground truncate">
                 {user?.firstName || user?.email || 'User'}
               </p>
-              <p className="text-[10px] text-primary">Premium</p>
+              <p className="text-[10px] text-primary">{t('common.premium')}</p>
             </div>
             <button
               onClick={handleLogout}
