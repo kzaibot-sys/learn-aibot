@@ -46,7 +46,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center px-4 bg-background">
       <div className="w-full max-w-sm">
         <Link href="/" className="mb-8 block text-center text-2xl font-bold text-foreground">
-          LearnHub Pro
+          AiBot
         </Link>
 
         <div className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-8">
@@ -62,6 +62,7 @@ export default function LoginPage() {
                 onChange={e => setEmail(e.target.value)}
                 className="w-full rounded-2xl border border-border/50 bg-secondary/50 backdrop-blur-sm px-4 py-3 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none placeholder:text-muted-foreground/70"
                 placeholder="you@example.com"
+                autoComplete="email"
               />
             </div>
 
@@ -74,6 +75,7 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 className="w-full rounded-2xl border border-border/50 bg-secondary/50 backdrop-blur-sm px-4 py-3 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none placeholder:text-muted-foreground/70"
                 placeholder={t('auth.enterPassword')}
+                autoComplete="current-password"
               />
             </div>
 

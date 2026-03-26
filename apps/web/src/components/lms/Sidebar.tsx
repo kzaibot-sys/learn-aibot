@@ -19,6 +19,7 @@ const navItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[] 
   { href: '/courses', labelKey: 'nav.courses', icon: LayoutGrid },
   { href: '/calendar', labelKey: 'nav.calendar', icon: Calendar },
   { href: '/achievements', labelKey: 'nav.achievements', icon: Trophy },
+  { href: '/leaderboard', labelKey: 'nav.leaderboard', icon: Trophy },
   { href: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];
 
@@ -58,7 +59,7 @@ export function Sidebar() {
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <h1 className="text-sm font-bold text-foreground truncate">LearnHub Pro</h1>
+            <h1 className="text-sm font-bold text-foreground truncate">AiBot</h1>
             <p className="text-[10px] text-muted-foreground truncate">{t('dashboard.subtitle')}</p>
           </div>
         )}

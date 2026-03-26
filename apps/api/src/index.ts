@@ -12,6 +12,7 @@ import { adminRouter } from './routes/admin';
 import { botRouter } from './routes/bot';
 import { notificationsRouter } from './routes/notifications';
 import { certificatesRouter } from './routes/certificates';
+import { gamificationRouter } from './routes/gamification';
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/certificates', certificatesRouter);
 app.use('/api/bot', botRouter);
+app.use('/api', gamificationRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {

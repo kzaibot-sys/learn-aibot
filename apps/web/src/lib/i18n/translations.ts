@@ -5,6 +5,7 @@ export const translations = {
     'nav.courses': 'Курсы',
     'nav.calendar': 'Календарь',
     'nav.achievements': 'Достижения',
+    'nav.leaderboard': 'Лидерборд',
     'nav.settings': 'Настройки',
     'nav.admin': 'Админ',
     'nav.admin.courses': 'Курсы',
@@ -176,6 +177,7 @@ export const translations = {
     'common.days': 'дней',
     'common.level': 'Уровень',
     'common.premium': 'Премиум',
+    'common.student': 'Ученик',
     'common.switchLang': 'Переключить на казахский',
     'common.min': 'мин',
     'common.hours': 'ч',
@@ -426,6 +428,11 @@ export const translations = {
     'landing.footer.socialTitle': 'Мы в соцсетях',
     'landing.footer.contact': 'support@aibot.kz',
     'landing.footer.company': 'ТОО AiBot',
+
+    // CTA Section
+    'landing.cta.title': 'Готовы начать обучение?',
+    'landing.cta.subtitle': 'Присоединяйтесь к нашей платформе и начните свой путь к новым знаниям уже сегодня. ИИ-помощник, видеоуроки и сертификаты ждут вас.',
+    'landing.cta.button': 'Начать сейчас',
   },
   kz: {
     // Navigation
@@ -433,6 +440,7 @@ export const translations = {
     'nav.courses': 'Курстар',
     'nav.calendar': 'Күнтізбе',
     'nav.achievements': 'Жетістіктер',
+    'nav.leaderboard': 'Лидерборд',
     'nav.settings': 'Баптаулар',
     'nav.admin': 'Әкімші',
     'nav.admin.courses': 'Курстар',
@@ -604,6 +612,7 @@ export const translations = {
     'common.days': 'күн',
     'common.level': 'Деңгей',
     'common.premium': 'Премиум',
+    'common.student': 'Оқушы',
     'common.switchLang': 'Орысшаға ауысу',
     'common.min': 'мин',
     'common.hours': 'сағ',
@@ -854,6 +863,11 @@ export const translations = {
     'landing.footer.socialTitle': 'Біз әлеуметтік желілерде',
     'landing.footer.contact': 'support@aibot.kz',
     'landing.footer.company': 'ТОО AiBot',
+
+    // CTA Section
+    'landing.cta.title': 'Оқуды бастауға дайынсыз ба?',
+    'landing.cta.subtitle': 'Платформамызға қосылып, жаңа білімге апаратын жолды бүгін бастаңыз. AI-көмекші, бейнесабақтар және сертификаттар сізді күтеді.',
+    'landing.cta.button': 'Қазір бастау',
   },
 } as const;
 

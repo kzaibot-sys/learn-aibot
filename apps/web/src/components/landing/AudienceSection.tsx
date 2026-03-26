@@ -1,8 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Users, Briefcase, RefreshCw, TrendingUp } from 'lucide-react';
 import { useI18n } from '@/lib/i18n/context';
+import { ScrollReveal } from '@/hooks/useScrollAnimation';
 
 export function AudienceSection() {
   const { t } = useI18n();
@@ -16,28 +16,21 @@ export function AudienceSection() {
   return (
     <section className="py-32 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-16 text-center text-4xl font-black sm:text-5xl"
-        >
-          {t('landing.audience.title1')}{' '}
-          <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
-            {t('landing.audience.title2')}
-          </span>
-        </motion.h2>
+        <ScrollReveal>
+          <h2 className="mb-16 text-center text-4xl font-black sm:text-5xl">
+            {t('landing.audience.title1')}{' '}
+            <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
+              {t('landing.audience.title2')}
+            </span>
+          </h2>
+        </ScrollReveal>
         <div className="grid gap-6 sm:grid-cols-2">
           {audiences.map((item, i) => {
             const Icon = item.icon;
             return (
-              <motion.div
+              <ScrollReveal
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                whileHover={{ y: -8, scale: 1.02 }}
+                delay={i * 100}
                 className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-8 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/20 transition-all"
               >
                 <div className="mb-4 p-4 rounded-2xl bg-gradient-to-br from-primary/20 via-accent/15 to-orange-400/10 border border-primary/20 w-fit">
@@ -45,7 +38,7 @@ export function AudienceSection() {
                 </div>
                 <h3 className="mb-2 text-xl font-bold text-foreground">{item.title}</h3>
                 <p className="text-muted-foreground">{item.desc}</p>
-              </motion.div>
+              </ScrollReveal>
             );
           })}
         </div>

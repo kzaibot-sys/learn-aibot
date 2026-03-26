@@ -1,8 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { BookOpen, Code, Rocket, Brain, Trophy } from 'lucide-react';
 import { useI18n } from '@/lib/i18n/context';
+import { ScrollReveal } from '@/hooks/useScrollAnimation';
 import type { TranslationKey } from '@/lib/i18n/translations';
 
 const moduleIcons = [BookOpen, Brain, Code, Rocket, Trophy];
@@ -20,28 +20,21 @@ export function ProgramSection() {
   return (
     <section id="program" className="py-32 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-16 text-center text-4xl font-black sm:text-5xl"
-        >
-          {t('landing.program.title1')}{' '}
-          <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
-            {t('landing.program.title2')}
-          </span>
-        </motion.h2>
+        <ScrollReveal>
+          <h2 className="mb-16 text-center text-4xl font-black sm:text-5xl">
+            {t('landing.program.title1')}{' '}
+            <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
+              {t('landing.program.title2')}
+            </span>
+          </h2>
+        </ScrollReveal>
         <div className="space-y-4">
           {modules.map((mod, i) => {
             const Icon = mod.icon;
             return (
-              <motion.div
+              <ScrollReveal
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                whileHover={{ y: -4, scale: 1.01 }}
+                delay={i * 100}
                 className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 transition-all cursor-default"
               >
                 <div className="flex items-center gap-4">
@@ -56,7 +49,7 @@ export function ProgramSection() {
                     {mod.lessons} {t('landing.program.lessonsCount')}
                   </span>
                 </div>
-              </motion.div>
+              </ScrollReveal>
             );
           })}
         </div>

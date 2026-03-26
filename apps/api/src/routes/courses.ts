@@ -41,6 +41,12 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
       price: true,
       currency: true,
       isFree: true,
+      modules: {
+        select: {
+          id: true,
+          lessons: { where: { isPublished: true }, select: { id: true } },
+        },
+      },
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -48,7 +54,14 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
   const paymentEnabled = config.payment.enabled;
   const response = {
     success: true,
-    data: courses.map(c => ({ ...c, price: c.price.toString(), paymentEnabled })),
+    data: courses.map(c => ({
+      ...c,
+      price: c.price.toString(),
+      paymentEnabled,
+      totalLessons: c.modules.reduce((sum, m) => sum + m.lessons.length, 0),
+      totalModules: c.modules.length,
+      modules: undefined,
+    })),
   };
 
   // Only cache the full (non-filtered) list

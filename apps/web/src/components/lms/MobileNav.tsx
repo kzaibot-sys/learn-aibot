@@ -19,6 +19,7 @@ const navItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[] 
   { href: '/courses', labelKey: 'nav.courses', icon: LayoutGrid },
   { href: '/calendar', labelKey: 'nav.calendar', icon: Calendar },
   { href: '/achievements', labelKey: 'nav.achievements', icon: Trophy },
+  { href: '/leaderboard', labelKey: 'nav.leaderboard', icon: Trophy },
   { href: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];
 
@@ -100,7 +101,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
               <GraduationCap className="w-5 h-5 text-white relative z-10" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-sm font-bold text-foreground truncate">LearnHub Pro</h1>
+              <h1 className="text-sm font-bold text-foreground truncate">AiBot</h1>
               <p className="text-[10px] text-muted-foreground truncate">{t('dashboard.subtitle')}</p>
             </div>
           </div>
@@ -219,7 +220,9 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
               <p className="text-sm font-medium text-foreground truncate">
                 {user?.firstName || user?.email || 'User'}
               </p>
-              <p className="text-[10px] text-primary">{t('common.premium')}</p>
+              <p className="text-[10px] text-muted-foreground capitalize">
+                {user?.role?.toLowerCase() || 'student'}
+              </p>
             </div>
             <button
               onClick={handleLogout}

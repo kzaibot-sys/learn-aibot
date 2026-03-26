@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { useI18n } from '@/lib/i18n/context';
+import { ScrollReveal } from '@/hooks/useScrollAnimation';
 import type { TranslationKey } from '@/lib/i18n/translations';
 
 export function FAQSection() {
@@ -18,58 +18,41 @@ export function FAQSection() {
   return (
     <section className="py-32 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-16 text-center text-4xl font-black sm:text-5xl"
-        >
-          {t('landing.faq.title1')}{' '}
-          <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
-            {t('landing.faq.title2')}
-          </span>
-        </motion.h2>
+        <ScrollReveal>
+          <h2 className="mb-16 text-center text-4xl font-black sm:text-5xl">
+            {t('landing.faq.title1')}{' '}
+            <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
+              {t('landing.faq.title2')}
+            </span>
+          </h2>
+        </ScrollReveal>
         <div className="space-y-3">
           {faqs.map((faq, i) => (
-            <motion.div
+            <ScrollReveal
               key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-              className={`rounded-3xl border bg-card/50 backdrop-blur-sm transition-colors ${
-                openIndex === i ? 'border-primary/50' : 'border-border/50'
-              }`}
+              delay={i * 50}
             >
-              <button
-                onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                className="flex w-full items-center justify-between p-6 text-left"
+              <div
+                className={`glass-card rounded-2xl overflow-hidden transition-all duration-300 ${
+                  openIndex === i ? 'border-l-4 border-l-primary shadow-lg shadow-primary/10' : 'border-l-4 border-l-transparent'
+                }`}
               >
-                <span className="font-bold text-foreground pr-4">{faq.q}</span>
-                <motion.div
-                  animate={{ rotate: openIndex === i ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="shrink-0"
+                <button
+                  onClick={() => setOpenIndex(openIndex === i ? null : i)}
+                  className="flex w-full items-center justify-between p-6 text-left hover:bg-primary/5 transition-colors"
                 >
-                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                </motion.div>
-              </button>
-              <AnimatePresence>
-                {openIndex === i && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="border-t border-border/50 px-6 pb-6 pt-4">
-                      <p className="text-muted-foreground leading-relaxed">{faq.a}</p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+                  <span className={`font-bold pr-4 transition-colors ${openIndex === i ? 'text-primary' : 'text-foreground'}`}>{faq.q}</span>
+                  <div className={`shrink-0 transition-transform duration-300 ${openIndex === i ? 'rotate-180' : ''}`}>
+                    <ChevronDown className={`w-5 h-5 transition-colors ${openIndex === i ? 'text-primary' : 'text-muted-foreground'}`} />
+                  </div>
+                </button>
+                <div className={`overflow-hidden transition-all duration-300 ease-out ${openIndex === i ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <div className="border-t border-border/30 px-6 pb-6 pt-4">
+                    <p className="text-muted-foreground leading-relaxed">{faq.a}</p>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
           ))}
         </div>
       </div>

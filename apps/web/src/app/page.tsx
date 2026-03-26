@@ -5,6 +5,7 @@ import { CoursesSection } from '@/components/landing/CoursesSection';
 import { HowItWorksSection } from '@/components/landing/HowItWorksSection';
 import { ReviewsSection } from '@/components/landing/ReviewsSection';
 import { FAQSection } from '@/components/landing/FAQSection';
+import { CTASection } from '@/components/landing/CTASection';
 import { Footer } from '@/components/landing/Footer';
 
 import type { Metadata } from 'next';
@@ -30,6 +31,7 @@ export default function HomePage() {
         <HowItWorksSection />
         <ReviewsSection />
         <FAQSection />
+        <CTASection />
       </main>
       <Footer />
     </>

@@ -56,17 +56,17 @@ export function Footer() {
             <h4 className="font-semibold text-foreground mb-4">{t('landing.footer.legalTitle')}</h4>
             <ul className="space-y-2.5">
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <a href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   {t('landing.footer.privacy')}
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <a href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   {t('landing.footer.terms')}
                 </a>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <a href="/offer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   {t('landing.footer.offer')}
                 </a>
               </li>
@@ -105,7 +105,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-border/50 text-center">
           <p className="text-sm text-muted-foreground">
-            &copy; 2024 {t('landing.footer.company')}. {t('landing.footer.rights')}
+            &copy; {new Date().getFullYear()} {t('landing.footer.company')}. {t('landing.footer.rights')}
           </p>
         </div>
       </div>

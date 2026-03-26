@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Award, Download, Hash, Loader2 } from 'lucide-react';
+import { Award, Download, Hash } from 'lucide-react';
 import { AuthGuard } from '@/components/lms/AuthGuard';
 import { Sidebar } from '@/components/lms/Sidebar';
 import { TopBar } from '@/components/lms/TopBar';
@@ -18,19 +17,6 @@ interface Certificate {
   fileUrl: string | null;
   issuedAt: string;
 }
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.1, duration: 0.4 },
-  }),
-};
-
-const stagger = {
-  visible: { transition: { staggerChildren: 0.1 } },
-};
 
 export default function CertificatesPage() {
   const { t } = useI18n();
@@ -48,7 +34,10 @@ export default function CertificatesPage() {
 
   const handleDownload = (cert: Certificate) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    window.open(`${apiUrl}/api/certificates/${cert.id}/download?token=${encodeURIComponent(token || '')}`, '_blank');
+    window.open(
+      `${apiUrl}/api/certificates/${cert.id}/download?token=${encodeURIComponent(token || '')}`,
+      '_blank',
+    );
   };
 
   return (
@@ -57,39 +46,36 @@ export default function CertificatesPage() {
         <Sidebar />
         <div className="flex-1 md:ml-72 ml-0">
           <TopBar />
-          <main className="p-3 sm:p-6 lg:p-8 space-y-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
+          <main className="p-3 sm:p-6 lg:p-8 space-y-8 animate-fade-in-up">
+
+            {/* Header */}
+            <div>
               <h1 className="text-2xl font-bold text-foreground mb-1">
                 {t('certificates.title')}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {t('certificates.subtitle')}
               </p>
-            </motion.div>
+            </div>
 
             {loading ? (
-              <div className="flex justify-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="h-40 skeleton rounded-3xl" />
+                ))}
               </div>
             ) : certificates.length > 0 ? (
-              <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={stagger}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              >
-                {certificates.map((cert, i) => (
-                  <motion.div
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {certificates.map(cert => (
+                  <div
                     key={cert.id}
-                    variants={fadeUp}
-                    custom={i}
-                    className="rounded-3xl bg-card/50 backdrop-blur-sm border border-border/50 p-6 hover:border-primary/30 transition-colors"
+                    className="glass-card hover-lift rounded-3xl border border-border/50 p-6 transition-all hover:border-primary/30 relative overflow-hidden"
                   >
-                    <div className="flex items-start gap-4 mb-5">
+                    {/* Gradient border accent */}
+                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/5 via-accent/5 to-orange-400/5 pointer-events-none" />
+                    <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-3xl bg-gradient-to-r from-primary via-accent to-orange-400" />
+
+                    <div className="flex items-start gap-4 mb-5 relative">
                       <div className="p-3 rounded-2xl bg-gradient-to-br from-primary via-accent to-orange-400 flex items-center justify-center shrink-0 shadow-lg shadow-primary/25">
                         <Award className="w-7 h-7 text-white" />
                       </div>
@@ -98,45 +84,44 @@ export default function CertificatesPage() {
                           {cert.courseTitle}
                         </h3>
                         <p className="text-xs text-muted-foreground">
-                          {t('certificates.completedStatus')} {new Date(cert.issuedAt).toLocaleDateString('ru-RU')}
+                          {t('certificates.completedStatus')}{' '}
+                          {new Date(cert.issuedAt).toLocaleDateString('ru-RU')}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 mb-5 px-3 py-2 rounded-xl bg-background/50 border border-border/30">
-                      <Hash className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground font-mono">
+                    {/* Certificate number */}
+                    <div className="flex items-center gap-2 mb-5 px-3 py-2 rounded-xl bg-background/50 border border-border/30 relative">
+                      <Hash className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <span className="text-xs text-muted-foreground font-mono truncate">
                         {cert.number}
                       </span>
                     </div>
 
+                    {/* Download button */}
                     <button
                       onClick={() => handleDownload(cert)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 text-white text-sm font-medium shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all"
+                      className="hover-lift w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 text-white text-sm font-medium shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all relative"
                     >
                       <Download className="w-4 h-4" />
                       {t('certificates.download')}
                     </button>
-                  </motion.div>
+                  </div>
                 ))}
-              </motion.div>
+              </div>
             ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-                className="flex flex-col items-center justify-center min-h-[40vh] text-center"
-              >
-                <div className="p-6 rounded-3xl bg-gradient-to-br from-primary/20 via-accent/15 to-orange-400/10 border border-primary/20 mb-6">
-                  <Award className="w-16 h-16 text-primary" />
+              /* Empty state */
+              <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+                <div className="p-8 rounded-3xl bg-gradient-to-br from-primary/15 via-accent/10 to-orange-400/5 border border-primary/20 mb-6 shadow-xl shadow-primary/10">
+                  <Award className="w-20 h-20 text-primary mx-auto" />
                 </div>
-                <h2 className="text-xl font-bold text-foreground mb-2">
+                <h2 className="text-2xl font-bold text-foreground mb-3">
                   {t('certificates.noCertificates')}
                 </h2>
-                <p className="text-sm text-muted-foreground max-w-sm">
-                  {t('certificates.emptyDesc')}
+                <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+                  Завершите курс на 100% для получения сертификата. Ваши достижения будут доступны здесь.
                 </p>
-              </motion.div>
+              </div>
             )}
           </main>
         </div>
