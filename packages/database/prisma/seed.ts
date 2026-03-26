@@ -46,7 +46,7 @@ async function main() {
       description: 'Вводный курс по искусственному интеллекту. Вы узнаете основные концепции AI, машинного обучения и нейронных сетей.',
       price: 0,
       isFree: true,
-      published: true,
+      isPublished: true,
     },
   });
   console.log(`Course created: ${course.title} (slug: ${course.slug})`);
@@ -61,7 +61,7 @@ async function main() {
       title: 'Введение в AI',
       description: 'Что такое искусственный интеллект и где он применяется',
       order: 1,
-      published: true,
+      isPublished: true,
     },
   });
 
@@ -74,7 +74,7 @@ async function main() {
       title: 'Машинное обучение',
       description: 'Основы машинного обучения и типы задач',
       order: 2,
-      published: true,
+      isPublished: true,
     },
   });
 
@@ -90,7 +90,7 @@ async function main() {
       type: 'TEXT',
       content: '<h2>Что такое искусственный интеллект?</h2><p>Искусственный интеллект (AI) — это область компьютерных наук, которая занимается созданием интеллектуальных машин, способных выполнять задачи, требующие человеческого интеллекта.</p><p>AI включает в себя:</p><ul><li>Машинное обучение</li><li>Обработку естественного языка</li><li>Компьютерное зрение</li><li>Робототехнику</li></ul>',
       order: 1,
-      published: true,
+      isPublished: true,
       isFree: true,
     },
   });
@@ -106,7 +106,7 @@ async function main() {
       type: 'TEXT',
       content: '<h2>AI в бизнесе</h2><p>Искусственный интеллект активно применяется в различных отраслях:</p><ul><li><strong>Маркетинг:</strong> персонализация, чат-боты, анализ данных</li><li><strong>Финансы:</strong> определение мошенничества, кредитный скоринг</li><li><strong>Медицина:</strong> диагностика, анализ снимков</li><li><strong>Образование:</strong> персональные AI-помощники</li></ul>',
       order: 2,
-      published: true,
+      isPublished: true,
       isFree: true,
     },
   });
@@ -122,7 +122,7 @@ async function main() {
       type: 'TEXT',
       content: '<h2>Три типа машинного обучения</h2><p><strong>1. Обучение с учителем (Supervised Learning)</strong> — модель учится на размеченных данных.</p><p><strong>2. Обучение без учителя (Unsupervised Learning)</strong> — модель находит закономерности в неразмеченных данных.</p><p><strong>3. Обучение с подкреплением (Reinforcement Learning)</strong> — модель учится через взаимодействие со средой и получение наград.</p>',
       order: 1,
-      published: true,
+      isPublished: true,
     },
   });
 
