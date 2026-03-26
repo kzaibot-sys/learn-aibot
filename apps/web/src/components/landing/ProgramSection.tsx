@@ -2,16 +2,21 @@
 
 import { motion } from 'framer-motion';
 import { BookOpen, Code, Rocket, Brain, Trophy } from 'lucide-react';
+import { useI18n } from '@/lib/i18n/context';
+import type { TranslationKey } from '@/lib/i18n/translations';
 
-const modules = [
-  { icon: BookOpen, title: 'Модуль 1: Введение', desc: 'Основы и подготовка к обучению', lessons: 5 },
-  { icon: Brain, title: 'Модуль 2: Фундамент', desc: 'Базовые концепции и инструменты', lessons: 8 },
-  { icon: Code, title: 'Модуль 3: Практика', desc: 'Реальные проекты и задачи', lessons: 10 },
-  { icon: Rocket, title: 'Модуль 4: Продвинутый уровень', desc: 'Углублённое изучение тем', lessons: 7 },
-  { icon: Trophy, title: 'Модуль 5: Финальный проект', desc: 'Создание собственного проекта', lessons: 4 },
-];
+const moduleIcons = [BookOpen, Brain, Code, Rocket, Trophy];
+const moduleLessons = [5, 8, 10, 7, 4];
 
 export function ProgramSection() {
+  const { t } = useI18n();
+
+  const modules = moduleIcons.map((icon, i) => ({
+    icon,
+    title: t(`landing.program.module${i + 1}` as TranslationKey),
+    desc: t(`landing.program.module${i + 1}desc` as TranslationKey),
+    lessons: moduleLessons[i],
+  }));
   return (
     <section id="program" className="py-32 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
@@ -21,9 +26,9 @@ export function ProgramSection() {
           viewport={{ once: true }}
           className="mb-16 text-center text-4xl font-black sm:text-5xl"
         >
-          Программа{' '}
+          {t('landing.program.title1')}{' '}
           <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
-            курса
+            {t('landing.program.title2')}
           </span>
         </motion.h2>
         <div className="space-y-4">
@@ -48,7 +53,7 @@ export function ProgramSection() {
                     <p className="mt-1 text-sm text-muted-foreground">{mod.desc}</p>
                   </div>
                   <span className="shrink-0 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-xs font-medium text-primary">
-                    {mod.lessons} уроков
+                    {mod.lessons} {t('landing.program.lessonsCount')}
                   </span>
                 </div>
               </motion.div>

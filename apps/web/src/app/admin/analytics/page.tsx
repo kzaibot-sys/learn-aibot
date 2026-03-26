@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/lib/auth';
+import { useI18n } from '@/lib/i18n/context';
 
 interface AnalyticsData {
   totalStudents: number;
@@ -18,6 +19,7 @@ interface AnalyticsData {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export default function AdminAnalyticsPage() {
+  const { t } = useI18n();
   const token = useAuthStore(s => s.token);
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,21 +92,21 @@ export default function AdminAnalyticsPage() {
   }
 
   if (!data) {
-    return <p className="text-muted-foreground">Не удалось загрузить аналитику</p>;
+    return <p className="text-muted-foreground">{t('admin.loadError')}</p>;
   }
 
   const cards = [
-    { label: 'Студенты', value: data.totalStudents, color: 'text-primary' },
-    { label: 'Курсы', value: data.totalCourses, color: 'text-purple-400' },
-    { label: 'Платежи', value: data.totalPayments, color: 'text-green-400' },
-    { label: 'Выручка', value: `${data.totalRevenue.toLocaleString('ru')} RUB`, color: 'text-yellow-400' },
+    { label: t('admin.studentsCount'), value: data.totalStudents, color: 'text-primary' },
+    { label: t('admin.coursesAnalytics'), value: data.totalCourses, color: 'text-purple-400' },
+    { label: t('admin.paymentsAnalytics'), value: data.totalPayments, color: 'text-green-400' },
+    { label: t('admin.revenue'), value: `${data.totalRevenue.toLocaleString('ru')} RUB`, color: 'text-yellow-400' },
   ];
 
   const maxRevenue = Math.max(...data.recentPayments.map(d => d.revenue), 1);
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-foreground">Аналитика</h1>
+      <h1 className="mb-6 text-2xl font-bold text-foreground">{t('admin.analytics')}</h1>
 
       {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -119,14 +121,14 @@ export default function AdminAnalyticsPage() {
       {/* Revenue chart (simple bar chart) */}
       {data.recentPayments.length > 0 && (
         <div className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Выручка по дням</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">{t('admin.revenueByDay')}</h2>
           <div className="flex items-end gap-1 h-40">
             {data.recentPayments.map((day, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-1">
                 <div
                   className="w-full bg-primary/60 rounded-t min-h-[2px] transition-all"
                   style={{ height: `${(day.revenue / maxRevenue) * 100}%` }}
-                  title={`${day.date}: ${day.revenue.toLocaleString('ru')} RUB (${day.count} платежей)`}
+                  title={`${day.date}: ${day.revenue.toLocaleString('ru')} RUB (${day.count} ${t('admin.paymentsCount')})`}
                 />
                 <span className="text-[10px] text-muted-foreground truncate w-full text-center">
                   {day.date.slice(0, 5)}

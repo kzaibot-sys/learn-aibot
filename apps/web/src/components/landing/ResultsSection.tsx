@@ -2,17 +2,15 @@
 
 import { motion } from 'framer-motion';
 import { CheckCircle2 } from 'lucide-react';
-
-const results = [
-  'Глубокое понимание предмета и уверенность в своих навыках',
-  'Портфолио из реальных проектов для резюме',
-  'Сертификат о прохождении курса',
-  'Доступ к сообществу единомышленников',
-  'Навыки, которые можно применить на практике сразу',
-  'Поддержка ИИ-помощника на всём пути обучения',
-];
+import { useI18n } from '@/lib/i18n/context';
+import type { TranslationKey } from '@/lib/i18n/translations';
 
 export function ResultsSection() {
+  const { t } = useI18n();
+
+  const results = ([1, 2, 3, 4, 5, 6] as const).map(
+    (n) => t(`landing.results.item${n}` as TranslationKey)
+  );
   return (
     <section className="py-32 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
@@ -22,9 +20,9 @@ export function ResultsSection() {
           viewport={{ once: true }}
           className="mb-16 text-center text-4xl font-black sm:text-5xl"
         >
-          Что вы{' '}
+          {t('landing.results.title1')}{' '}
           <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
-            получите
+            {t('landing.results.title2')}
           </span>
         </motion.h2>
         <div className="grid gap-4 sm:grid-cols-2">

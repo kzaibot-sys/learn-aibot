@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/auth';
 import { apiRequest } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/context';
 
 interface Lesson {
   id: string;
@@ -30,6 +31,7 @@ interface CourseDetail {
 }
 
 export default function AdminModulesPage() {
+  const { t } = useI18n();
   const params = useParams();
   const courseId = params.id as string;
   const token = useAuthStore(s => s.token);
@@ -88,7 +90,7 @@ export default function AdminModulesPage() {
   }
 
   async function handleDeleteModule(moduleId: string) {
-    if (!confirm('Удалить модуль и все его уроки?')) return;
+    if (!confirm(t('admin.deleteModuleConfirm'))) return;
     try {
       await apiRequest(`/api/admin/modules/${moduleId}`, { method: 'DELETE' }, token);
       loadCourse();
@@ -98,7 +100,7 @@ export default function AdminModulesPage() {
   }
 
   async function handleDeleteLesson(lessonId: string) {
-    if (!confirm('Удалить урок?')) return;
+    if (!confirm(t('admin.deleteLessonConfirm'))) return;
     try {
       await apiRequest(`/api/admin/lessons/${lessonId}`, { method: 'DELETE' }, token);
       loadCourse();
@@ -129,23 +131,23 @@ export default function AdminModulesPage() {
   }
 
   if (!course) {
-    return <p className="text-muted-foreground">Курс не найден</p>;
+    return <p className="text-muted-foreground">{t('common.notFound')}</p>;
   }
 
   return (
     <div>
       <Link href="/admin/courses" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-        &larr; К списку курсов
+        &larr; {t('admin.backToCourses')}
       </Link>
 
-      <h1 className="mt-4 mb-6 text-2xl font-bold text-foreground">{course.title} — Модули и уроки</h1>
+      <h1 className="mt-4 mb-6 text-2xl font-bold text-foreground">{course.title} — {t('admin.modulesAndLessons')}</h1>
 
       {/* Add module */}
       <div className="flex gap-2 mb-6">
         <input
           value={newModuleTitle}
           onChange={e => setNewModuleTitle(e.target.value)}
-          placeholder="Название нового модуля"
+          placeholder={t('admin.newModulePlaceholder')}
           className="flex-1 rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
           onKeyDown={e => e.key === 'Enter' && handleAddModule()}
         />
@@ -153,7 +155,7 @@ export default function AdminModulesPage() {
           onClick={handleAddModule}
           className="rounded-lg bg-gradient-to-r from-primary via-accent to-orange-400 px-4 py-2 text-sm font-medium text-white hover:shadow-lg hover:shadow-primary/25 transition-all"
         >
-          Добавить модуль
+          {t('admin.addModule')}
         </button>
       </div>
 
@@ -170,10 +172,10 @@ export default function AdminModulesPage() {
                     mod.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-secondary/50 text-muted-foreground'
                   }`}
                 >
-                  {mod.isPublished ? 'Опубликован' : 'Черновик'}
+                  {mod.isPublished ? t('common.published') : t('common.draft')}
                 </button>
                 <button onClick={() => handleDeleteModule(mod.id)} className="text-red-500 text-xs hover:underline">
-                  Удалить
+                  {t('common.delete')}
                 </button>
               </div>
             </div>
@@ -193,10 +195,10 @@ export default function AdminModulesPage() {
                         lesson.isPublished ? 'text-green-400' : 'text-muted-foreground'
                       }`}
                     >
-                      {lesson.isPublished ? 'Опубл.' : 'Черн.'}
+                      {lesson.isPublished ? t('admin.publishedShort') : t('admin.draftShort')}
                     </button>
                     <button onClick={() => handleDeleteLesson(lesson.id)} className="text-red-500 text-xs hover:underline">
-                      Удалить
+                      {t('common.delete')}
                     </button>
                   </div>
                 </div>
@@ -209,16 +211,16 @@ export default function AdminModulesPage() {
                 <input
                   value={newLessonTitle}
                   onChange={e => setNewLessonTitle(e.target.value)}
-                  placeholder="Название урока"
+                  placeholder={t('admin.lessonPlaceholder')}
                   className="flex-1 rounded-lg border border-border/50 bg-secondary/50 px-3 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none"
                   onKeyDown={e => e.key === 'Enter' && handleAddLesson(mod.id)}
                   autoFocus
                 />
                 <button onClick={() => handleAddLesson(mod.id)} className="text-primary text-sm hover:underline">
-                  Добавить
+                  {t('common.add')}
                 </button>
                 <button onClick={() => setAddingToModule(null)} className="text-muted-foreground text-sm hover:underline">
-                  Отмена
+                  {t('common.cancel')}
                 </button>
               </div>
             ) : (
@@ -226,7 +228,7 @@ export default function AdminModulesPage() {
                 onClick={() => { setAddingToModule(mod.id); setNewLessonTitle(''); }}
                 className="text-sm text-primary hover:underline"
               >
-                + Добавить урок
+                {t('admin.addLesson')}
               </button>
             )}
           </div>

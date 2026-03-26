@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/auth';
 import { apiRequest } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/context';
 
 interface AdminCourse {
   id: string;
@@ -18,6 +19,7 @@ interface AdminCourse {
 }
 
 export default function AdminCoursesPage() {
+  const { t } = useI18n();
   const token = useAuthStore(s => s.token);
   const [courses, setCourses] = useState<AdminCourse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ export default function AdminCoursesPage() {
   useEffect(() => { loadCourses(); }, [loadCourses]);
 
   async function handleDelete(id: string) {
-    if (!confirm('Удалить курс? Это действие необратимо.')) return;
+    if (!confirm(t('admin.deleteCourseConfirm'))) return;
     try {
       await apiRequest(`/api/admin/courses/${id}`, { method: 'DELETE' }, token);
       setCourses(prev => prev.filter(c => c.id !== id));
@@ -63,12 +65,12 @@ export default function AdminCoursesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Курсы</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('admin.courses')}</h1>
         <button
           onClick={() => setShowCreate(true)}
           className="rounded-lg bg-gradient-to-r from-primary via-accent to-orange-400 px-4 py-2 text-sm font-medium text-white hover:shadow-lg hover:shadow-primary/25 transition-all"
         >
-          Создать курс
+          {t('admin.createCourse')}
         </button>
       </div>
 
@@ -85,18 +87,18 @@ export default function AdminCoursesPage() {
           <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
         </div>
       ) : courses.length === 0 ? (
-        <p className="text-muted-foreground text-center py-12">Нет курсов</p>
+        <p className="text-muted-foreground text-center py-12">{t('admin.noCourses')}</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border/50 text-left text-muted-foreground">
-                <th className="pb-3 font-medium">Название</th>
-                <th className="pb-3 font-medium">Slug</th>
-                <th className="pb-3 font-medium">Цена</th>
-                <th className="pb-3 font-medium">Студенты</th>
-                <th className="pb-3 font-medium">Статус</th>
-                <th className="pb-3 font-medium">Действия</th>
+                <th className="pb-3 font-medium">{t('admin.courseName')}</th>
+                <th className="pb-3 font-medium">{t('admin.slug')}</th>
+                <th className="pb-3 font-medium">{t('admin.price')}</th>
+                <th className="pb-3 font-medium">{t('admin.students')}</th>
+                <th className="pb-3 font-medium">{t('admin.status')}</th>
+                <th className="pb-3 font-medium">{t('admin.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -105,7 +107,7 @@ export default function AdminCoursesPage() {
                   <td className="py-3 text-foreground font-medium">{course.title}</td>
                   <td className="py-3 text-muted-foreground">{course.slug}</td>
                   <td className="py-3 text-muted-foreground">
-                    {course.isFree ? 'Бесплатно' : `${course.price} ${course.currency}`}
+                    {course.isFree ? t('courses.free') : `${course.price} ${course.currency}`}
                   </td>
                   <td className="py-3 text-muted-foreground">{course._count.enrollments}</td>
                   <td className="py-3">
@@ -117,7 +119,7 @@ export default function AdminCoursesPage() {
                           : 'bg-secondary/50 text-muted-foreground'
                       }`}
                     >
-                      {course.isPublished ? 'Опубликован' : 'Черновик'}
+                      {course.isPublished ? t('common.published') : t('common.draft')}
                     </button>
                   </td>
                   <td className="py-3">
@@ -126,13 +128,13 @@ export default function AdminCoursesPage() {
                         href={`/admin/courses/${course.id}/modules`}
                         className="text-primary hover:underline text-xs"
                       >
-                        Модули
+                        {t('admin.modules')}
                       </Link>
                       <button
                         onClick={() => handleDelete(course.id)}
                         className="text-red-500 hover:underline text-xs"
                       >
-                        Удалить
+                        {t('common.delete')}
                       </button>
                     </div>
                   </td>
@@ -155,6 +157,7 @@ function CreateCourseForm({
   onCreated: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useI18n();
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [price, setPrice] = useState('0');
@@ -180,10 +183,10 @@ function CreateCourseForm({
 
   return (
     <form onSubmit={handleSubmit} className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 mb-6">
-      <h2 className="text-lg font-semibold text-foreground mb-4">Новый курс</h2>
+      <h2 className="text-lg font-semibold text-foreground mb-4">{t('admin.newCourse')}</h2>
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <label className="mb-1 block text-sm text-muted-foreground">Название</label>
+          <label className="mb-1 block text-sm text-muted-foreground">{t('admin.courseName')}</label>
           <input
             required
             value={title}
@@ -195,7 +198,7 @@ function CreateCourseForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-muted-foreground">Slug</label>
+          <label className="mb-1 block text-sm text-muted-foreground">{t('admin.slug')}</label>
           <input
             required
             value={slug}
@@ -204,7 +207,7 @@ function CreateCourseForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-muted-foreground">Цена (RUB)</label>
+          <label className="mb-1 block text-sm text-muted-foreground">{t('admin.priceRub')}</label>
           <input
             type="number"
             required
@@ -221,14 +224,14 @@ function CreateCourseForm({
           disabled={saving}
           className="rounded-lg bg-gradient-to-r from-primary via-accent to-orange-400 px-4 py-2 text-sm font-medium text-white hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50 transition-all"
         >
-          {saving ? 'Создание...' : 'Создать'}
+          {saving ? t('common.creating') : t('common.create')}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="rounded-lg border border-border/50 px-4 py-2 text-sm text-muted-foreground hover:bg-secondary/50 transition-colors"
         >
-          Отмена
+          {t('common.cancel')}
         </button>
       </div>
     </form>

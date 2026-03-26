@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n/context';
+import { useTheme } from '@/lib/theme';
 import {
   Home, BookOpen, LayoutGrid, Award, User,
   BookMarked, Users, CreditCard, BarChart3,
@@ -28,41 +29,15 @@ const adminItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[
   { href: '/admin/analytics', labelKey: 'nav.admin.analytics', icon: BarChart3 },
 ];
 
-const THEME_KEY = 'lms-theme';
-
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const { t, locale, setLocale } = useI18n();
+  const { dark, toggleTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
-  const [dark, setDark] = useState(true);
 
   const isAdmin = user?.role === 'ADMIN';
-
-  // Initialize theme from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem(THEME_KEY);
-    if (saved === 'light') {
-      setDark(false);
-      document.documentElement.classList.remove('dark');
-    } else {
-      // Default to dark
-      setDark(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  function toggleTheme() {
-    const newDark = !dark;
-    setDark(newDark);
-    localStorage.setItem(THEME_KEY, newDark ? 'dark' : 'light');
-    if (newDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }
 
   function toggleLocale() {
     setLocale(locale === 'ru' ? 'kz' : 'ru');
@@ -84,7 +59,7 @@ export function Sidebar() {
         {!collapsed && (
           <div className="min-w-0">
             <h1 className="text-sm font-bold text-foreground truncate">LearnHub Pro</h1>
-            <p className="text-[10px] text-muted-foreground truncate">AI бот жасау платформасы</p>
+            <p className="text-[10px] text-muted-foreground truncate">{t('dashboard.subtitle')}</p>
           </div>
         )}
       </div>

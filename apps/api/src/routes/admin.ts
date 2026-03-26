@@ -281,4 +281,31 @@ router.get('/payments', asyncHandler(async (req: Request, res: Response) => {
   });
 }));
 
+// ===== NOTIFICATIONS =====
+
+// POST /api/admin/notifications — send notification to all users
+router.post('/notifications', asyncHandler(async (req: Request, res: Response) => {
+  const { title, message, type } = req.body;
+
+  if (!title || !message) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'title and message are required');
+  }
+
+  const users = await prisma.user.findMany({
+    where: { isActive: true },
+    select: { id: true },
+  });
+
+  await prisma.notification.createMany({
+    data: users.map(u => ({
+      userId: u.id,
+      title,
+      message,
+      type: type || 'info',
+    })),
+  });
+
+  res.json({ success: true, data: { sentTo: users.length } });
+}));
+
 export { router as adminRouter };

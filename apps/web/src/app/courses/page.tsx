@@ -11,6 +11,7 @@ import { Sidebar } from '@/components/lms/Sidebar';
 import { TopBar } from '@/components/lms/TopBar';
 import { useAuthStore } from '@/lib/auth';
 import { apiRequest } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/context';
 
 interface Course {
   id: string;
@@ -26,6 +27,7 @@ interface Course {
 
 export default function CoursesPage() {
   const token = useAuthStore(s => s.token);
+  const { t } = useI18n();
   const [courses, setCourses] = useState<Course[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -58,8 +60,8 @@ export default function CoursesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <h1 className="text-4xl font-black text-foreground mb-2">Курсы</h1>
-              <p className="text-muted-foreground mb-8">Выбери свой путь к новым знаниям и навыкам</p>
+              <h1 className="text-4xl font-black text-foreground mb-2">{t('courses.title')}</h1>
+              <p className="text-muted-foreground mb-8">{t('courses.subtitle')}</p>
             </motion.div>
 
             {/* Stats */}
@@ -73,21 +75,21 @@ export default function CoursesPage() {
                 <LayoutGrid className="w-5 h-5 text-primary" />
                 <div>
                   <p className="text-2xl font-black text-primary">{courses.length}</p>
-                  <p className="text-xs text-muted-foreground">Всего курсов</p>
+                  <p className="text-xs text-muted-foreground">{t('courses.total')}</p>
                 </div>
               </div>
               <div className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-5 flex items-center gap-3">
                 <Clock className="w-5 h-5 text-primary" />
                 <div>
                   <p className="text-2xl font-black text-primary">{totalLessons}</p>
-                  <p className="text-xs text-muted-foreground">Уроков</p>
+                  <p className="text-xs text-muted-foreground">{t('courses.lessons')}</p>
                 </div>
               </div>
               <div className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-5 flex items-center gap-3">
                 <Star className="w-5 h-5 text-primary" />
                 <div>
                   <p className="text-2xl font-black text-primary">4.8</p>
-                  <p className="text-xs text-muted-foreground">Средний рейтинг</p>
+                  <p className="text-xs text-muted-foreground">{t('courses.rating')}</p>
                 </div>
               </div>
             </motion.div>
@@ -104,18 +106,18 @@ export default function CoursesPage() {
                 type="text"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Поиск курсов..."
+                placeholder={t('courses.search')}
                 className="w-full rounded-2xl border border-border/50 bg-secondary/50 backdrop-blur-sm pl-12 pr-6 py-3.5 text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none placeholder:text-muted-foreground/70"
               />
             </motion.div>
 
             {/* Courses grid */}
             {loading ? (
-              <div className="text-center py-20 text-muted-foreground">Загрузка...</div>
+              <div className="text-center py-20 text-muted-foreground">{t('common.loading')}</div>
             ) : filtered.length === 0 ? (
               <div className="text-center py-20">
                 <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                <p className="text-muted-foreground">Курсы не найдены</p>
+                <p className="text-muted-foreground">{t('courses.notFound')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -156,7 +158,7 @@ export default function CoursesPage() {
                         <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
                           <span className="flex items-center gap-1">
                             <Clock className="w-3.5 h-3.5" />
-                            {course.modules?.reduce((s, m) => s + (m.lessons?.length || 0), 0) || 0} уроков
+                            {course.modules?.reduce((s, m) => s + (m.lessons?.length || 0), 0) || 0} {t('dashboard.ofLessons')}
                           </span>
                           <span className="flex items-center gap-1">
                             <Users className="w-3.5 h-3.5" />
@@ -169,7 +171,7 @@ export default function CoursesPage() {
                         </div>
 
                         <div className="rounded-xl bg-gradient-to-r from-primary via-accent to-orange-400 text-white text-center py-2.5 font-bold text-sm">
-                          Начать курс
+                          {t('courses.start')}
                         </div>
                       </div>
                     </Link>

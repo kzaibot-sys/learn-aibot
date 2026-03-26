@@ -5,6 +5,7 @@ import { Award, Download, FileText, Hash } from 'lucide-react';
 import { AuthGuard } from '@/components/lms/AuthGuard';
 import { Sidebar } from '@/components/lms/Sidebar';
 import { TopBar } from '@/components/lms/TopBar';
+import { useI18n } from '@/lib/i18n/context';
 
 /* ---------- mock data ---------- */
 
@@ -42,6 +43,7 @@ const stagger = {
 /* ---------- component ---------- */
 
 export default function CertificatesPage() {
+  const { t } = useI18n();
   const hasCertificates = certificates.length > 0;
 
   return (
@@ -57,10 +59,10 @@ export default function CertificatesPage() {
               transition={{ duration: 0.5 }}
             >
               <h1 className="text-2xl font-bold text-foreground mb-1">
-                Сертификаты
+                {t('certificates.title')}
               </h1>
               <p className="text-sm text-muted-foreground">
-                Ваши достижения и подтверждения пройденных курсов
+                {t('certificates.subtitle')}
               </p>
             </motion.div>
 
@@ -88,7 +90,7 @@ export default function CertificatesPage() {
                           {cert.courseTitle}
                         </h3>
                         <p className="text-xs text-muted-foreground">
-                          Завершён {cert.completionDate}
+                          {t('certificates.completedStatus')} {cert.completionDate}
                         </p>
                       </div>
                     </div>
@@ -104,7 +106,7 @@ export default function CertificatesPage() {
                     {/* Download Button */}
                     <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 text-white text-sm font-medium shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all">
                       <Download className="w-4 h-4" />
-                      Скачать PDF
+                      {t('certificates.download')}
                     </button>
                   </motion.div>
                 ))}
@@ -121,11 +123,10 @@ export default function CertificatesPage() {
                   <Award className="w-16 h-16 text-primary" />
                 </div>
                 <h2 className="text-xl font-bold text-foreground mb-2">
-                  Пока нет сертификатов
+                  {t('certificates.noCertificates')}
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-sm">
-                  Завершите курс, чтобы получить сертификат. Он будет доступен для
-                  скачивания здесь.
+                  {t('certificates.emptyDesc')}
                 </p>
               </motion.div>
             )}

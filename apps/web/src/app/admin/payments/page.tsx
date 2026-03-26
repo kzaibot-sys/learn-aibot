@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '@/lib/auth';
+import { useI18n } from '@/lib/i18n/context';
 
 interface Payment {
   id: string;
@@ -30,6 +31,7 @@ const statusColors: Record<string, string> = {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export default function AdminPaymentsPage() {
+  const { t } = useI18n();
   const token = useAuthStore(s => s.token);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
@@ -61,7 +63,7 @@ export default function AdminPaymentsPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-foreground">Платежи</h1>
+      <h1 className="mb-6 text-2xl font-bold text-foreground">{t('admin.payments')}</h1>
 
       {/* Filters */}
       <div className="mb-6 flex gap-2">
@@ -73,7 +75,7 @@ export default function AdminPaymentsPage() {
               statusFilter === s ? 'bg-primary text-white' : 'bg-secondary/50 text-muted-foreground hover:bg-border/50'
             }`}
           >
-            {s || 'Все'}
+            {s || t('admin.all')}
           </button>
         ))}
       </div>
@@ -83,19 +85,19 @@ export default function AdminPaymentsPage() {
           <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
         </div>
       ) : payments.length === 0 ? (
-        <p className="text-muted-foreground text-center py-12">Нет платежей</p>
+        <p className="text-muted-foreground text-center py-12">{t('admin.noPayments')}</p>
       ) : (
         <>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/50 text-left text-muted-foreground">
-                  <th className="pb-3 font-medium">Дата</th>
-                  <th className="pb-3 font-medium">Пользователь</th>
-                  <th className="pb-3 font-medium">Курс</th>
-                  <th className="pb-3 font-medium">Сумма</th>
-                  <th className="pb-3 font-medium">Провайдер</th>
-                  <th className="pb-3 font-medium">Статус</th>
+                  <th className="pb-3 font-medium">{t('admin.date')}</th>
+                  <th className="pb-3 font-medium">{t('admin.user')}</th>
+                  <th className="pb-3 font-medium">{t('admin.course')}</th>
+                  <th className="pb-3 font-medium">{t('admin.amount')}</th>
+                  <th className="pb-3 font-medium">{t('admin.provider')}</th>
+                  <th className="pb-3 font-medium">{t('admin.status')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -126,7 +128,7 @@ export default function AdminPaymentsPage() {
                 onClick={() => setPage(p => p - 1)}
                 className="rounded-lg border border-border/50 px-3 py-1 text-sm text-muted-foreground hover:bg-secondary/50 disabled:opacity-50 transition-colors"
               >
-                Назад
+                {t('common.back')}
               </button>
               <span className="text-sm text-muted-foreground">{page} / {meta.totalPages}</span>
               <button
@@ -134,7 +136,7 @@ export default function AdminPaymentsPage() {
                 onClick={() => setPage(p => p + 1)}
                 className="rounded-lg border border-border/50 px-3 py-1 text-sm text-muted-foreground hover:bg-secondary/50 disabled:opacity-50 transition-colors"
               >
-                Вперёд
+                {t('common.forward')}
               </button>
             </div>
           )}

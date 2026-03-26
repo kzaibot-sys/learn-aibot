@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { prisma } from '@lms/database';
 import { config } from '../config';
 import { authenticate } from '../middleware/auth';
@@ -11,18 +12,53 @@ import type { JwtPayload } from '@lms/shared';
 
 const router = Router();
 
-function generateTokens(user: { id: string; email: string | null; role: string }): { accessToken: string } {
+function generateAccessToken(user: { id: string; email: string | null; role: string }): string {
   const payload: Omit<JwtPayload, 'iat' | 'exp'> = {
     sub: user.id,
     email: user.email ?? undefined,
     role: user.role,
   };
 
-  const accessToken = jwt.sign(payload, config.jwt.secret, {
+  return jwt.sign(payload, config.jwt.secret, {
     expiresIn: config.jwt.expiresIn,
   } as jwt.SignOptions);
+}
 
-  return { accessToken };
+function generateRefreshTokenString(): string {
+  return crypto.randomBytes(40).toString('hex');
+}
+
+async function createRefreshToken(userId: string): Promise<string> {
+  const rawToken = generateRefreshTokenString();
+  const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+  // Parse refresh expiry (e.g. '30d' -> 30 days)
+  const match = config.jwt.refreshExpiresIn.match(/^(\d+)([dhms])$/);
+  let expiresMs = 30 * 24 * 60 * 60 * 1000; // default 30 days
+  if (match) {
+    const num = parseInt(match[1]);
+    const unit = match[2];
+    const multipliers: Record<string, number> = { d: 86400000, h: 3600000, m: 60000, s: 1000 };
+    expiresMs = num * (multipliers[unit] || 86400000);
+  }
+
+  const expiresAt = new Date(Date.now() + expiresMs);
+
+  await prisma.refreshToken.create({
+    data: { userId, tokenHash, expiresAt },
+  });
+
+  return rawToken;
+}
+
+async function generateTokens(user: { id: string; email: string | null; role: string }): Promise<{ accessToken: string; refreshToken: string }> {
+  const accessToken = generateAccessToken(user);
+  const refreshToken = await createRefreshToken(user.id);
+  return { accessToken, refreshToken };
+}
+
+function formatUser(user: { id: string; email: string | null; firstName: string | null; lastName: string | null; role: string }) {
+  return { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role };
 }
 
 // POST /api/auth/register
@@ -49,14 +85,11 @@ router.post('/register', asyncHandler(async (req: Request, res: Response) => {
     },
   });
 
-  const tokens = generateTokens(user);
+  const tokens = await generateTokens(user);
 
   res.status(201).json({
     success: true,
-    data: {
-      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
-      ...tokens,
-    },
+    data: { user: formatUser(user), ...tokens },
   });
 }));
 
@@ -78,14 +111,47 @@ router.post('/login', asyncHandler(async (req: Request, res: Response) => {
     throw new AppError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
   }
 
-  const tokens = generateTokens(user);
+  const tokens = await generateTokens(user);
 
   res.json({
     success: true,
-    data: {
-      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
-      ...tokens,
-    },
+    data: { user: formatUser(user), ...tokens },
+  });
+}));
+
+// POST /api/auth/refresh — get new token pair using refresh token
+router.post('/refresh', asyncHandler(async (req: Request, res: Response) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'refreshToken is required');
+  }
+
+  const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+
+  const storedToken = await prisma.refreshToken.findFirst({
+    where: { tokenHash },
+    include: { user: true },
+  });
+
+  if (!storedToken) {
+    throw new AppError(401, 'INVALID_REFRESH_TOKEN', 'Invalid refresh token');
+  }
+
+  if (storedToken.expiresAt < new Date()) {
+    await prisma.refreshToken.delete({ where: { id: storedToken.id } });
+    throw new AppError(401, 'REFRESH_TOKEN_EXPIRED', 'Refresh token has expired');
+  }
+
+  // Token rotation: delete old token
+  await prisma.refreshToken.delete({ where: { id: storedToken.id } });
+
+  const user = storedToken.user;
+  const tokens = await generateTokens(user);
+
+  res.json({
+    success: true,
+    data: { user: formatUser(user), ...tokens },
   });
 }));
 
@@ -131,14 +197,11 @@ router.post('/telegram', asyncHandler(async (req: Request, res: Response) => {
   }
 
   const user = tgAccount!.user;
-  const tokens = generateTokens(user);
+  const tokens = await generateTokens(user);
 
   res.json({
     success: true,
-    data: {
-      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
-      ...tokens,
-    },
+    data: { user: formatUser(user), ...tokens },
   });
 }));
 

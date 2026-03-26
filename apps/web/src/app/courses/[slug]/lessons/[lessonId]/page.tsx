@@ -20,6 +20,7 @@ import { TopBar } from '@/components/lms/TopBar';
 import { VideoPlayer } from '@/components/lms/VideoPlayer';
 import { useAuthStore } from '@/lib/auth';
 import { apiRequest } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/context';
 
 /* ---------- types ---------- */
 
@@ -106,6 +107,7 @@ export default function LessonPage() {
   const slug = params.slug as string;
   const lessonId = params.lessonId as string;
   const token = useAuthStore((s) => s.token);
+  const { t } = useI18n();
 
   const [lesson, setLesson] = useState<LessonDetail | null>(null);
   const [course, setCourse] = useState<CourseDetail | null>(null);
@@ -251,7 +253,7 @@ export default function LessonPage() {
         <div className="ml-64">
           <TopBar />
           <div className="text-center py-20 text-muted-foreground">
-            Урок не найден
+            {t('lesson.notFound')}
           </div>
         </div>
       </AuthGuard>
@@ -278,7 +280,7 @@ export default function LessonPage() {
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
           >
             <ChevronLeft className="h-4 w-4" />
-            Назад к курсу
+            {t('lesson.backToCourse')}
           </Link>
 
           <div className="flex gap-6">
@@ -301,7 +303,7 @@ export default function LessonPage() {
                   <div className="w-full aspect-video flex flex-col items-center justify-center bg-zinc-900 text-muted-foreground">
                     <Play className="h-16 w-16 mb-3 opacity-30" />
                     <span className="text-sm opacity-50">
-                      Видео недоступно
+                      {t('lesson.videoUnavailable')}
                     </span>
                   </div>
                 )}
@@ -317,7 +319,7 @@ export default function LessonPage() {
               >
                 <div className="flex items-center gap-3 flex-wrap">
                   <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                    Урок {lessonNumber}
+                    {t('lesson.lesson')} {lessonNumber}
                   </span>
                   {lesson.duration && (
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
@@ -366,9 +368,9 @@ export default function LessonPage() {
                     <Target className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Сложность</p>
+                    <p className="text-xs text-muted-foreground">{t('lesson.difficulty')}</p>
                     <p className="text-sm font-medium text-foreground">
-                      Средняя
+                      {t('lesson.medium')}
                     </p>
                   </div>
                 </div>
@@ -378,9 +380,9 @@ export default function LessonPage() {
                     <BookOpen className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Задач</p>
+                    <p className="text-xs text-muted-foreground">{t('lesson.tasks')}</p>
                     <p className="text-sm font-medium text-foreground">
-                      {taskCount} практики
+                      {taskCount} {t('lesson.practice')}
                     </p>
                   </div>
                 </div>
@@ -390,7 +392,7 @@ export default function LessonPage() {
                     <Zap className="h-5 w-5 text-orange-400" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Награда</p>
+                    <p className="text-xs text-muted-foreground">{t('lesson.reward')}</p>
                     <p className="text-sm font-medium text-foreground">
                       +50 XP
                     </p>
@@ -416,10 +418,10 @@ export default function LessonPage() {
                   }`}
                 >
                   {isCompleted
-                    ? 'Урок выполнен'
+                    ? t('lesson.completed')
                     : completing
-                      ? 'Сохранение...'
-                      : 'Завершить урок и пройти тест \u2192'}
+                      ? t('common.saving')
+                      : t('lesson.completeAndTest')}
                 </button>
               </motion.div>
 
@@ -437,14 +439,14 @@ export default function LessonPage() {
                     className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    Предыдущий
+                    {t('lesson.prev')}
                   </button>
                 ) : (
                   <span />
                 )}
 
                 <span className="text-xs text-muted-foreground">
-                  Урок {lessonNumber} из {totalLessons}
+                  {t('lesson.lesson')} {lessonNumber} {t('lesson.of')} {totalLessons}
                 </span>
 
                 {nextLesson ? (
@@ -452,7 +454,7 @@ export default function LessonPage() {
                     onClick={() => goToLesson(nextLesson.id)}
                     className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Следующий
+                    {t('lesson.next')}
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 ) : (
@@ -473,7 +475,7 @@ export default function LessonPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <BookOpen className="h-5 w-5 text-primary" />
                   <h2 className="text-sm font-semibold text-foreground">
-                    Содержание курса
+                    {t('lesson.content')}
                   </h2>
                 </div>
 

@@ -15,6 +15,7 @@ import {
 import { AuthGuard } from '@/components/lms/AuthGuard';
 import { Sidebar } from '@/components/lms/Sidebar';
 import { TopBar } from '@/components/lms/TopBar';
+import { useI18n } from '@/lib/i18n/context';
 
 /* ---------- data ---------- */
 
@@ -25,8 +26,8 @@ const xpPercent = 68;
 
 interface Achievement {
   id: string;
-  title: string;
-  description: string;
+  titleKey: string;
+  descKey: string;
   xp: number;
   icon: React.ElementType;
   unlocked: boolean;
@@ -36,8 +37,8 @@ interface Achievement {
 const achievements: Achievement[] = [
   {
     id: '1',
-    title: 'Первый шаг',
-    description: 'Завершите первый урок',
+    titleKey: 'achievements.firstStep',
+    descKey: 'achievements.firstStepDesc',
     xp: 10,
     icon: BookOpen,
     unlocked: true,
@@ -45,8 +46,8 @@ const achievements: Achievement[] = [
   },
   {
     id: '2',
-    title: 'Огненная серия',
-    description: 'Учитесь 7 дней подряд',
+    titleKey: 'achievements.fireSeries',
+    descKey: 'achievements.fireSeriesDesc',
     xp: 50,
     icon: Flame,
     unlocked: true,
@@ -54,8 +55,8 @@ const achievements: Achievement[] = [
   },
   {
     id: '3',
-    title: 'Мастер знаний',
-    description: 'Завершите 10 курсов',
+    titleKey: 'achievements.knowledgeMaster',
+    descKey: 'achievements.knowledgeMasterDesc',
     xp: 100,
     icon: Trophy,
     unlocked: true,
@@ -63,8 +64,8 @@ const achievements: Achievement[] = [
   },
   {
     id: '4',
-    title: 'Быстрый ученик',
-    description: 'Завершите курс за неделю',
+    titleKey: 'achievements.fastLearner',
+    descKey: 'achievements.fastLearnerDesc',
     xp: 75,
     icon: Zap,
     unlocked: true,
@@ -72,8 +73,8 @@ const achievements: Achievement[] = [
   },
   {
     id: '5',
-    title: 'Идеальный результат',
-    description: 'Получите 100% на 5 тестах',
+    titleKey: 'achievements.perfectScore',
+    descKey: 'achievements.perfectScoreDesc',
     xp: 150,
     icon: Star,
     unlocked: true,
@@ -81,24 +82,24 @@ const achievements: Achievement[] = [
   },
   {
     id: '6',
-    title: 'Легенда платформы',
-    description: 'Достигните level 10',
+    titleKey: 'achievements.platformLegend',
+    descKey: 'achievements.platformLegendDesc',
     xp: 500,
     icon: Crown,
     unlocked: false,
   },
   {
     id: '7',
-    title: 'Командный игрок',
-    description: 'Помогите 10 студентам',
+    titleKey: 'achievements.teamPlayer',
+    descKey: 'achievements.teamPlayerDesc',
     xp: 200,
     icon: Users,
     unlocked: false,
   },
   {
     id: '8',
-    title: 'Марафонец',
-    description: 'Учитесь 30 дней подряд',
+    titleKey: 'achievements.marathoner',
+    descKey: 'achievements.marathonerDesc',
     xp: 300,
     icon: Target,
     unlocked: false,
@@ -126,6 +127,8 @@ const stagger = {
 /* ---------- component ---------- */
 
 export default function AchievementsPage() {
+  const { t } = useI18n();
+
   return (
     <AuthGuard>
       <div className="flex min-h-screen bg-background">
@@ -147,10 +150,10 @@ export default function AchievementsPage() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-foreground">
-                      Level {currentLevel}
+                      {t('achievements.level')} {currentLevel}
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                      {xpPercent}% XP до Level {currentLevel + 1} — {currentXP} XP
+                      {xpPercent}% {t('achievements.xpToLevel')} {currentLevel + 1} — {currentXP} XP
                     </p>
                   </div>
                 </div>
@@ -175,7 +178,7 @@ export default function AchievementsPage() {
               variants={stagger}
             >
               <h3 className="text-xl font-bold text-foreground mb-4">
-                Открытые достижения
+                {t('achievements.unlocked')}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {unlockedAchievements.map((achievement, i) => {
@@ -193,14 +196,14 @@ export default function AchievementsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <h4 className="text-sm font-semibold text-foreground truncate">
-                            {achievement.title}
+                            {t(achievement.titleKey as any)}
                           </h4>
                           <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full shrink-0 ml-2">
                             +{achievement.xp} XP
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground mb-2">
-                          {achievement.description}
+                          {t(achievement.descKey as any)}
                         </p>
                         {achievement.date && (
                           <p className="text-[10px] text-muted-foreground/70">
@@ -221,7 +224,7 @@ export default function AchievementsPage() {
               variants={stagger}
             >
               <h3 className="text-xl font-bold text-foreground mb-4">
-                Заблокированные
+                {t('achievements.locked')}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {lockedAchievements.map((achievement, i) => {
@@ -238,17 +241,17 @@ export default function AchievementsPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <h4 className="text-sm font-semibold text-muted-foreground truncate">
-                            {achievement.title}
+                            {t(achievement.titleKey as any)}
                           </h4>
                           <span className="text-xs font-medium text-muted-foreground bg-muted/20 px-2 py-0.5 rounded-full shrink-0 ml-2">
                             {achievement.xp} XP
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground/70 mb-2">
-                          {achievement.description}
+                          {t(achievement.descKey as any)}
                         </p>
                         <p className="text-[10px] text-muted-foreground/50">
-                          Заблокировано
+                          {t('achievements.lockedLabel')}
                         </p>
                       </div>
                     </motion.div>

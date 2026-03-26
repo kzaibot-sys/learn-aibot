@@ -5,8 +5,11 @@ import { CalendarDays, Clock } from 'lucide-react';
 import { AuthGuard } from '@/components/lms/AuthGuard';
 import { Sidebar } from '@/components/lms/Sidebar';
 import { TopBar } from '@/components/lms/TopBar';
+import { useI18n } from '@/lib/i18n/context';
 
 export default function CalendarPage() {
+  const { t } = useI18n();
+
   return (
     <AuthGuard>
       <div className="flex min-h-screen bg-background">
@@ -35,7 +38,7 @@ export default function CalendarPage() {
                 transition={{ delay: 0.3, duration: 0.4 }}
                 className="text-2xl font-bold text-foreground mb-3"
               >
-                Здесь будет твоё расписание
+                {t('calendar.coming')}
               </motion.h1>
 
               <motion.p
@@ -44,8 +47,7 @@ export default function CalendarPage() {
                 transition={{ delay: 0.4, duration: 0.4 }}
                 className="text-sm text-muted-foreground max-w-md mb-8"
               >
-                Мы работаем над этой функцией. Скоро здесь появится твоё расписание
-                занятий.
+                {t('calendar.comingDesc')}
               </motion.p>
 
               <motion.div
@@ -55,7 +57,7 @@ export default function CalendarPage() {
                 className="flex items-center gap-2 text-xs text-muted-foreground/60"
               >
                 <Clock className="w-4 h-4" />
-                <span>Скоро</span>
+                <span>{t('calendar.soon')}</span>
               </motion.div>
             </motion.div>
           </main>

@@ -167,7 +167,7 @@ export default function CoursePage() {
         <div className="ml-64">
           <TopBar />
           <div className="text-center py-20 text-muted-foreground">
-            Курс не найден
+            {t('lesson.courseNotFound')}
           </div>
         </div>
       </AuthGuard>
@@ -212,7 +212,7 @@ export default function CoursePage() {
                 <div className="flex items-center gap-2 mb-3">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
                     <GraduationCap className="h-3.5 w-3.5" />
-                    {course.modules.length} {course.modules.length === 1 ? 'модуль' : course.modules.length < 5 ? 'модуля' : 'модулей'}
+                    {course.modules.length} {course.modules.length === 1 ? t('courses.moduleWord') : course.modules.length < 5 ? t('courses.modulesWord2') : t('courses.modulesWord5')}
                   </span>
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
                     <BookOpen className="h-3.5 w-3.5" />
@@ -242,7 +242,7 @@ export default function CoursePage() {
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-muted-foreground">
-                          {progress.completedLessons} / {totalLessons} уроков завершено
+                          {progress.completedLessons} / {totalLessons} {t('courses.lessonsCompleted')}
                         </span>
                         <span className="text-sm font-semibold text-primary">
                           {progressPercent}%
@@ -272,7 +272,7 @@ export default function CoursePage() {
                             {Number(course.price).toLocaleString('ru-RU')} &#8381;
                           </span>
                           <button className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 px-8 py-3 text-sm font-semibold text-white hover:shadow-lg hover:shadow-primary/25 transition-all">
-                            Купить курс
+                            {t('courses.buy')}
                           </button>
                         </>
                       ) : (
@@ -281,7 +281,7 @@ export default function CoursePage() {
                           className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 px-8 py-3 text-sm font-semibold text-white hover:shadow-lg hover:shadow-primary/25 transition-all"
                         >
                           <Play className="h-4 w-4" />
-                          Начать обучение
+                          {t('courses.startLearning')}
                         </Link>
                       )}
                     </div>
@@ -374,11 +374,11 @@ export default function CoursePage() {
                               </p>
                               <div className="flex items-center gap-3 mt-0.5">
                                 <span className="text-xs text-muted-foreground capitalize">
-                                  {lesson.type === 'VIDEO' ? 'Видео' : lesson.type === 'TEXT' ? 'Текст' : lesson.type === 'QUIZ' ? 'Тест' : lesson.type.toLowerCase()}
+                                  {lesson.type === 'VIDEO' ? t('courses.video') : lesson.type === 'TEXT' ? t('courses.text') : lesson.type === 'QUIZ' ? t('courses.quiz') : lesson.type.toLowerCase()}
                                 </span>
                                 {lesson.isFree && (
                                   <span className="text-xs text-green-500 font-medium">
-                                    Бесплатно
+                                    {t('courses.free')}
                                   </span>
                                 )}
                               </div>

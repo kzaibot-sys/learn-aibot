@@ -9,6 +9,7 @@ import { progressRouter } from './routes/progress';
 import { paymentsRouter } from './routes/payments';
 import { adminRouter } from './routes/admin';
 import { botRouter } from './routes/bot';
+import { notificationsRouter } from './routes/notifications';
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use('/api/courses', coursesRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/notifications', notificationsRouter);
 app.use('/api/bot', botRouter);
 
 // Health check

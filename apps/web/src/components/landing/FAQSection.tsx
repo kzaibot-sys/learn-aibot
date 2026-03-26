@@ -3,17 +3,16 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
-
-const faqs = [
-  { q: 'Как долго длится доступ к курсу?', a: 'Доступ к курсу предоставляется навсегда. Вы можете проходить его в своём темпе и возвращаться к материалам в любое время.' },
-  { q: 'Нужен ли опыт для прохождения?', a: 'Нет, курс подходит для начинающих. Мы начинаем с основ и постепенно усложняем материал.' },
-  { q: 'Как работает ИИ-помощник?', a: 'ИИ-помощник доступен в Telegram боте. Вы можете задавать вопросы по материалам курса и получать мгновенные ответы 24/7.' },
-  { q: 'Можно ли вернуть деньги?', a: 'Да, в течение 14 дней после покупки вы можете запросить полный возврат, если курс вам не подошёл.' },
-  { q: 'Будут ли обновления курса?', a: 'Да, мы регулярно обновляем материалы и добавляем новые уроки. Все обновления доступны бесплатно.' },
-  { q: 'Как происходит оплата?', a: 'Мы принимаем оплату через ЮKassa (карты РФ и СНГ) и Stripe (международные карты).' },
-];
+import { useI18n } from '@/lib/i18n/context';
+import type { TranslationKey } from '@/lib/i18n/translations';
 
 export function FAQSection() {
+  const { t } = useI18n();
+
+  const faqs = ([1, 2, 3, 4, 5, 6] as const).map((n) => ({
+    q: t(`landing.faq.q${n}` as TranslationKey),
+    a: t(`landing.faq.a${n}` as TranslationKey),
+  }));
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
@@ -25,9 +24,9 @@ export function FAQSection() {
           viewport={{ once: true }}
           className="mb-16 text-center text-4xl font-black sm:text-5xl"
         >
-          Частые{' '}
+          {t('landing.faq.title1')}{' '}
           <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
-            вопросы
+            {t('landing.faq.title2')}
           </span>
         </motion.h2>
         <div className="space-y-3">

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '@/lib/auth';
 import { apiRequest } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/context';
 
 interface Student {
   id: string;
@@ -24,6 +25,7 @@ interface PaginationMeta {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export default function AdminStudentsPage() {
+  const { t } = useI18n();
   const token = useAuthStore(s => s.token);
   const [students, setStudents] = useState<Student[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
@@ -76,21 +78,21 @@ export default function AdminStudentsPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-foreground">Студенты</h1>
+      <h1 className="mb-6 text-2xl font-bold text-foreground">{t('admin.studentsTitle')}</h1>
 
       {/* Search */}
       <div className="mb-6">
         <input
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1); }}
-          placeholder="Поиск по email или имени..."
+          placeholder={t('admin.searchStudents')}
           className="w-full max-w-md rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
         />
       </div>
 
       {/* Grant access */}
       <div className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-4 mb-6">
-        <h2 className="text-sm font-semibold mb-3 text-muted-foreground">Ручная выдача доступа</h2>
+        <h2 className="text-sm font-semibold mb-3 text-muted-foreground">{t('admin.grantAccess')}</h2>
         <div className="flex gap-2 flex-wrap">
           <input
             value={grantUserId}
@@ -105,7 +107,7 @@ export default function AdminStudentsPage() {
             className="rounded-lg border border-border/50 bg-secondary/50 px-3 py-1.5 text-sm text-foreground focus:border-primary focus:outline-none"
           />
           <button onClick={handleGrant} className="rounded-lg bg-green-600 px-4 py-1.5 text-sm text-white hover:bg-green-700 transition-colors">
-            Выдать доступ
+            {t('admin.grantAccessButton')}
           </button>
           {grantMessage && <span className="text-sm text-green-400 self-center">{grantMessage}</span>}
         </div>
@@ -122,12 +124,12 @@ export default function AdminStudentsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/50 text-left text-muted-foreground">
-                  <th className="pb-3 font-medium">ID</th>
-                  <th className="pb-3 font-medium">Email</th>
-                  <th className="pb-3 font-medium">Имя</th>
-                  <th className="pb-3 font-medium">Роль</th>
-                  <th className="pb-3 font-medium">Курсов</th>
-                  <th className="pb-3 font-medium">Регистрация</th>
+                  <th className="pb-3 font-medium">{t('admin.id')}</th>
+                  <th className="pb-3 font-medium">{t('admin.email')}</th>
+                  <th className="pb-3 font-medium">{t('admin.name')}</th>
+                  <th className="pb-3 font-medium">{t('admin.role')}</th>
+                  <th className="pb-3 font-medium">{t('admin.coursesCount')}</th>
+                  <th className="pb-3 font-medium">{t('admin.registration')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -159,7 +161,7 @@ export default function AdminStudentsPage() {
                 onClick={() => setPage(p => p - 1)}
                 className="rounded-lg border border-border/50 px-3 py-1 text-sm text-muted-foreground hover:bg-secondary/50 disabled:opacity-50 transition-colors"
               >
-                Назад
+                {t('common.back')}
               </button>
               <span className="text-sm text-muted-foreground">{page} / {meta.totalPages}</span>
               <button
@@ -167,7 +169,7 @@ export default function AdminStudentsPage() {
                 onClick={() => setPage(p => p + 1)}
                 className="rounded-lg border border-border/50 px-3 py-1 text-sm text-muted-foreground hover:bg-secondary/50 disabled:opacity-50 transition-colors"
               >
-                Вперёд
+                {t('common.forward')}
               </button>
             </div>
           )}

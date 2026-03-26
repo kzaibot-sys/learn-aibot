@@ -6,9 +6,11 @@ import { Sidebar } from '@/components/lms/Sidebar';
 import { TopBar } from '@/components/lms/TopBar';
 import { useAuthStore } from '@/lib/auth';
 import { apiRequest } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/context';
 
 export default function ProfilePage() {
-  const { user, token, setAuth } = useAuthStore();
+  const { t } = useI18n();
+  const { user, token, refreshToken, setAuth } = useAuthStore();
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
   const [saving, setSaving] = useState(false);
@@ -30,11 +32,11 @@ export default function ProfilePage() {
         token,
       );
       if (user) {
-        setAuth({ ...user, firstName: updated.firstName, lastName: updated.lastName }, token!);
+        setAuth({ ...user, firstName: updated.firstName, lastName: updated.lastName }, token!, refreshToken!);
       }
-      setMessage('Профиль обновлён');
+      setMessage(t('profile.updated'));
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : 'Ошибка');
+      setMessage(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setSaving(false);
     }
@@ -43,7 +45,7 @@ export default function ProfilePage() {
   async function handlePasswordSubmit(e: FormEvent) {
     e.preventDefault();
     if (newPassword.length < 6) {
-      setPasswordMessage('Пароль должен быть минимум 6 символов');
+      setPasswordMessage(t('profile.passwordMinLength'));
       return;
     }
     setSavingPassword(true);
@@ -54,11 +56,11 @@ export default function ProfilePage() {
         { method: 'PATCH', body: JSON.stringify({ currentPassword, newPassword }) },
         token,
       );
-      setPasswordMessage('Пароль изменён');
+      setPasswordMessage(t('profile.passwordChanged'));
       setCurrentPassword('');
       setNewPassword('');
     } catch (err) {
-      setPasswordMessage(err instanceof Error ? err.message : 'Ошибка');
+      setPasswordMessage(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setSavingPassword(false);
     }
@@ -70,11 +72,11 @@ export default function ProfilePage() {
       <div className="ml-64">
         <TopBar />
         <main className="p-6 max-w-xl">
-          <h1 className="mb-6 text-2xl font-bold text-foreground">Профиль</h1>
+          <h1 className="mb-6 text-2xl font-bold text-foreground">{t('profile.title')}</h1>
 
           {/* Profile info */}
           <form onSubmit={handleProfileSubmit} className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 mb-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Личные данные</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">{t('profile.personalInfo')}</h2>
 
             <div className="mb-3">
               <label className="mb-1 block text-sm text-muted-foreground">Email</label>
@@ -87,7 +89,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="mb-3">
-              <label className="mb-1 block text-sm text-muted-foreground">Имя</label>
+              <label className="mb-1 block text-sm text-muted-foreground">{t('profile.firstName')}</label>
               <input
                 type="text"
                 value={firstName}
@@ -97,7 +99,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="mb-4">
-              <label className="mb-1 block text-sm text-muted-foreground">Фамилия</label>
+              <label className="mb-1 block text-sm text-muted-foreground">{t('profile.lastName')}</label>
               <input
                 type="text"
                 value={lastName}
@@ -113,16 +115,16 @@ export default function ProfilePage() {
               disabled={saving}
               className="rounded-lg bg-gradient-to-r from-primary via-accent to-orange-400 px-6 py-2 text-sm font-medium text-white hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50 transition-all"
             >
-              {saving ? 'Сохранение...' : 'Сохранить'}
+              {saving ? t('common.saving') : t('common.save')}
             </button>
           </form>
 
           {/* Password change */}
           <form onSubmit={handlePasswordSubmit} className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Сменить пароль</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">{t('profile.changePassword')}</h2>
 
             <div className="mb-3">
-              <label className="mb-1 block text-sm text-muted-foreground">Текущий пароль</label>
+              <label className="mb-1 block text-sm text-muted-foreground">{t('profile.currentPassword')}</label>
               <input
                 type="password"
                 value={currentPassword}
@@ -133,7 +135,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="mb-4">
-              <label className="mb-1 block text-sm text-muted-foreground">Новый пароль</label>
+              <label className="mb-1 block text-sm text-muted-foreground">{t('profile.newPassword')}</label>
               <input
                 type="password"
                 value={newPassword}
@@ -144,7 +146,7 @@ export default function ProfilePage() {
             </div>
 
             {passwordMessage && (
-              <p className={`mb-3 text-sm ${passwordMessage.includes('Ошибка') ? 'text-red-400' : 'text-green-400'}`}>
+              <p className={`mb-3 text-sm ${passwordMessage.includes(t('common.error')) ? 'text-red-400' : 'text-green-400'}`}>
                 {passwordMessage}
               </p>
             )}
@@ -154,7 +156,7 @@ export default function ProfilePage() {
               disabled={savingPassword}
               className="rounded-lg bg-gradient-to-r from-primary via-accent to-orange-400 px-6 py-2 text-sm font-medium text-white hover:shadow-lg hover:shadow-primary/25 disabled:opacity-50 transition-all"
             >
-              {savingPassword ? 'Сохранение...' : 'Сменить пароль'}
+              {savingPassword ? t('common.saving') : t('profile.changePassword')}
             </button>
           </form>
         </main>

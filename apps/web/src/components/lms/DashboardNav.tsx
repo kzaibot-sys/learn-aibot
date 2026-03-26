@@ -3,18 +3,20 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/auth';
+import { useI18n } from '@/lib/i18n/context';
 
 export function DashboardNav() {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
+  const { t } = useI18n();
 
   const links = [
-    { href: '/dashboard', label: 'Мои курсы' },
-    { href: '/profile', label: 'Профиль' },
+    { href: '/dashboard', label: t('nav.courses') },
+    { href: '/profile', label: t('profile.title') },
   ];
 
   if (user?.role === 'ADMIN') {
-    links.push({ href: '/admin/courses', label: 'Админ' });
+    links.push({ href: '/admin/courses', label: t('nav.admin') });
   }
 
   return (
@@ -44,7 +46,7 @@ export function DashboardNav() {
             onClick={logout}
             className="text-sm text-gray-500 hover:text-white transition-colors"
           >
-            Выйти
+            {t('common.logout')}
           </button>
         </div>
       </div>

@@ -14,7 +14,9 @@ interface AuthUser {
 interface AuthState {
   user: AuthUser | null;
   token: string | null;
-  setAuth: (user: AuthUser, token: string) => void;
+  refreshToken: string | null;
+  setAuth: (user: AuthUser, token: string, refreshToken: string) => void;
+  setTokens: (token: string, refreshToken: string) => void;
   logout: () => void;
 }
 
@@ -23,14 +25,15 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
-      setAuth: (user, token) => set({ user, token }),
-      logout: () => set({ user: null, token: null }),
+      refreshToken: null,
+      setAuth: (user, token, refreshToken) => set({ user, token, refreshToken }),
+      setTokens: (token, refreshToken) => set({ token, refreshToken }),
+      logout: () => set({ user: null, token: null, refreshToken: null }),
     }),
     {
       name: 'lms-auth',
       storage: createJSONStorage(() => {
         if (typeof window === 'undefined') {
-          // SSR: return no-op storage
           return {
             getItem: () => null,
             setItem: () => {},

@@ -10,30 +10,30 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#ff8533',
+          DEFAULT: 'var(--color-primary)',
           hover: '#e6772e',
           foreground: '#ffffff',
         },
         accent: {
-          DEFAULT: '#ffaa66',
+          DEFAULT: 'var(--color-accent)',
           foreground: '#ffffff',
         },
-        background: '#0a0a0f',
-        foreground: '#f0f0f3',
+        background: 'var(--color-background)',
+        foreground: 'var(--color-foreground)',
         card: {
-          DEFAULT: '#141419',
-          foreground: '#f0f0f3',
+          DEFAULT: 'var(--color-card)',
+          foreground: 'var(--color-card-foreground)',
         },
-        popover: '#1a1a1f',
-        secondary: '#1a1a1f',
+        popover: 'var(--color-popover)',
+        secondary: 'var(--color-secondary)',
         muted: {
-          DEFAULT: '#1f1f26',
-          foreground: '#9a9aa5',
+          DEFAULT: 'var(--color-muted)',
+          foreground: 'var(--color-muted-foreground)',
         },
-        border: '#2a2a35',
-        input: '#1a1a1f',
-        ring: '#ff8533',
-        destructive: '#ff4444',
+        border: 'var(--color-border)',
+        input: 'var(--color-input)',
+        ring: 'var(--color-ring)',
+        destructive: 'var(--color-destructive)',
         /* Compat aliases for LMS pages */
         brand: {
           DEFAULT: '#ff8533',
@@ -45,14 +45,7 @@ const config: Config = {
           600: '#e6772e',
           700: '#c2410c',
         },
-        dark: {
-          bg: '#0a0a0f',
-          card: '#141419',
-          sidebar: '#0a0a0f',
-          input: '#1a1a1f',
-          border: '#2a2a35',
-          hover: '#1f1f26',
-        },
+        'orange-400': 'var(--color-orange-400)',
       },
       borderRadius: {
         'sm': 'calc(1rem - 4px)',

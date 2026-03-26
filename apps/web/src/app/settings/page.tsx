@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   User,
@@ -20,6 +20,7 @@ import { Sidebar } from '@/components/lms/Sidebar';
 import { TopBar } from '@/components/lms/TopBar';
 import { useAuthStore } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n/context';
+import { useTheme } from '@/lib/theme';
 
 /* ---------- animation ---------- */
 
@@ -36,37 +37,14 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
-const THEME_KEY = 'lms-theme';
-
 /* ---------- component ---------- */
 
 export default function SettingsPage() {
   const { user } = useAuthStore();
   const { t, locale, setLocale } = useI18n();
-  const [darkMode, setDarkMode] = useState(true);
+  const { dark: darkMode, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [twoFactor, setTwoFactor] = useState(false);
-
-  // Sync theme state from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem(THEME_KEY);
-    if (saved === 'light') {
-      setDarkMode(false);
-    } else {
-      setDarkMode(true);
-    }
-  }, []);
-
-  function toggleTheme() {
-    const newDark = !darkMode;
-    setDarkMode(newDark);
-    localStorage.setItem(THEME_KEY, newDark ? 'dark' : 'light');
-    if (newDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }
 
   function toggleLocale() {
     setLocale(locale === 'ru' ? 'kz' : 'ru');

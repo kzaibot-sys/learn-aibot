@@ -6,11 +6,27 @@
   --font-size: 16px;
   --radius: 1rem;
 
-  /* Primary orange system */
+  /* Primary orange system — same for both themes */
   --color-primary: #ff8533;
   --color-accent: #ffaa66;
   --color-orange-400: #ff9944;
+  --color-ring: #ff8533;
+  --color-destructive: #ff4444;
 
+  /* Light theme */
+  --color-background: #f8f9fa;
+  --color-foreground: #1a1a2e;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1a2e;
+  --color-popover: #ffffff;
+  --color-secondary: #f0f0f5;
+  --color-muted: #e8e8ed;
+  --color-muted-foreground: #6b7280;
+  --color-border: #e0e0e8;
+  --color-input: #f5f5f8;
+}
+
+.dark {
   /* Dark theme */
   --color-background: #0a0a0f;
   --color-foreground: #f0f0f3;
@@ -22,11 +38,13 @@
   --color-muted-foreground: #9a9aa5;
   --color-border: #2a2a35;
   --color-input: #1a1a1f;
-  --color-ring: #ff8533;
-  --color-destructive: #ff4444;
 }
 
 @layer base {
+  * {
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
   body {
     @apply bg-[var(--color-background)] text-[var(--color-foreground)];
     font-size: var(--font-size);

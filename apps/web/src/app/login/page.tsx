@@ -5,14 +5,17 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/auth';
 import { apiRequest } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/context';
 
 interface AuthResponse {
   user: { id: string; email: string | null; firstName: string | null; lastName: string | null; role: string };
   accessToken: string;
+  refreshToken: string;
 }
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const setAuth = useAuthStore(s => s.setAuth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,10 +33,10 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      setAuth(data.user, data.accessToken);
+      setAuth(data.user, data.accessToken, data.refreshToken);
       router.push('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка авторизации');
+      setError(err instanceof Error ? err.message : t('auth.error'));
     } finally {
       setLoading(false);
     }
@@ -47,11 +50,11 @@ export default function LoginPage() {
         </Link>
 
         <div className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-8">
-          <h1 className="mb-6 text-xl font-bold text-center text-foreground">Вход</h1>
+          <h1 className="mb-6 text-xl font-bold text-center text-foreground">{t('auth.login')}</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm text-muted-foreground">Email</label>
+              <label className="mb-1 block text-sm text-muted-foreground">{t('auth.email')}</label>
               <input
                 type="email"
                 required
@@ -63,14 +66,14 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm text-muted-foreground">Пароль</label>
+              <label className="mb-1 block text-sm text-muted-foreground">{t('auth.password')}</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 className="w-full rounded-2xl border border-border/50 bg-secondary/50 backdrop-blur-sm px-4 py-3 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none placeholder:text-muted-foreground/70"
-                placeholder="Введите пароль"
+                placeholder={t('auth.enterPassword')}
               />
             </div>
 
@@ -81,7 +84,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 py-3 text-sm font-bold text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 disabled:opacity-50 transition-all"
             >
-              {loading ? 'Загрузка...' : 'Войти'}
+              {loading ? t('auth.loading') : t('auth.submit')}
             </button>
           </form>
         </div>

@@ -2,14 +2,23 @@
 
 import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
+import { useI18n } from '@/lib/i18n/context';
+import type { TranslationKey } from '@/lib/i18n/translations';
 
-const reviews = [
-  { name: 'Анна К.', text: 'Отличный курс! Наконец-то нашла структурированный материал. Задания помогли закрепить теорию на практике.', role: 'Веб-разработчик' },
-  { name: 'Дмитрий М.', text: 'ИИ-помощник в Telegram — это гениально. Мог задать вопрос в любое время и получить понятный ответ.', role: 'Начинающий специалист' },
-  { name: 'Елена С.', text: 'Прошла курс за 3 недели. Всё понятно, видео качественные, задания по делу. Рекомендую!', role: 'Продакт-менеджер' },
+const reviewTexts = [
+  'Отличный курс! Наконец-то нашла структурированный материал. Задания помогли закрепить теорию на практике.',
+  'ИИ-помощник в Telegram — это гениально. Мог задать вопрос в любое время и получить понятный ответ.',
+  'Прошла курс за 3 недели. Всё понятно, видео качественные, задания по делу. Рекомендую!',
 ];
 
 export function ReviewsSection() {
+  const { t } = useI18n();
+
+  const reviews = ([1, 2, 3] as const).map((n, i) => ({
+    name: t(`landing.reviews.name${n}` as TranslationKey),
+    text: reviewTexts[i],
+    role: t(`landing.reviews.role${n}` as TranslationKey),
+  }));
   return (
     <section id="reviews" className="py-32 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
@@ -19,9 +28,9 @@ export function ReviewsSection() {
           viewport={{ once: true }}
           className="mb-16 text-center text-4xl font-black sm:text-5xl"
         >
-          Отзывы{' '}
+          {t('landing.reviews.title1')}{' '}
           <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
-            студентов
+            {t('landing.reviews.title2')}
           </span>
         </motion.h2>
         <div className="grid gap-6 sm:grid-cols-3">

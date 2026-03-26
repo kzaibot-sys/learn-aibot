@@ -2,15 +2,17 @@
 
 import { motion } from 'framer-motion';
 import { Users, Briefcase, RefreshCw, TrendingUp } from 'lucide-react';
-
-const audiences = [
-  { icon: Users, title: 'Начинающие специалисты', desc: 'Которые хотят получить структурированные знания с нуля' },
-  { icon: Briefcase, title: 'Практикующие профессионалы', desc: 'Которым нужно систематизировать опыт и освоить новые инструменты' },
-  { icon: RefreshCw, title: 'Карьерные переходчики', desc: 'Которые хотят сменить профессию и войти в новую сферу' },
-  { icon: TrendingUp, title: 'Предприниматели', desc: 'Которым нужны практические навыки для развития бизнеса' },
-];
+import { useI18n } from '@/lib/i18n/context';
 
 export function AudienceSection() {
+  const { t } = useI18n();
+
+  const audiences = [
+    { icon: Users, title: t('landing.audience.beginners'), desc: t('landing.audience.beginnersDesc') },
+    { icon: Briefcase, title: t('landing.audience.professionals'), desc: t('landing.audience.professionalsDesc') },
+    { icon: RefreshCw, title: t('landing.audience.switchers'), desc: t('landing.audience.switchersDesc') },
+    { icon: TrendingUp, title: t('landing.audience.entrepreneurs'), desc: t('landing.audience.entrepreneursDesc') },
+  ];
   return (
     <section className="py-32 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
@@ -20,9 +22,9 @@ export function AudienceSection() {
           viewport={{ once: true }}
           className="mb-16 text-center text-4xl font-black sm:text-5xl"
         >
-          Для кого{' '}
+          {t('landing.audience.title1')}{' '}
           <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
-            этот курс
+            {t('landing.audience.title2')}
           </span>
         </motion.h2>
         <div className="grid gap-6 sm:grid-cols-2">

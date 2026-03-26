@@ -2,8 +2,10 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Sparkles, ArrowRight } from 'lucide-react';
+import { useI18n } from '@/lib/i18n/context';
 
 export function HeroSection() {
+  const { t } = useI18n();
   const { scrollY } = useScroll();
   const opacity = useTransform(scrollY, [0, 400], [1, 0]);
   const scale = useTransform(scrollY, [0, 400], [1, 0.95]);
@@ -25,7 +27,7 @@ export function HeroSection() {
           className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-5 py-2 text-sm text-primary mb-8"
         >
           <Sparkles className="w-4 h-4" />
-          Новый курс уже доступен
+          {t('landing.hero.badge')}
         </motion.div>
 
         <motion.h1
@@ -34,9 +36,9 @@ export function HeroSection() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="mb-6 text-5xl font-black tracking-tight sm:text-6xl lg:text-8xl"
         >
-          Освойте новые навыки{' '}
+          {t('landing.hero.title1')}{' '}
           <span className="bg-gradient-to-r from-primary via-accent to-orange-400 bg-clip-text text-transparent">
-            с экспертами
+            {t('landing.hero.title2')}
           </span>
         </motion.h1>
 
@@ -46,7 +48,7 @@ export function HeroSection() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground sm:text-xl"
         >
-          Структурированные курсы с видеоуроками, практическими заданиями и поддержкой от ИИ-помощника. Учитесь в удобном темпе.
+          {t('landing.hero.subtitle')}
         </motion.p>
 
         <motion.div
@@ -61,7 +63,7 @@ export function HeroSection() {
             whileTap={{ scale: 0.95 }}
             className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 px-8 py-5 text-lg font-bold text-white shadow-2xl shadow-primary/50 hover:shadow-primary/70 transition-shadow"
           >
-            Начать обучение
+            {t('landing.hero.cta')}
             <ArrowRight className="w-5 h-5" />
           </motion.a>
           <motion.a
@@ -70,7 +72,7 @@ export function HeroSection() {
             whileTap={{ scale: 0.95 }}
             className="inline-flex items-center rounded-2xl border-2 border-border hover:border-primary/50 bg-secondary/50 backdrop-blur-sm px-8 py-5 text-lg font-bold text-foreground transition-colors"
           >
-            Программа курса
+            {t('landing.hero.program')}
           </motion.a>
         </motion.div>
 

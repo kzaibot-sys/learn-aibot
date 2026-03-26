@@ -2,8 +2,11 @@
 
 import { motion } from 'framer-motion';
 import { Check, Zap } from 'lucide-react';
+import { useI18n } from '@/lib/i18n/context';
+import type { TranslationKey } from '@/lib/i18n/translations';
 
 export function PricingSection() {
+  const { t } = useI18n();
   return (
     <section id="pricing" className="py-32 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-md">
@@ -13,7 +16,7 @@ export function PricingSection() {
           viewport={{ once: true }}
           className="mb-16 text-center text-4xl font-black sm:text-5xl"
         >
-          Стоимость
+          {t('landing.pricing.title')}
         </motion.h2>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -26,7 +29,7 @@ export function PricingSection() {
           <div className="mb-6">
             <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-primary to-accent text-white text-sm font-bold rounded-full px-5 py-1.5">
               <Zap className="w-4 h-4" />
-              Полный доступ
+              {t('landing.pricing.fullAccess')}
             </span>
           </div>
 
@@ -36,16 +39,10 @@ export function PricingSection() {
             </span>
             <span className="text-2xl text-muted-foreground">₸</span>
           </div>
-          <p className="mb-8 text-sm text-muted-foreground">единоразовый платёж, доступ навсегда</p>
+          <p className="mb-8 text-sm text-muted-foreground">{t('landing.pricing.oneTime')}</p>
 
           <ul className="mb-8 space-y-4 text-left">
-            {[
-              '34 видеоурока',
-              'Практические задания',
-              'ИИ-помощник 24/7',
-              'Сертификат',
-              'Обновления курса бесплатно',
-            ].map((item, i) => (
+            {([1, 2, 3, 4, 5] as const).map((n) => t(`landing.pricing.feature${n}` as TranslationKey)).map((item, i) => (
               <li key={i} className="flex items-center gap-3 text-foreground/90">
                 <div className="shrink-0 p-1 rounded-full bg-primary/10 border border-primary/20">
                   <Check className="w-3.5 h-3.5 text-primary" />
@@ -61,7 +58,7 @@ export function PricingSection() {
             whileTap={{ scale: 0.95 }}
             className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-primary via-accent to-orange-400 px-8 py-4 text-lg font-bold text-white shadow-2xl shadow-primary/50 hover:shadow-primary/70 transition-shadow"
           >
-            Купить курс
+            {t('landing.pricing.buy')}
           </motion.a>
         </motion.div>
       </div>
