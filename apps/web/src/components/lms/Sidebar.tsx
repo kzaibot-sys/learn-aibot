@@ -1,43 +1,71 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/auth';
+import { useI18n } from '@/lib/i18n/context';
 import {
   Home, BookOpen, LayoutGrid, Award, User,
   BookMarked, Users, CreditCard, BarChart3,
   LogOut, ChevronLeft, ChevronRight, GraduationCap,
-  Sun, Moon, Calendar, Trophy, Settings, Flame,
+  Sun, Moon, Calendar, Trophy, Settings, Flame, Globe,
 } from 'lucide-react';
+import type { TranslationKey } from '@/lib/i18n/translations';
 
-const navItems = [
-  { href: '/dashboard', label: 'Главная', icon: Home },
-  { href: '/courses', label: 'Курсы', icon: LayoutGrid },
-  { href: '/calendar', label: 'Календарь', icon: Calendar },
-  { href: '/achievements', label: 'Достижения', icon: Trophy },
-  { href: '/settings', label: 'Настройки', icon: Settings },
+const navItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[] = [
+  { href: '/dashboard', labelKey: 'nav.home', icon: Home },
+  { href: '/courses', labelKey: 'nav.courses', icon: LayoutGrid },
+  { href: '/calendar', labelKey: 'nav.calendar', icon: Calendar },
+  { href: '/achievements', labelKey: 'nav.achievements', icon: Trophy },
+  { href: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];
 
-const adminItems = [
-  { href: '/admin/courses', label: 'Курсы', icon: BookMarked },
-  { href: '/admin/students', label: 'Студенты', icon: Users },
-  { href: '/admin/payments', label: 'Платежи', icon: CreditCard },
-  { href: '/admin/analytics', label: 'Аналитика', icon: BarChart3 },
+const adminItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[] = [
+  { href: '/admin/courses', labelKey: 'nav.admin.courses', icon: BookMarked },
+  { href: '/admin/students', labelKey: 'nav.admin.students', icon: Users },
+  { href: '/admin/payments', labelKey: 'nav.admin.payments', icon: CreditCard },
+  { href: '/admin/analytics', labelKey: 'nav.admin.analytics', icon: BarChart3 },
 ];
+
+const THEME_KEY = 'lms-theme';
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
+  const { t, locale, setLocale } = useI18n();
   const [collapsed, setCollapsed] = useState(false);
   const [dark, setDark] = useState(true);
 
   const isAdmin = user?.role === 'ADMIN';
 
+  // Initialize theme from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light') {
+      setDark(false);
+      document.documentElement.classList.remove('dark');
+    } else {
+      // Default to dark
+      setDark(true);
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
   function toggleTheme() {
-    setDark(!dark);
-    document.documentElement.classList.toggle('dark');
+    const newDark = !dark;
+    setDark(newDark);
+    localStorage.setItem(THEME_KEY, newDark ? 'dark' : 'light');
+    if (newDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
+
+  function toggleLocale() {
+    setLocale(locale === 'ru' ? 'kz' : 'ru');
   }
 
   function handleLogout() {
@@ -56,7 +84,7 @@ export function Sidebar() {
         {!collapsed && (
           <div className="min-w-0">
             <h1 className="text-sm font-bold text-foreground truncate">LearnHub Pro</h1>
-            <p className="text-[10px] text-muted-foreground truncate">Продолжай развиваться</p>
+            <p className="text-[10px] text-muted-foreground truncate">AI бот жасау платформасы</p>
           </div>
         )}
       </div>
@@ -75,6 +103,7 @@ export function Sidebar() {
           {navItems.map(item => {
             const active = pathname === item.href || pathname.startsWith(item.href + '/');
             const Icon = item.icon;
+            const label = t(item.labelKey);
             return (
               <Link
                 key={item.href}
@@ -84,10 +113,10 @@ export function Sidebar() {
                     ? 'bg-gradient-to-r from-primary via-accent to-orange-400 text-white shadow-xl shadow-primary/30 font-medium'
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
-                title={collapsed ? item.label : undefined}
+                title={collapsed ? label : undefined}
               >
                 <Icon className="w-5 h-5 shrink-0" strokeWidth={2.5} />
-                {!collapsed && <span className="truncate">{item.label}</span>}
+                {!collapsed && <span className="truncate">{label}</span>}
               </Link>
             );
           })}
@@ -102,7 +131,7 @@ export function Sidebar() {
                 <Flame className="w-4 h-4 text-orange-400" />
               </div>
               <span className="text-xs font-medium text-foreground">
-                Серия обучения 7 дней
+                {t('common.streak')} 7 {t('common.days')}
               </span>
             </div>
 
@@ -128,7 +157,7 @@ export function Sidebar() {
 
         {collapsed && (
           <div className="flex justify-center mt-4 mb-2">
-            <div className="p-1.5 rounded-xl bg-orange-500/10" title="Серия обучения: 7 дней">
+            <div className="p-1.5 rounded-xl bg-orange-500/10" title={`${t('common.streak')}: 7 ${t('common.days')}`}>
               <Flame className="w-4 h-4 text-orange-400" />
             </div>
           </div>
@@ -139,13 +168,14 @@ export function Sidebar() {
             <div className="my-4 mx-3 border-t border-border/50" />
             {!collapsed && (
               <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Админ
+                {t('nav.admin')}
               </p>
             )}
             <div className="space-y-1">
               {adminItems.map(item => {
                 const active = pathname.startsWith(item.href);
                 const Icon = item.icon;
+                const label = t(item.labelKey);
                 return (
                   <Link
                     key={item.href}
@@ -155,10 +185,10 @@ export function Sidebar() {
                         ? 'bg-gradient-to-r from-primary via-accent to-orange-400 text-white shadow-xl shadow-primary/30 font-medium'
                         : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                     }`}
-                    title={collapsed ? item.label : undefined}
+                    title={collapsed ? label : undefined}
                   >
                     <Icon className="w-5 h-5 shrink-0" strokeWidth={2.5} />
-                    {!collapsed && <span className="truncate">{item.label}</span>}
+                    {!collapsed && <span className="truncate">{label}</span>}
                   </Link>
                 );
               })}
@@ -167,17 +197,29 @@ export function Sidebar() {
         )}
       </nav>
 
-      {/* Theme toggle + User */}
+      {/* Theme toggle + Language toggle + User */}
       <div className="border-t border-border/50 p-3 shrink-0 space-y-3">
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          className="flex items-center gap-3 w-full px-3 py-2 rounded-2xl text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
-          title={collapsed ? (dark ? 'Светлая тема' : 'Тёмная тема') : undefined}
-        >
-          {dark ? <Sun className="w-5 h-5 shrink-0" /> : <Moon className="w-5 h-5 shrink-0" />}
-          {!collapsed && <span>{dark ? 'Светлая тема' : 'Тёмная тема'}</span>}
-        </button>
+        {/* Theme + Language row */}
+        <div className="flex items-center gap-2">
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 flex-1 px-3 py-2 rounded-2xl text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+            title={collapsed ? (dark ? t('theme.light') : t('theme.dark')) : undefined}
+          >
+            {dark ? <Sun className="w-5 h-5 shrink-0" /> : <Moon className="w-5 h-5 shrink-0" />}
+            {!collapsed && <span>{dark ? t('theme.light') : t('theme.dark')}</span>}
+          </button>
+
+          {/* Language toggle */}
+          <button
+            onClick={toggleLocale}
+            className="flex items-center justify-center w-10 h-10 rounded-2xl text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all border border-border/50 shrink-0"
+            title={locale === 'ru' ? 'Kazakh' : 'Russian'}
+          >
+            {locale === 'ru' ? 'RU' : 'KZ'}
+          </button>
+        </div>
 
         {/* User profile */}
         <div className="flex items-center gap-3">
@@ -196,7 +238,7 @@ export function Sidebar() {
             <button
               onClick={handleLogout}
               className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
-              title="Выйти"
+              title={t('common.logout')}
             >
               <LogOut className="w-4 h-4" />
             </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   User,
@@ -19,6 +19,7 @@ import { AuthGuard } from '@/components/lms/AuthGuard';
 import { Sidebar } from '@/components/lms/Sidebar';
 import { TopBar } from '@/components/lms/TopBar';
 import { useAuthStore } from '@/lib/auth';
+import { useI18n } from '@/lib/i18n/context';
 
 /* ---------- animation ---------- */
 
@@ -35,17 +36,40 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
+const THEME_KEY = 'lms-theme';
+
 /* ---------- component ---------- */
 
 export default function SettingsPage() {
   const { user } = useAuthStore();
+  const { t, locale, setLocale } = useI18n();
   const [darkMode, setDarkMode] = useState(true);
   const [notifications, setNotifications] = useState(true);
   const [twoFactor, setTwoFactor] = useState(false);
 
+  // Sync theme state from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light') {
+      setDarkMode(false);
+    } else {
+      setDarkMode(true);
+    }
+  }, []);
+
   function toggleTheme() {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle('dark');
+    const newDark = !darkMode;
+    setDarkMode(newDark);
+    localStorage.setItem(THEME_KEY, newDark ? 'dark' : 'light');
+    if (newDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
+
+  function toggleLocale() {
+    setLocale(locale === 'ru' ? 'kz' : 'ru');
   }
 
   return (
@@ -60,9 +84,9 @@ export default function SettingsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-2xl font-bold text-foreground mb-1">Настройки</h1>
+              <h1 className="text-2xl font-bold text-foreground mb-1">{t('settings.title')}</h1>
               <p className="text-sm text-muted-foreground">
-                Управляйте своим аккаунтом и предпочтениями
+                {t('settings.subtitle')}
               </p>
             </motion.div>
 
@@ -80,7 +104,7 @@ export default function SettingsPage() {
               >
                 <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                   <User className="w-5 h-5 text-primary" />
-                  Аккаунт
+                  {t('settings.account')}
                 </h2>
 
                 <div className="space-y-4">
@@ -90,14 +114,14 @@ export default function SettingsPage() {
                         <User className="w-4 h-4 text-primary" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">Имя</p>
+                        <p className="text-sm font-medium text-foreground">{t('settings.name')}</p>
                         <p className="text-xs text-muted-foreground">
-                          {user?.firstName || 'Не указано'}
+                          {user?.firstName || t('settings.notSet')}
                         </p>
                       </div>
                     </div>
                     <button className="text-xs text-primary hover:text-primary/80 transition-colors">
-                      Изменить
+                      {t('settings.change')}
                     </button>
                   </div>
 
@@ -109,14 +133,14 @@ export default function SettingsPage() {
                         <Mail className="w-4 h-4 text-primary" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">Email</p>
+                        <p className="text-sm font-medium text-foreground">{t('settings.email')}</p>
                         <p className="text-xs text-muted-foreground">
-                          {user?.email || 'Не указано'}
+                          {user?.email || t('settings.notSet')}
                         </p>
                       </div>
                     </div>
                     <button className="text-xs text-primary hover:text-primary/80 transition-colors">
-                      Изменить
+                      {t('settings.change')}
                     </button>
                   </div>
 
@@ -128,12 +152,12 @@ export default function SettingsPage() {
                         <Lock className="w-4 h-4 text-primary" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">Пароль</p>
+                        <p className="text-sm font-medium text-foreground">{t('settings.password')}</p>
                         <p className="text-xs text-muted-foreground">********</p>
                       </div>
                     </div>
                     <button className="text-xs text-primary hover:text-primary/80 transition-colors">
-                      Изменить
+                      {t('settings.change')}
                     </button>
                   </div>
                 </div>
@@ -147,7 +171,7 @@ export default function SettingsPage() {
               >
                 <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                   <Sun className="w-5 h-5 text-primary" />
-                  Настройки
+                  {t('settings.preferences')}
                 </h2>
 
                 <div className="space-y-4">
@@ -162,9 +186,9 @@ export default function SettingsPage() {
                         )}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">Тема</p>
+                        <p className="text-sm font-medium text-foreground">{t('settings.theme')}</p>
                         <p className="text-xs text-muted-foreground">
-                          {darkMode ? 'Тёмная' : 'Светлая'}
+                          {darkMode ? t('settings.dark') : t('settings.light')}
                         </p>
                       </div>
                     </div>
@@ -191,11 +215,18 @@ export default function SettingsPage() {
                         <Globe className="w-4 h-4 text-primary" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">Язык</p>
-                        <p className="text-xs text-muted-foreground">Русский</p>
+                        <p className="text-sm font-medium text-foreground">{t('settings.language')}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {locale === 'ru' ? 'Русский' : 'Қазақша'}
+                        </p>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    <button
+                      onClick={toggleLocale}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-secondary/50 border border-border/50 transition-all"
+                    >
+                      {locale === 'ru' ? 'RU' : 'KZ'}
+                    </button>
                   </div>
 
                   <div className="border-t border-border/30" />
@@ -207,9 +238,9 @@ export default function SettingsPage() {
                         <Bell className="w-4 h-4 text-primary" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">Уведомления</p>
+                        <p className="text-sm font-medium text-foreground">{t('settings.notifications')}</p>
                         <p className="text-xs text-muted-foreground">
-                          {notifications ? 'Включены' : 'Выключены'}
+                          {notifications ? t('settings.enabled') : t('settings.disabled')}
                         </p>
                       </div>
                     </div>
@@ -237,20 +268,20 @@ export default function SettingsPage() {
               >
                 <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-primary" />
-                  Подписка
+                  {t('settings.subscription')}
                 </h2>
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-bold text-white bg-gradient-to-r from-primary via-accent to-orange-400 px-3 py-1 rounded-full">
-                      Premium
+                      {t('settings.premium')}
                     </span>
                     <p className="text-sm text-muted-foreground">
-                      Действует до 26 марта 2027
+                      {t('settings.validUntil')}
                     </p>
                   </div>
                   <button className="text-xs text-primary hover:text-primary/80 transition-colors">
-                    Управление
+                    {t('settings.manage')}
                   </button>
                 </div>
               </motion.div>
@@ -263,7 +294,7 @@ export default function SettingsPage() {
               >
                 <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                   <Shield className="w-5 h-5 text-primary" />
-                  Безопасность
+                  {t('settings.security')}
                 </h2>
 
                 <div className="flex items-center justify-between">
@@ -273,12 +304,12 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        Двухфакторная аутентификация
+                        {t('settings.2fa')}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {twoFactor
-                          ? 'Включена — ваш аккаунт защищён'
-                          : 'Выключена — рекомендуем включить'}
+                          ? t('settings.2faEnabled')
+                          : t('settings.2faDisabled')}
                       </p>
                     </div>
                   </div>
@@ -305,14 +336,13 @@ export default function SettingsPage() {
               >
                 <h2 className="text-lg font-semibold text-red-400 flex items-center gap-2">
                   <Trash2 className="w-5 h-5" />
-                  Опасная зона
+                  {t('settings.danger')}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Удаление аккаунта необратимо. Все ваши данные, курсы и прогресс будут
-                  безвозвратно удалены.
+                  {t('settings.deleteDescription')}
                 </p>
                 <button className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-medium hover:bg-red-500/20 transition-colors">
-                  Удалить аккаунт
+                  {t('settings.deleteAccount')}
                 </button>
               </motion.div>
             </motion.div>

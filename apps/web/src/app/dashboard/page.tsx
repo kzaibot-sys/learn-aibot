@@ -16,6 +16,7 @@ import { Sidebar } from '@/components/lms/Sidebar';
 import { TopBar } from '@/components/lms/TopBar';
 import { useAuthStore } from '@/lib/auth';
 import { apiRequest } from '@/lib/api';
+import { useI18n } from '@/lib/i18n/context';
 
 /* ---------- types ---------- */
 
@@ -59,6 +60,7 @@ const staggerContainer = {
 /* ---------- component ---------- */
 
 export default function DashboardPage() {
+  const { t } = useI18n();
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
   const [courses, setCourses] = useState<DashboardCourse[]>([]);
@@ -119,28 +121,28 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      label: 'Активные курсы',
+      label: t('dashboard.activeCourses'),
       value: stats.activeCourses,
       icon: BookOpen,
-      trend: '+2 за месяц',
+      trend: t('dashboard.trendMonth'),
     },
     {
-      label: 'Завершено',
+      label: t('dashboard.completed'),
       value: stats.completedLessons,
       icon: CheckCircle2,
-      trend: `из ${stats.totalLessons} уроков`,
+      trend: `${stats.totalLessons} ${t('dashboard.ofLessons')}`,
     },
     {
-      label: 'Часов обучения',
+      label: t('dashboard.hours'),
       value: stats.hours,
       icon: Clock,
-      trend: 'общее время',
+      trend: t('dashboard.totalTime'),
     },
     {
-      label: 'Достижения',
+      label: t('dashboard.achievements'),
       value: stats.badges,
       icon: Award,
-      trend: 'сертификатов',
+      trend: t('dashboard.certificates'),
     },
   ];
 
@@ -163,7 +165,7 @@ export default function DashboardPage() {
             <motion.div variants={fadeUp} custom={0}>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-medium text-primary">
                 <Sparkles className="h-3.5 w-3.5" />
-                Добро пожаловать назад!
+                {t('dashboard.welcome')}
               </span>
             </motion.div>
 
@@ -172,7 +174,7 @@ export default function DashboardPage() {
               custom={1}
               className="text-3xl font-bold tracking-tight text-foreground"
             >
-              Продолжай развиваться
+              AI бот жасау платформасы
             </motion.h1>
 
             <motion.p
@@ -180,7 +182,7 @@ export default function DashboardPage() {
               custom={2}
               className="text-muted-foreground"
             >
-              Ты на пути к достижению своих целей
+              {t('dashboard.onTrack')}
             </motion.p>
           </motion.div>
 
@@ -242,13 +244,13 @@ export default function DashboardPage() {
                   className="flex items-center justify-between"
                 >
                   <h2 className="text-xl font-semibold text-foreground">
-                    Твой прогресс
+                    {t('dashboard.progress')}
                   </h2>
                   <Link
                     href="/courses"
                     className="text-sm text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1"
                   >
-                    Смотреть все
+                    {t('dashboard.viewAll')}
                     <ChevronRight className="h-4 w-4" />
                   </Link>
                 </motion.div>
@@ -260,13 +262,13 @@ export default function DashboardPage() {
                     className="rounded-3xl bg-card/50 backdrop-blur-sm border border-border/50 p-8 text-center"
                   >
                     <p className="text-muted-foreground mb-4">
-                      У тебя пока нет активных курсов
+                      {t('dashboard.noCourses')}
                     </p>
                     <Link
                       href="/courses"
                       className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary via-accent to-orange-400 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow"
                     >
-                      Перейти к каталогу
+                      {t('dashboard.goToCatalog')}
                       <ChevronRight className="h-4 w-4" />
                     </Link>
                   </motion.div>
@@ -302,10 +304,10 @@ export default function DashboardPage() {
                               </h3>
                               <p className="text-xs text-muted-foreground mt-0.5">
                                 {totalModules > 0
-                                  ? `Глава ${currentModule} из ${totalModules}`
-                                  : `${p.completedLessons} из ${p.totalLessons} уроков`}
+                                  ? `${t('dashboard.chapter')} ${currentModule} ${t('dashboard.of')} ${totalModules}`
+                                  : `${p.completedLessons} ${t('dashboard.of')} ${p.totalLessons} ${t('dashboard.ofLessons')}`}
                                 {' • '}
-                                {isComplete ? 'Завершён' : 'В процессе'}
+                                {isComplete ? t('dashboard.completedStatus') : t('dashboard.inProgress')}
                               </p>
 
                               {/* progress bar */}
