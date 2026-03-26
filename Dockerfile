@@ -38,9 +38,11 @@ COPY --from=builder /app/apps/${APP_NAME}/package.json ./apps/${APP_NAME}/packag
 # Copy src/assets if present (fonts for PDF generation, etc.)
 # Using wildcard so it doesn't fail if the directory doesn't exist
 COPY --from=builder /app/apps/${APP_NAME}/src/asset[s] ./apps/${APP_NAME}/src/assets
+# Copy Prisma schema for db push at startup
+COPY --from=builder /app/packages/database/prisma ./packages/database/prisma
 
 USER appuser
 ENV PORT=3001
 EXPOSE ${PORT}
 WORKDIR /app/apps/${APP_NAME}
-CMD ["node", "dist/index.js"]
+CMD ["sh", "-c", "npx prisma db push --schema=/app/packages/database/prisma/schema.prisma --skip-generate --accept-data-loss 2>/dev/null; node dist/index.js"]
