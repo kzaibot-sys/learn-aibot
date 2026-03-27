@@ -149,50 +149,83 @@ export default function AdminAnalyticsPage() {
             <p className="text-muted-foreground">{t('admin.noCourseStats')}</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/50 text-left text-muted-foreground">
-                  <th className="px-6 py-4 font-medium">{t('admin.courseName')}</th>
-                  <th className="px-6 py-4 font-medium text-center">{t('admin.enrolledStudents')}</th>
-                  <th className="px-6 py-4 font-medium">{t('admin.avgProgress')}</th>
-                  <th className="px-6 py-4 font-medium text-center">{t('admin.totalLessons')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedCourses.map(course => (
-                  <tr key={course.id} className="border-b border-border/30 hover:bg-secondary/20 transition-colors">
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-foreground">{course.title}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">/{course.slug}</p>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 text-xs font-medium">
-                        <Users className="w-3 h-3" />
-                        {course.enrolledCount}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3 min-w-[180px]">
-                        <div className="flex-1 bg-secondary/50 rounded-full h-2.5 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${getProgressColor(course.avgProgress)}`}
-                            style={{ width: `${Math.min(course.avgProgress, 100)}%` }}
-                          />
-                        </div>
-                        <span className={`text-xs font-semibold w-10 text-right ${getProgressTextColor(course.avgProgress)}`}>
-                          {course.avgProgress}%
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center text-muted-foreground">
-                      {course.totalLessons}
-                    </td>
+          <>
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/50 text-left text-muted-foreground">
+                    <th className="px-6 py-4 font-medium">{t('admin.courseName')}</th>
+                    <th className="px-6 py-4 font-medium text-center">{t('admin.enrolledStudents')}</th>
+                    <th className="px-6 py-4 font-medium">{t('admin.avgProgress')}</th>
+                    <th className="px-6 py-4 font-medium text-center">{t('admin.totalLessons')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {sortedCourses.map(course => (
+                    <tr key={course.id} className="border-b border-border/30 hover:bg-secondary/20 transition-colors">
+                      <td className="px-6 py-4">
+                        <p className="font-medium text-foreground">{course.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">/{course.slug}</p>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 text-xs font-medium">
+                          <Users className="w-3 h-3" />
+                          {course.enrolledCount}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3 min-w-[180px]">
+                          <div className="flex-1 bg-secondary/50 rounded-full h-2.5 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${getProgressColor(course.avgProgress)}`}
+                              style={{ width: `${Math.min(course.avgProgress, 100)}%` }}
+                            />
+                          </div>
+                          <span className={`text-xs font-semibold w-10 text-right ${getProgressTextColor(course.avgProgress)}`}>
+                            {course.avgProgress}%
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center text-muted-foreground">
+                        {course.totalLessons}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="md:hidden divide-y divide-border/30">
+              {sortedCourses.map(course => (
+                <div key={course.id} className="p-4 space-y-3">
+                  <div>
+                    <p className="font-medium text-foreground">{course.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">/{course.slug}</p>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 font-medium">
+                      <Users className="w-3 h-3" />
+                      {course.enrolledCount} {t('admin.enrolledStudents').toLowerCase()}
+                    </span>
+                    <span className="text-muted-foreground">{course.totalLessons} {t('admin.totalLessons').toLowerCase()}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 bg-secondary/50 rounded-full h-2 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${getProgressColor(course.avgProgress)}`}
+                        style={{ width: `${Math.min(course.avgProgress, 100)}%` }}
+                      />
+                    </div>
+                    <span className={`text-xs font-semibold w-10 text-right ${getProgressTextColor(course.avgProgress)}`}>
+                      {course.avgProgress}%
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

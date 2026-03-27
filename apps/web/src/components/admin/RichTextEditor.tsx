@@ -89,7 +89,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Начнит�
       {/* Editor */}
       <EditorContent
         editor={editor}
-        className="prose prose-sm dark:prose-invert max-w-none px-4 py-3 min-h-[120px] focus:outline-none [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[100px] text-foreground"
+        className="prose prose-sm max-w-none px-4 py-3 min-h-[120px] focus:outline-none [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[100px] text-foreground"
       />
     </div>
   );

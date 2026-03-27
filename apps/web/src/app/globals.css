@@ -26,19 +26,6 @@
   --color-input: #e5e5ea;
 }
 
-.dark {
-  /* Dark theme — Figma design */
-  --color-background: #0a0a0f;
-  --color-foreground: #f0f0f3;
-  --color-card: #14141a;
-  --color-card-foreground: #f0f0f3;
-  --color-popover: #1a1a1f;
-  --color-secondary: #1a1a1f;
-  --color-muted: #1a1a1f;
-  --color-muted-foreground: #9a9aa5;
-  --color-border: #2a2a35;
-  --color-input: #2a2a35;
-}
 
 @layer base {
   * {

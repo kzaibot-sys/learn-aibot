@@ -13,7 +13,6 @@ import {
   Users,
   GraduationCap,
   Layers,
-  Lock,
   Award,
 } from 'lucide-react';
 import { SkeletonCourseDetail } from '@/components/ui/Skeleton';
@@ -29,7 +28,6 @@ interface Lesson {
   type: string;
   duration: number | null;
   order: number;
-  isFree: boolean;
 }
 
 interface Module {
@@ -45,7 +43,6 @@ interface CourseDetail {
   slug: string;
   title: string;
   description: string | null;
-  price: number | null;
   imageUrl: string | null;
   modules: Module[];
 }
@@ -210,7 +207,7 @@ export default function CoursePage() {
                   </p>
                 )}
 
-                {/* Progress bar (enrolled) or price (not enrolled) */}
+                {/* Progress bar (enrolled) or start button (not enrolled) */}
                 <div className="mt-6">
                   {enrolled && progress ? (
                     <div>
@@ -352,11 +349,6 @@ export default function CoursePage() {
                                 <span className="text-xs text-muted-foreground capitalize">
                                   {lesson.type === 'VIDEO' ? t('courses.video') : lesson.type === 'TEXT' ? t('courses.text') : lesson.type === 'QUIZ' ? t('courses.quiz') : lesson.type.toLowerCase()}
                                 </span>
-                                {lesson.isFree && (
-                                  <span className="text-xs text-green-500 font-medium">
-                                    {t('courses.free')}
-                                  </span>
-                                )}
                               </div>
                             </div>
 
@@ -368,10 +360,7 @@ export default function CoursePage() {
                               </div>
                             )}
 
-                            {/* Status indicator */}
-                            {!enrolled && !lesson.isFree && (
-                              <Lock className="h-4 w-4 text-muted-foreground/50" />
-                            )}
+                            {/* All lessons accessible for enrolled users */}
                           </Link>
                         </motion.div>
                       );

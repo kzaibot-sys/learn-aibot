@@ -61,37 +61,8 @@ function formatUser(user: { id: string; email: string | null; firstName: string 
   return { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, middleName: user.middleName ?? null, phone: user.phone ?? null, role: user.role };
 }
 
-// POST /api/auth/register
-router.post('/register', asyncHandler(async (req: Request, res: Response) => {
-  const { email, password, firstName, lastName } = req.body;
-
-  if (!email || !password) {
-    throw new AppError(400, 'VALIDATION_ERROR', 'Email and password are required');
-  }
-
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    throw new AppError(409, 'USER_EXISTS', 'User with this email already exists');
-  }
-
-  const passwordHash = await bcrypt.hash(password, 12);
-
-  const user = await prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-      firstName: firstName || null,
-      lastName: lastName || null,
-    },
-  });
-
-  const tokens = await generateTokens(user);
-
-  res.status(201).json({
-    success: true,
-    data: { user: formatUser(user), ...tokens },
-  });
-}));
+// Registration is disabled — users are created via Telegram bot only.
+// POST /api/auth/register route has been removed.
 
 // POST /api/auth/login
 router.post('/login', asyncHandler(async (req: Request, res: Response) => {

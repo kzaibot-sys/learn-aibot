@@ -3,6 +3,7 @@ import { prisma } from '@lms/database';
 import { authenticate } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { AppError } from '../middleware/errorHandler';
+import { cacheDelete } from '../services/redis';
 
 const router = Router();
 
@@ -32,6 +33,9 @@ router.post('/lesson/:lessonId/complete', asyncHandler(async (req: Request, res:
       completedAt: new Date(),
     },
   });
+
+  // Invalidate user's progress cache
+  await cacheDelete(`progress:${userId}`);
 
   res.json({
     success: true,
@@ -71,9 +75,10 @@ router.get('/course/:courseId', asyncHandler(async (req: Request, res: Response)
 
   const course = await prisma.course.findUnique({
     where: { id: courseId },
-    include: {
+    select: {
+      id: true,
       modules: {
-        include: {
+        select: {
           lessons: {
             where: { isPublished: true },
             select: { id: true },
@@ -94,6 +99,12 @@ router.get('/course/:courseId', asyncHandler(async (req: Request, res: Response)
     where: {
       userId,
       lessonId: { in: lessonIds },
+    },
+    select: {
+      lessonId: true,
+      completed: true,
+      watchedSec: true,
+      completedAt: true,
     },
   });
 

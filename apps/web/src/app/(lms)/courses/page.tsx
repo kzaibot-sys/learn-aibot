@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-  LayoutGrid, Clock, Users, Star, Search, BookOpen, CheckCircle2,
+  LayoutGrid, Clock, Users, Search, BookOpen, CheckCircle2,
 } from 'lucide-react';
 import { SkeletonCard, SkeletonStatCard } from '@/components/ui/Skeleton';
 import { useAuthStore } from '@/lib/auth';
@@ -18,14 +18,12 @@ interface Course {
   slug: string;
   description: string | null;
   coverImage: string | null;
-  price: string;
-  isFree?: boolean;
   published: boolean;
   _count?: { enrollments: number; modules: number };
   modules?: { id: string; lessons: { id: string }[] }[];
 }
 
-type SortOption = 'name' | 'price' | 'popularity';
+type SortOption = 'name' | 'popularity';
 
 export default function CoursesPageWrapper() {
   return (
@@ -96,9 +94,6 @@ function CoursesPage() {
       case 'name':
         result = result.slice().sort((a, b) => a.title.localeCompare(b.title));
         break;
-      case 'price':
-        result = result.slice().sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-        break;
       case 'popularity':
         result = result.slice().sort((a, b) => (b._count?.enrollments || 0) - (a._count?.enrollments || 0));
         break;
@@ -151,10 +146,10 @@ function CoursesPage() {
                   </div>
                 </div>
                 <div className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-5 flex items-center gap-3">
-                  <Star className="w-5 h-5 text-primary" />
+                  <Users className="w-5 h-5 text-primary" />
                   <div>
-                    <p className="text-2xl font-black text-primary">4.8</p>
-                    <p className="text-xs text-muted-foreground">{t('courses.rating')}</p>
+                    <p className="text-2xl font-black text-primary">{courses.reduce((s, c) => s + (c._count?.enrollments || 0), 0)}</p>
+                    <p className="text-xs text-muted-foreground">{t('courses.enrolled')}</p>
                   </div>
                 </div>
               </motion.div>
@@ -183,7 +178,6 @@ function CoursesPage() {
                 className="rounded-2xl border border-border/50 bg-secondary/50 backdrop-blur-sm px-4 py-3.5 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-orange-500/50 focus:outline-none"
               >
                 <option value="name">{t('courses.sortByName')}</option>
-                <option value="price">{t('courses.sortByPrice')}</option>
                 <option value="popularity">{t('courses.sortByPopularity')}</option>
               </select>
             </motion.div>
@@ -248,10 +242,6 @@ function CoursesPage() {
                             <span className="flex items-center gap-1">
                               <Users className="w-3.5 h-3.5" />
                               {course._count?.enrollments || 0}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Star className="w-3.5 h-3.5 fill-primary text-primary" />
-                              4.8
                             </span>
                           </div>
 

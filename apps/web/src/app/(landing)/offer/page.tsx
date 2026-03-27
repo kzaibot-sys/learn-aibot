@@ -18,7 +18,7 @@ export default function OfferPage() {
 
         <h1 className="text-3xl font-bold mb-8">Публичная оферта</h1>
 
-        <div className="prose prose-neutral dark:prose-invert max-w-none space-y-6 text-muted-foreground">
+        <div className="prose prose-neutral max-w-none space-y-6 text-muted-foreground">
           <p>
             Настоящий документ является официальным предложением (публичной офертой)
             ТОО «AiBot» заключить договор на оказание образовательных услуг посредством

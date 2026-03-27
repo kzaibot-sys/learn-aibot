@@ -6,7 +6,7 @@ import { asyncHandler } from '../middleware/asyncHandler';
 import { AppError } from '../middleware/errorHandler';
 import { grantCourseAccess, revokeCourseAccess } from '../services/enrollment';
 import { uploadFile } from '../services/storage';
-import { cacheInvalidatePattern } from '../services/redis';
+import { cacheGet, cacheSet, cacheInvalidatePattern } from '../services/redis';
 
 const videoUpload = multer({
   storage: multer.memoryStorage(),
@@ -238,6 +238,14 @@ router.get('/students', asyncHandler(async (req: Request, res: Response) => {
   const perPage = Math.min(50, Math.max(1, Number(req.query.perPage) || 20));
   const search = (req.query.search as string) || '';
 
+  // Try cache first (60s, keyed by page + search)
+  const cacheKey = `admin:students:${page}:${search}`;
+  const cached = await cacheGet<unknown>(cacheKey);
+  if (cached) {
+    res.json(cached);
+    return;
+  }
+
   const where = search
     ? {
         OR: [
@@ -267,11 +275,14 @@ router.get('/students', asyncHandler(async (req: Request, res: Response) => {
     prisma.user.count({ where }),
   ]);
 
-  res.json({
+  const response = {
     success: true,
     data: students,
     meta: { page, perPage, total, totalPages: Math.ceil(total / perPage) },
-  });
+  };
+
+  await cacheSet(cacheKey, response, 60);
+  res.json(response);
 }));
 
 // ===== ENROLLMENT MANAGEMENT =====
@@ -516,6 +527,14 @@ router.get('/certificates', asyncHandler(async (req: Request, res: Response) => 
 
 // GET /api/admin/analytics
 router.get('/analytics', asyncHandler(async (req: Request, res: Response) => {
+  // Try cache first (120s)
+  const analyticsCacheKey = 'admin:analytics';
+  const cachedAnalytics = await cacheGet<unknown>(analyticsCacheKey);
+  if (cachedAnalytics) {
+    res.json(cachedAnalytics);
+    return;
+  }
+
   const [totalStudents, totalCourses, courses, recentRegistrations] = await Promise.all([
     prisma.user.count({ where: { role: 'STUDENT' } }),
     prisma.course.count(),
@@ -572,7 +591,7 @@ router.get('/analytics', asyncHandler(async (req: Request, res: Response) => {
     };
   }));
 
-  res.json({
+  const analyticsResponse = {
     success: true,
     data: {
       totalStudents,
@@ -580,7 +599,10 @@ router.get('/analytics', asyncHandler(async (req: Request, res: Response) => {
       recentRegistrations,
       courses: courseStats,
     },
-  });
+  };
+
+  await cacheSet(analyticsCacheKey, analyticsResponse, 120);
+  res.json(analyticsResponse);
 }));
 
 export { router as adminRouter };

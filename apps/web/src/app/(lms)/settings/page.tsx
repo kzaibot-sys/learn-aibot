@@ -6,7 +6,6 @@ import {
   User,
   Mail,
   Lock,
-  Moon,
   Sun,
   Globe,
   Bell,
@@ -14,7 +13,6 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n/context';
-import { useTheme } from '@/lib/theme';
 
 /* ---------- animation ---------- */
 
@@ -36,7 +34,6 @@ const stagger = {
 export default function SettingsPage() {
   const { user } = useAuthStore();
   const { t, locale, setLocale } = useI18n();
-  const { dark: darkMode, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
 
   function toggleLocale() {
@@ -141,39 +138,6 @@ export default function SettingsPage() {
                 </h2>
 
                 <div className="space-y-4">
-                  {/* Theme toggle */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-orange-500/10">
-                        {darkMode ? (
-                          <Moon className="w-4 h-4 text-primary" />
-                        ) : (
-                          <Sun className="w-4 h-4 text-primary" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{t('settings.theme')}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {darkMode ? t('settings.dark') : t('settings.light')}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={toggleTheme}
-                      className={`relative w-11 h-6 rounded-full transition-colors ${
-                        darkMode ? 'bg-primary' : 'bg-border'
-                      }`}
-                    >
-                      <span
-                        className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${
-                          darkMode ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  <div className="border-t border-border/30" />
-
                   {/* Language */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">

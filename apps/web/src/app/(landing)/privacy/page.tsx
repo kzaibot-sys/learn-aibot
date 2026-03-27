@@ -18,7 +18,7 @@ export default function PrivacyPage() {
 
         <h1 className="text-3xl font-bold mb-8">Политика конфиденциальности</h1>
 
-        <div className="prose prose-neutral dark:prose-invert max-w-none space-y-6 text-muted-foreground">
+        <div className="prose prose-neutral max-w-none space-y-6 text-muted-foreground">
           <p>
             Настоящая Политика конфиденциальности определяет порядок обработки и защиты
             персональных данных пользователей платформы AiBot (далее — «Платформа»),

@@ -391,7 +391,7 @@ export default function LessonPage() {
                   initial="hidden"
                   animate="visible"
                   custom={1}
-                  className="mt-4 prose dark:prose-invert prose-sm max-w-none"
+                  className="mt-4 prose prose-sm max-w-none"
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(lesson.content) }}
                 />
               )}

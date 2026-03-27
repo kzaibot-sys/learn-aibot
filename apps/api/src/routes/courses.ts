@@ -11,6 +11,14 @@ const router = Router();
 router.get('/my-progress', authenticate, asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
 
+  // Try cache first (60s per user)
+  const cacheKey = `progress:${userId}`;
+  const cached = await cacheGet<unknown>(cacheKey);
+  if (cached) {
+    res.json(cached);
+    return;
+  }
+
   const enrollments = await prisma.enrollment.findMany({
     where: { userId, status: 'ACTIVE' },
     include: {
@@ -40,6 +48,7 @@ router.get('/my-progress', authenticate, asyncHandler(async (req: Request, res: 
 
   const progressRecords = await prisma.lessonProgress.findMany({
     where: { userId, lessonId: { in: allLessonIds } },
+    select: { lessonId: true, completed: true },
   });
 
   const progressMap = new Map(progressRecords.map(p => [p.lessonId, p]));
@@ -64,7 +73,9 @@ router.get('/my-progress', authenticate, asyncHandler(async (req: Request, res: 
     };
   });
 
-  res.json({ success: true, data });
+  const response = { success: true, data };
+  await cacheSet(cacheKey, response, 60);
+  res.json(response);
 }));
 
 // GET /api/courses — published courses list (optional ?search=term)
@@ -142,11 +153,27 @@ router.get('/:slug', asyncHandler(async (req: Request, res: Response) => {
 
   const course = await prisma.course.findUnique({
     where: { slug, isPublished: true },
-    include: {
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      description: true,
+      coverUrl: true,
+      price: true,
+      currency: true,
+      isFree: true,
+      isPublished: true,
+      createdAt: true,
+      updatedAt: true,
       modules: {
         where: { isPublished: true },
         orderBy: { order: 'asc' },
-        include: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          order: true,
+          isPublished: true,
           lessons: {
             where: { isPublished: true },
             orderBy: { order: 'asc' },

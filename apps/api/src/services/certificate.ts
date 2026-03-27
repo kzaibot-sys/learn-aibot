@@ -1,5 +1,6 @@
 import PDFDocument from 'pdfkit';
 import path from 'path';
+import fs from 'fs';
 
 interface CertificateData {
   fullName: string;
@@ -24,9 +25,16 @@ export function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
     const W = 842; // A4 landscape width
     const H = 595; // A4 landscape height
 
-    const fontDir = path.join(__dirname, '../assets/fonts');
-    doc.registerFont('Roboto', path.join(fontDir, 'Roboto-Regular.ttf'));
-    doc.registerFont('Roboto-Bold', path.join(fontDir, 'Roboto-Bold.ttf'));
+    const robotoPath = path.join(__dirname, '../assets/fonts/Roboto-Regular.ttf');
+    const robotoBoldPath = path.join(__dirname, '../assets/fonts/Roboto-Bold.ttf');
+
+    if (fs.existsSync(robotoPath) && fs.existsSync(robotoBoldPath)) {
+      doc.registerFont('Roboto', robotoPath);
+      doc.registerFont('Roboto-Bold', robotoBoldPath);
+    } else {
+      doc.registerFont('Roboto', 'Helvetica');
+      doc.registerFont('Roboto-Bold', 'Helvetica-Bold');
+    }
 
     // Background
     doc.rect(0, 0, W, H).fill('#FAFBFC');

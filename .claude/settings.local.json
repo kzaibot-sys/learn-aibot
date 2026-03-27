@@ -6,7 +6,19 @@
       "WebFetch(domain:ccusage.com)",
       "WebFetch(domain:mcpmarket.com)",
       "Bash(pnpm dlx:*)",
-      "WebFetch(domain:api-production-d64b.up.railway.app)"
+      "WebFetch(domain:api-production-d64b.up.railway.app)",
+      "Bash(gh api:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_fill_form",
+      "mcp__playwright__browser_click",
+      "Bash(railway status:*)",
+      "Bash(railway up:*)",
+      "Bash(railway service:*)",
+      "Bash(railway logs:*)",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_network_requests",
+      "mcp__playwright__browser_wait_for"
     ]
   }
 }

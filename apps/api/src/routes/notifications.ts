@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { prisma } from '@lms/database';
 import { authenticate } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
+import { cacheGet, cacheSet, cacheDelete } from '../services/redis';
 
 const router = Router();
 
@@ -33,11 +34,22 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
 // GET /api/notifications/unread-count
 router.get('/unread-count', asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
+
+  // Cache unread count for 15s (polled every 30s)
+  const unreadCacheKey = `notifications:unread:${userId}`;
+  const cachedCount = await cacheGet<unknown>(unreadCacheKey);
+  if (cachedCount) {
+    res.json(cachedCount);
+    return;
+  }
+
   const count = await prisma.notification.count({
     where: { userId, isRead: false },
   });
 
-  res.json({ success: true, data: { count } });
+  const unreadResponse = { success: true, data: { count } };
+  await cacheSet(unreadCacheKey, unreadResponse, 15);
+  res.json(unreadResponse);
 }));
 
 // PATCH /api/notifications/read-all — mark all as read
@@ -48,6 +60,7 @@ router.patch('/read-all', asyncHandler(async (req: Request, res: Response) => {
     data: { isRead: true },
   });
 
+  await cacheDelete(`notifications:unread:${userId}`);
   res.json({ success: true, data: { ok: true } });
 }));
 
@@ -61,6 +74,7 @@ router.patch('/:id/read', asyncHandler(async (req: Request, res: Response) => {
     data: { isRead: true },
   });
 
+  await cacheDelete(`notifications:unread:${userId}`);
   res.json({ success: true, data: { ok: true } });
 }));
 

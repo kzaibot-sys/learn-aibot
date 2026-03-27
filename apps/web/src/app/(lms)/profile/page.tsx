@@ -71,7 +71,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-xl">
+    <div className="max-w-xl mx-auto animate-fade-in-up">
           <h1 className="mb-6 text-2xl font-bold text-foreground">{t('profile.title')}</h1>
 
           {/* Profile info */}
@@ -96,45 +96,49 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="mb-3">
-              <label className="mb-1 block text-sm text-muted-foreground">{t('profile.lastName')}</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={e => setLastName(e.target.value)}
-                className="w-full rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-              />
+            <div className="grid gap-3 sm:grid-cols-2 mb-3">
+              <div>
+                <label className="mb-1 block text-sm text-muted-foreground">{t('profile.lastName')} *</label>
+                <input
+                  type="text"
+                  required
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  className="w-full rounded-xl border border-border/50 bg-secondary/50 px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none transition-colors"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm text-muted-foreground">{t('profile.firstName')} *</label>
+                <input
+                  type="text"
+                  required
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  className="w-full rounded-xl border border-border/50 bg-secondary/50 px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none transition-colors"
+                />
+              </div>
             </div>
 
-            <div className="mb-3">
-              <label className="mb-1 block text-sm text-muted-foreground">{t('profile.firstName')}</label>
-              <input
-                type="text"
-                value={firstName}
-                onChange={e => setFirstName(e.target.value)}
-                className="w-full rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="mb-1 block text-sm text-muted-foreground">{t('profile.middleName')}</label>
-              <input
-                type="text"
-                value={middleName}
-                onChange={e => setMiddleName(e.target.value)}
-                className="w-full rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="mb-1 block text-sm text-muted-foreground">{t('profile.phone')}</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                placeholder="+7 (___) ___-__-__"
-                className="w-full rounded-lg border border-border/50 bg-secondary/50 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-              />
+            <div className="grid gap-3 sm:grid-cols-2 mb-4">
+              <div>
+                <label className="mb-1 block text-sm text-muted-foreground">{t('profile.middleName')}</label>
+                <input
+                  type="text"
+                  value={middleName}
+                  onChange={e => setMiddleName(e.target.value)}
+                  className="w-full rounded-xl border border-border/50 bg-secondary/50 px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none transition-colors"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm text-muted-foreground">{t('profile.phone')}</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  placeholder="+7 (___) ___-__-__"
+                  className="w-full rounded-xl border border-border/50 bg-secondary/50 px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none transition-colors"
+                />
+              </div>
             </div>
 
             {message && <p className="mb-3 text-sm text-green-400">{message}</p>}

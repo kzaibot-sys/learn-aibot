@@ -6,7 +6,7 @@ import { authenticate } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { AppError } from '../middleware/errorHandler';
 import { generateCertificatePDF } from '../services/certificate';
-import { uploadFile, getSignedUrl } from '../services/storage';
+import { cacheGet, cacheSet, cacheDelete } from '../services/redis';
 import { config } from '../config';
 import type { JwtPayload } from '@lms/shared';
 
@@ -64,27 +64,18 @@ router.post('/request/:courseId', authenticate, asyncHandler(async (req: Request
   const number = `AIBOT-${randomSegment(5)}-${randomSegment(4)}`;
   const now = new Date();
 
-  const fullName = `${firstName} ${lastName}`;
-  const pdfBuffer = await generateCertificatePDF({
-    fullName,
-    courseTitle: course.title,
-    certificateNumber: number,
-    issuedDate: now,
-  });
-
-  // Upload to S3
-  const key = `certificates/${userId}/${courseId}/${number}.pdf`;
-  const fileUrl = await uploadFile(pdfBuffer, key, 'application/pdf');
-
-  // Save to DB
+  // Save to DB (PDF is generated on-the-fly at download time)
   const certificate = await prisma.certificate.create({
     data: {
       userId,
       courseId,
       number,
-      fileUrl,
+      fileUrl: null,
     },
   });
+
+  // Invalidate user's certificate cache
+  await cacheDelete(`certs:${userId}`);
 
   res.status(201).json({ success: true, data: certificate });
 }));
@@ -92,6 +83,14 @@ router.post('/request/:courseId', authenticate, asyncHandler(async (req: Request
 // GET /api/certificates/my — list user's certificates (authenticated)
 router.get('/my', authenticate, asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
+
+  // Try cache first (60s per user)
+  const certsCacheKey = `certs:${userId}`;
+  const cachedCerts = await cacheGet<unknown>(certsCacheKey);
+  if (cachedCerts) {
+    res.json(cachedCerts);
+    return;
+  }
 
   const certificates = await prisma.certificate.findMany({
     where: { userId },
@@ -110,7 +109,9 @@ router.get('/my', authenticate, asyncHandler(async (req: Request, res: Response)
     issuedAt: cert.issuedAt,
   }));
 
-  res.json({ success: true, data });
+  const certsResponse = { success: true, data };
+  await cacheSet(certsCacheKey, certsResponse, 60);
+  res.json(certsResponse);
 }));
 
 // GET /api/certificates/verify/:number — public verification (no auth)
@@ -144,42 +145,56 @@ router.get('/verify/:number', asyncHandler(async (req: Request, res: Response) =
   });
 }));
 
-// GET /api/certificates/:id/download — download certificate PDF (authenticated via Bearer or ?token= query)
+// GET /api/certificates/:id/download — generate PDF on-the-fly and stream to client
 router.get('/:id/download', asyncHandler(async (req: Request, res: Response) => {
-  // Support token passed as query param for direct browser downloads
-  if (!req.user && req.query.token) {
+  // Support token via query param for direct browser downloads
+  let userId: string;
+  if (req.query.token) {
     try {
       const payload = jwt.verify(req.query.token as string, config.jwt.secret) as JwtPayload;
-      req.user = payload;
+      userId = payload.sub;
+    } catch {
+      throw new AppError(401, 'UNAUTHORIZED', 'Invalid or expired token');
+    }
+  } else {
+    // Try Bearer token from header
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      throw new AppError(401, 'UNAUTHORIZED', 'Authentication required');
+    }
+    try {
+      const payload = jwt.verify(authHeader.split(' ')[1], config.jwt.secret) as JwtPayload;
+      userId = payload.sub;
     } catch {
       throw new AppError(401, 'UNAUTHORIZED', 'Invalid or expired token');
     }
   }
-  if (!req.user) {
-    throw new AppError(401, 'UNAUTHORIZED', 'Authentication required');
-  }
-  const userId = req.user.sub;
 
   const certificate = await prisma.certificate.findUnique({
     where: { id: req.params.id },
+    include: {
+      course: { select: { title: true } },
+      user: { select: { firstName: true, lastName: true, middleName: true } },
+    },
   });
 
   if (!certificate || certificate.userId !== userId) {
     throw new AppError(404, 'CERTIFICATE_NOT_FOUND', 'Certificate not found');
   }
 
-  if (!certificate.fileUrl) {
-    throw new AppError(404, 'FILE_NOT_FOUND', 'Certificate file not found');
-  }
+  const fullName = [certificate.user.firstName, certificate.user.middleName, certificate.user.lastName]
+    .filter(Boolean).join(' ') || 'Студент';
 
-  // If fileUrl is an S3 key (no http), generate signed URL
-  if (!certificate.fileUrl.startsWith('http')) {
-    const signedUrl = await getSignedUrl(certificate.fileUrl, 600);
-    res.redirect(signedUrl);
-    return;
-  }
+  const pdfBuffer = await generateCertificatePDF({
+    fullName,
+    courseTitle: certificate.course.title,
+    certificateNumber: certificate.number,
+    issuedDate: certificate.issuedAt,
+  });
 
-  res.redirect(certificate.fileUrl);
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="certificate-${certificate.number}.pdf"`);
+  res.send(pdfBuffer);
 }));
 
 export { router as certificatesRouter };

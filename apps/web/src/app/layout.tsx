@@ -15,16 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: `
-          (function(){
-            try{var t=localStorage.getItem('lms-theme');
-            if(t==='light')document.documentElement.classList.remove('dark');
-            else document.documentElement.classList.add('dark');
-            }catch(e){document.documentElement.classList.add('dark')}
-          })()
-        `}} />
-      </head>
+      <head />
       <body className={`${inter.className} min-h-screen bg-background text-foreground antialiased`}>
         <Providers>
           {children}

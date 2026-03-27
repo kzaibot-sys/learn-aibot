@@ -3,8 +3,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n/context';
-import { useTheme } from '@/lib/theme';
-import { Sun, Moon } from 'lucide-react';
 import { NotificationDropdown } from './NotificationDropdown';
 import { MobileNavToggle, MobileNav } from './MobileNav';
 
@@ -12,7 +10,6 @@ export function TopBar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { t, locale, setLocale } = useI18n();
-  const { dark, toggleTheme } = useTheme();
   const router = useRouter();
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -85,15 +82,6 @@ export function TopBar() {
               <path d="M2 12h20" />
             </svg>
             {locale.toUpperCase()}
-          </button>
-
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className="hidden sm:flex p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-            title={dark ? t('theme.light') : t('theme.dark')}
-          >
-            {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
 
           {/* Notifications */}

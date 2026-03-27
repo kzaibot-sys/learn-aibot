@@ -5,12 +5,11 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n/context';
-import { useTheme } from '@/lib/theme';
 import {
   Home, BookOpen, LayoutGrid, Award, User,
   BookMarked, Users, BarChart3,
-  LogOut, GraduationCap, Sun, Moon,
-  Settings, X, Menu,
+  LogOut, GraduationCap,
+  Settings, X, Menu, Globe,
 } from 'lucide-react';
 import type { TranslationKey } from '@/lib/i18n/translations';
 
@@ -25,6 +24,7 @@ const navItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[] 
 const adminItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[] = [
   { href: '/admin/courses', labelKey: 'nav.admin.courses', icon: BookMarked },
   { href: '/admin/students', labelKey: 'nav.admin.students', icon: Users },
+  { href: '/admin/certificates', labelKey: 'nav.admin.certificates', icon: Award },
   { href: '/admin/analytics', labelKey: 'nav.admin.analytics', icon: BarChart3 },
 ];
 
@@ -45,8 +45,6 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const { t, locale, setLocale } = useI18n();
-  const { dark, toggleTheme } = useTheme();
-
   const isAdmin = user?.role === 'ADMIN';
 
   function toggleLocale() {
@@ -88,7 +86,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
 
       {/* Sidebar panel */}
       <aside
-        className={`fixed left-0 top-0 h-full w-72 max-w-[85vw] bg-background dark:bg-[#14141A] border-r border-border/50 z-50 flex flex-col transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed left-0 top-0 h-full w-72 max-w-[85vw] bg-background border-r border-border/50 z-50 flex flex-col transition-transform duration-300 ease-out md:hidden ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -167,22 +165,15 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
           )}
         </nav>
 
-        {/* Theme toggle + Language toggle + User */}
+        {/* Language toggle + User */}
         <div className="border-t border-border/50 p-3 shrink-0 space-y-3">
           <div className="flex items-center gap-2">
             <button
-              onClick={toggleTheme}
+              onClick={toggleLocale}
               className="flex items-center gap-3 flex-1 px-3 py-2 rounded-2xl text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all min-h-[44px]"
             >
-              {dark ? <Sun className="w-5 h-5 shrink-0" /> : <Moon className="w-5 h-5 shrink-0" />}
-              <span>{dark ? t('theme.light') : t('theme.dark')}</span>
-            </button>
-            <button
-              onClick={toggleLocale}
-              className="flex items-center justify-center w-11 h-11 rounded-2xl text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all border border-border/50 shrink-0"
-              title={locale === 'ru' ? 'Kazakh' : 'Russian'}
-            >
-              {locale === 'ru' ? 'RU' : 'KZ'}
+              <Globe className="w-5 h-5 shrink-0" />
+              <span>{locale === 'ru' ? 'Қазақша' : 'Русский'}</span>
             </button>
           </div>
 

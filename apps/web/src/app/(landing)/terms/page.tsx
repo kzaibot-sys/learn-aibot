@@ -18,7 +18,7 @@ export default function TermsPage() {
 
         <h1 className="text-3xl font-bold mb-8">Условия использования</h1>
 
-        <div className="prose prose-neutral dark:prose-invert max-w-none space-y-6 text-muted-foreground">
+        <div className="prose prose-neutral max-w-none space-y-6 text-muted-foreground">
           <p>
             Настоящие Условия использования (далее — «Условия») регулируют порядок
             доступа и использования образовательной платформы AiBot, принадлежащей

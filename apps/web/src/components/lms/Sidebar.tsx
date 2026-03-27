@@ -5,12 +5,11 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/auth';
 import { useI18n } from '@/lib/i18n/context';
-import { useTheme } from '@/lib/theme';
 import {
   Home, BookOpen, LayoutGrid, Award, User,
   BookMarked, Users, BarChart3,
   LogOut, ChevronLeft, ChevronRight, GraduationCap,
-  Sun, Moon, Settings,
+  Settings, Globe,
 } from 'lucide-react';
 import type { TranslationKey } from '@/lib/i18n/translations';
 
@@ -25,6 +24,7 @@ const navItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[] 
 const adminItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[] = [
   { href: '/admin/courses', labelKey: 'nav.admin.courses', icon: BookMarked },
   { href: '/admin/students', labelKey: 'nav.admin.students', icon: Users },
+  { href: '/admin/certificates', labelKey: 'nav.admin.certificates', icon: Award },
   { href: '/admin/analytics', labelKey: 'nav.admin.analytics', icon: BarChart3 },
 ];
 
@@ -33,7 +33,6 @@ export function Sidebar() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const { t, locale, setLocale } = useI18n();
-  const { dark, toggleTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN';
@@ -48,7 +47,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className={`fixed left-0 top-0 h-screen bg-background dark:bg-[#14141A] border-r border-border/50 hidden md:flex flex-col transition-all duration-300 z-40 ${collapsed ? 'w-16' : 'w-72'}`}>
+    <aside className={`fixed left-0 top-0 h-screen bg-background border-r border-border/50 hidden md:flex flex-col transition-all duration-300 z-40 ${collapsed ? 'w-16' : 'w-72'}`}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-border/50 shrink-0">
         <Link href="/dashboard" className="flex items-center gap-3">
@@ -131,27 +130,16 @@ export function Sidebar() {
         )}
       </nav>
 
-      {/* Theme toggle + Language toggle + User */}
+      {/* Language toggle + User */}
       <div className="border-t border-border/50 p-3 shrink-0 space-y-3">
-        {/* Theme + Language row */}
         <div className="flex items-center gap-2">
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className="flex items-center gap-3 flex-1 px-3 py-2 rounded-2xl text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
-            title={collapsed ? (dark ? t('theme.light') : t('theme.dark')) : undefined}
-          >
-            {dark ? <Sun className="w-5 h-5 shrink-0" /> : <Moon className="w-5 h-5 shrink-0" />}
-            {!collapsed && <span>{dark ? t('theme.light') : t('theme.dark')}</span>}
-          </button>
-
-          {/* Language toggle */}
           <button
             onClick={toggleLocale}
-            className="flex items-center justify-center w-10 h-10 rounded-2xl text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all border border-border/50 shrink-0"
-            title={locale === 'ru' ? 'Kazakh' : 'Russian'}
+            className="flex items-center gap-3 flex-1 px-3 py-2 rounded-2xl text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+            title={collapsed ? (locale === 'ru' ? 'Қазақша' : 'Русский') : undefined}
           >
-            {locale === 'ru' ? 'RU' : 'KZ'}
+            <Globe className="w-5 h-5 shrink-0" />
+            {!collapsed && <span>{locale === 'ru' ? 'Қазақша' : 'Русский'}</span>}
           </button>
         </div>
 
