@@ -57,8 +57,8 @@ async function generateTokens(user: { id: string; email: string | null; role: st
   return { accessToken, refreshToken };
 }
 
-function formatUser(user: { id: string; email: string | null; firstName: string | null; lastName: string | null; role: string }) {
-  return { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role };
+function formatUser(user: { id: string; email: string | null; firstName: string | null; lastName: string | null; middleName?: string | null; phone?: string | null; role: string }) {
+  return { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, middleName: user.middleName ?? null, phone: user.phone ?? null, role: user.role };
 }
 
 // POST /api/auth/register
