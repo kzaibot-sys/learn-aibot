@@ -34,7 +34,12 @@
       "mcp__playwright__browser_take_screenshot",
       "Bash(cd:*)",
       "mcp__playwright__browser_evaluate",
-      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_gJhxlsQ2F9tW@ep-lingering-sun-a4xz7f6z-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require\" node -e \":*)"
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_gJhxlsQ2F9tW@ep-lingering-sun-a4xz7f6z-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require\" node -e \":*)",
+      "Bash(ssh-keygen:*)",
+      "Bash(sshpass:*)",
+      "Bash(ssh:*)",
+      "Bash(expect:*)",
+      "Bash(\"C:/Users/aiman/OneDrive/Desktop/learn-aibot/docker-compose.prod.yml\":*)"
     ]
   }
 }

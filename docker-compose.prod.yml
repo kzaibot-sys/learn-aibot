@@ -3,18 +3,16 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER:-lms}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME:-lms_db}
+      POSTGRES_USER: lms
+      POSTGRES_PASSWORD: lms_secure_2026
+      POSTGRES_DB: lms_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-lms}"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U lms"]
+      interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - lms-network
 
   redis:
     image: redis:7-alpine
@@ -23,76 +21,45 @@ services:
       - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - lms-network
 
   api:
     build:
       context: .
       dockerfile: Dockerfile
-      target: runner
-      args:
-        APP_NAME: api
     restart: unless-stopped
-    env_file: .env
+    ports:
+      - "127.0.0.1:3001:3001"
+    environment:
+      DATABASE_URL: postgresql://lms:lms_secure_2026@postgres:5432/lms_db
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: aibot-jwt-secret-2026-prod-vds
+      BOT_SECRET: aibot-secret-2026-4a23a33063418f4f
+      TELEGRAM_BOT_TOKEN: ""
+      NEXT_PUBLIC_APP_URL: https://demo-lms.aibot.kz
+      PORT: 3001
+      NODE_ENV: production
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    networks:
-      - lms-network
-
-  bot:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: runner
-      args:
-        APP_NAME: bot
-    restart: unless-stopped
-    env_file: .env
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - lms-network
 
   web:
     build:
       context: .
       dockerfile: Dockerfile.web
-    restart: unless-stopped
-    env_file: .env
-    networks:
-      - lms-network
-
-  nginx:
-    image: nginx:alpine
+      args:
+        NEXT_PUBLIC_API_URL: https://demo-lms.aibot.kz/api
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - certbot_webroot:/var/www/certbot:ro
-    depends_on:
-      - api
-      - web
-    networks:
-      - lms-network
+      - "127.0.0.1:3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
 
 volumes:
   postgres_data:
   redis_data:
-  certbot_webroot:
-
-networks:
-  lms-network:
-    driver: bridge
