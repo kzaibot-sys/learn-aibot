@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch --env-file=../../.env src/index.ts",
-    "build": "tsc",
+    "build": "tsc && node -e \"const fs=require('fs');const p=require('path');function c(s,d){if(!fs.existsSync(s))return;fs.mkdirSync(d,{recursive:true});for(const f of fs.readdirSync(s)){const sp=p.join(s,f),dp=p.join(d,f);fs.statSync(sp).isDirectory()?c(sp,dp):fs.copyFileSync(sp,dp)}}c('src/assets','dist/assets')\"",
     "start": "node dist/index.js"
   },
   "dependencies": {

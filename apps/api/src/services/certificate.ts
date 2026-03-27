@@ -9,6 +9,22 @@ interface CertificateData {
   issuedDate: Date;
 }
 
+function findFontsDir(): string {
+  // Try multiple paths: src (dev) and relative to dist (prod/Docker)
+  const candidates = [
+    path.join(__dirname, '../assets/fonts'),        // from dist/services/ -> dist/assets/fonts
+    path.join(__dirname, '../../src/assets/fonts'),  // from dist/services/ -> src/assets/fonts
+    path.resolve('src/assets/fonts'),                // from CWD (apps/api/)
+    path.resolve('apps/api/src/assets/fonts'),       // from monorepo root
+  ];
+  for (const dir of candidates) {
+    if (fs.existsSync(path.join(dir, 'Roboto-Regular.ttf'))) {
+      return dir;
+    }
+  }
+  return '';
+}
+
 export function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
@@ -25,143 +41,159 @@ export function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
     const W = 842; // A4 landscape width
     const H = 595; // A4 landscape height
 
-    const robotoPath = path.join(__dirname, '../assets/fonts/Roboto-Regular.ttf');
-    const robotoBoldPath = path.join(__dirname, '../assets/fonts/Roboto-Bold.ttf');
-
-    if (fs.existsSync(robotoPath) && fs.existsSync(robotoBoldPath)) {
-      doc.registerFont('Roboto', robotoPath);
-      doc.registerFont('Roboto-Bold', robotoBoldPath);
+    // Register fonts with Cyrillic support
+    const fontsDir = findFontsDir();
+    if (fontsDir) {
+      doc.registerFont('Main', path.join(fontsDir, 'Roboto-Regular.ttf'));
+      doc.registerFont('Bold', path.join(fontsDir, 'Roboto-Bold.ttf'));
     } else {
-      doc.registerFont('Roboto', 'Helvetica');
-      doc.registerFont('Roboto-Bold', 'Helvetica-Bold');
+      // Fallback — Helvetica doesn't support Cyrillic well, but at least won't crash
+      doc.registerFont('Main', 'Helvetica');
+      doc.registerFont('Bold', 'Helvetica-Bold');
     }
 
-    // Background
-    doc.rect(0, 0, W, H).fill('#FAFBFC');
+    // === COLORS (AiBot brand: orange accent) ===
+    const BRAND = '#F97316';      // orange-500
+    const BRAND_DARK = '#EA580C'; // orange-600
+    const DARK = '#1E293B';       // slate-800
+    const GRAY = '#64748B';       // slate-500
+    const LIGHT_GRAY = '#94A3B8'; // slate-400
+    const BG = '#FAFBFC';
 
-    // Outer border (gold)
-    const borderMargin = 25;
-    doc.lineWidth(3)
-       .rect(borderMargin, borderMargin, W - borderMargin * 2, H - borderMargin * 2)
-       .stroke('#C8A951');
+    // === BACKGROUND ===
+    doc.rect(0, 0, W, H).fill(BG);
 
-    // Inner border (blue)
-    const innerMargin = 35;
-    doc.lineWidth(1)
-       .rect(innerMargin, innerMargin, W - innerMargin * 2, H - innerMargin * 2)
-       .stroke('#1A3B6D');
+    // === DECORATIVE DIAGONAL CORNERS (like Kogio) ===
+    // Top-left triangle
+    doc.save();
+    doc.moveTo(0, 0).lineTo(120, 0).lineTo(0, 120).closePath().fill(BRAND);
+    doc.restore();
 
-    // Decorative corner accents
-    const cornerSize = 30;
-    const corners = [
-      [innerMargin, innerMargin],
-      [W - innerMargin - cornerSize, innerMargin],
-      [innerMargin, H - innerMargin - cornerSize],
-      [W - innerMargin - cornerSize, H - innerMargin - cornerSize],
-    ];
-    corners.forEach(([x, y]) => {
-      doc.rect(x, y, cornerSize, cornerSize).fill('#C8A951');
-      doc.rect(x + 3, y + 3, cornerSize - 6, cornerSize - 6).fill('#FAFBFC');
-    });
+    // Bottom-right triangle
+    doc.save();
+    doc.moveTo(W, H).lineTo(W - 120, H).lineTo(W, H - 120).closePath().fill(BRAND);
+    doc.restore();
 
-    // Logo
-    doc.font('Roboto-Bold')
-       .fontSize(18)
-       .fillColor('#1A3B6D')
-       .text('AiBot', 0, 70, { align: 'center', width: W });
+    // === SUBTLE BORDER ===
+    const m = 40;
+    doc.lineWidth(0.5).rect(m, m, W - m * 2, H - m * 2).stroke('#E2E8F0');
 
-    // Decorative line
-    const lineY = 100;
-    doc.moveTo(W / 2 - 100, lineY).lineTo(W / 2 + 100, lineY).lineWidth(2).stroke('#C8A951');
+    // === INNER DECORATIVE BORDER (double line) ===
+    const m2 = 50;
+    doc.lineWidth(1.5).rect(m2, m2, W - m2 * 2, H - m2 * 2).stroke(BRAND);
+    const m3 = 54;
+    doc.lineWidth(0.5).rect(m3, m3, W - m3 * 2, H - m3 * 2).stroke('#E2E8F0');
 
-    // Title
-    doc.font('Roboto-Bold')
-       .fontSize(42)
-       .fillColor('#1A3B6D')
-       .text('СЕРТИФИКАТ', 0, 125, { align: 'center', width: W });
+    // === LOGO ===
+    doc.font('Bold')
+       .fontSize(28)
+       .fillColor(BRAND)
+       .text('AiBot', 0, 80, { align: 'center', width: W });
 
-    // Subtitle
-    doc.font('Roboto')
-       .fontSize(14)
-       .fillColor('#4A5568')
-       .text('Настоящим подтверждается, что', 0, 185, { align: 'center', width: W });
+    // Small tagline
+    doc.font('Main')
+       .fontSize(9)
+       .fillColor(LIGHT_GRAY)
+       .text('ОБРАЗОВАТЕЛЬНАЯ ПЛАТФОРМА', 0, 112, { align: 'center', width: W, characterSpacing: 3 });
 
-    // Name
-    doc.font('Roboto-Bold')
-       .fontSize(30)
-       .fillColor('#1A3B6D')
-       .text(data.fullName, 0, 215, { align: 'center', width: W });
+    // === TITLE ===
+    doc.font('Bold')
+       .fontSize(44)
+       .fillColor(BRAND)
+       .text('СЕРТИФИКАТ', 0, 145, { align: 'center', width: W });
 
-    // Course text
-    doc.font('Roboto')
-       .fontSize(14)
-       .fillColor('#4A5568')
-       .text('успешно завершил(а) курс', 0, 265, { align: 'center', width: W });
+    // === DECORATIVE LINE ===
+    const lineY = 200;
+    doc.moveTo(W / 2 - 80, lineY).lineTo(W / 2 + 80, lineY).lineWidth(2).stroke(BRAND);
 
-    // Course title
-    doc.font('Roboto-Bold')
-       .fontSize(22)
-       .fillColor('#C8A951')
-       .text(`"${data.courseTitle}"`, 0, 290, { align: 'center', width: W });
-
-    // Platform text
-    doc.font('Roboto')
+    // === SUBTITLE ===
+    doc.font('Main')
        .fontSize(12)
-       .fillColor('#4A5568')
-       .text('на образовательной платформе AiBot', 0, 325, { align: 'center', width: W });
+       .fillColor(GRAY)
+       .text('НАСТОЯЩИЙ СЕРТИФИКАТ ПОДТВЕРЖДАЕТ, ЧТО', 0, 218, { align: 'center', width: W, characterSpacing: 1.5 });
 
-    // Date
+    // === NAME ===
+    doc.font('Bold')
+       .fontSize(32)
+       .fillColor(DARK)
+       .text(data.fullName, 0, 250, { align: 'center', width: W });
+
+    // === COURSE LINE ===
+    doc.font('Main')
+       .fontSize(12)
+       .fillColor(GRAY)
+       .text('ПРОШЁЛ КУРС', 0, 300, { align: 'center', width: W, characterSpacing: 1.5 });
+
+    // === COURSE TITLE ===
+    doc.font('Bold')
+       .fontSize(20)
+       .fillColor(DARK)
+       .text(`«${data.courseTitle}»`, 0, 325, { align: 'center', width: W });
+
+    // === PLATFORM TEXT ===
+    doc.font('Main')
+       .fontSize(10)
+       .fillColor(LIGHT_GRAY)
+       .text('на образовательной платформе AiBot', 0, 355, { align: 'center', width: W });
+
+    // === BOTTOM SECTION ===
+    const bottomY = 420;
+
+    // Left — Date
+    doc.font('Main')
+       .fontSize(10)
+       .fillColor(GRAY)
+       .text('Дата выдачи:', 120, bottomY, { width: 150 });
+
     const dateStr = data.issuedDate.toLocaleDateString('ru-RU', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
     });
-    doc.font('Roboto')
+    doc.font('Bold')
        .fontSize(11)
-       .fillColor('#718096')
-       .text(`Дата выдачи: ${dateStr}`, 0, 360, { align: 'center', width: W });
+       .fillColor(DARK)
+       .text(dateStr, 120, bottomY + 16, { width: 200 });
 
-    // Certificate number
-    doc.font('Roboto')
-       .fontSize(10)
-       .fillColor('#A0AEC0')
-       .text(`${data.certificateNumber}`, 0, 380, { align: 'center', width: W });
+    // Center — Logo seal (circle with "A" icon)
+    const cx = W / 2;
+    const cy = bottomY + 20;
+    doc.circle(cx, cy, 28).lineWidth(2.5).stroke(BRAND);
+    doc.circle(cx, cy, 22).lineWidth(1).stroke(BRAND);
+    doc.font('Bold').fontSize(20).fillColor(BRAND);
+    doc.text('A', cx - 10, cy - 10, { width: 20, align: 'center' });
 
-    // Bottom section — signatures
-    const bottomY = 440;
-
-    // Left — Company seal
-    const sealX = 200;
-    doc.circle(sealX, bottomY + 25, 35).lineWidth(2).stroke('#1A3B6D');
-    doc.circle(sealX, bottomY + 25, 30).lineWidth(1).stroke('#1A3B6D');
-    doc.font('Roboto-Bold').fontSize(7).fillColor('#1A3B6D');
-    doc.text('ТОО', sealX - 10, bottomY + 12, { width: 20, align: 'center' });
-    doc.text('AiBot', sealX - 15, bottomY + 22, { width: 30, align: 'center' });
-
-    doc.font('Roboto')
-       .fontSize(10)
-       .fillColor('#4A5568')
-       .text('Печать организации', sealX - 50, bottomY + 70, { width: 100, align: 'center' });
-
-    // Right — Director signature
-    const sigX = W - 250;
-    doc.moveTo(sigX, bottomY + 45).lineTo(sigX + 120, bottomY + 45).lineWidth(1).stroke('#4A5568');
-    doc.font('Roboto')
-       .fontSize(10)
-       .fillColor('#4A5568')
-       .text('Директор', sigX, bottomY + 50, { width: 120, align: 'center' });
-    doc.font('Roboto-Bold')
-       .fontSize(10)
-       .fillColor('#1A3B6D')
-       .text('Асылбеков Е.Т.', sigX, bottomY + 65, { width: 120, align: 'center' });
-
-    // Decorative bottom line
-    doc.moveTo(W / 2 - 150, H - 55).lineTo(W / 2 + 150, H - 55).lineWidth(1).stroke('#C8A951');
-
-    doc.font('Roboto')
+    doc.font('Main')
        .fontSize(8)
-       .fillColor('#A0AEC0')
-       .text('Проверить подлинность: aibot.kz/certificates/verify/' + data.certificateNumber, 0, H - 50, { align: 'center', width: W });
+       .fillColor(GRAY)
+       .text('ТОО «AiBot»', cx - 40, cy + 35, { width: 80, align: 'center' });
+
+    // Right — Director
+    const sigX = W - 280;
+    doc.font('Bold')
+       .fontSize(11)
+       .fillColor(DARK)
+       .text('АСЫЛБЕКОВ Е.Т.', sigX, bottomY, { width: 160 });
+
+    doc.font('Main')
+       .fontSize(9)
+       .fillColor(GRAY)
+       .text('Генеральный директор', sigX, bottomY + 16, { width: 160 });
+
+    // Signature line
+    doc.moveTo(sigX, bottomY + 40).lineTo(sigX + 130, bottomY + 40).lineWidth(0.5).stroke('#CBD5E1');
+
+    // === CERTIFICATE NUMBER ===
+    doc.font('Main')
+       .fontSize(8)
+       .fillColor(LIGHT_GRAY)
+       .text(data.certificateNumber, 0, H - 70, { align: 'center', width: W });
+
+    // === VERIFICATION URL ===
+    doc.font('Main')
+       .fontSize(7)
+       .fillColor(LIGHT_GRAY)
+       .text('Проверить подлинность: aibot.kz/certificates/verify/' + data.certificateNumber, 0, H - 58, { align: 'center', width: W });
 
     doc.end();
   });
