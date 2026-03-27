@@ -23,7 +23,6 @@ model User {
 
   telegramAccount TelegramAccount?
   enrollments     Enrollment[]
-  payments        Payment[]
   progress        LessonProgress[]
   submissions     TaskSubmission[]
   certificates    Certificate[]
@@ -49,39 +48,8 @@ model TelegramAccount {
   linkedAt   DateTime @default(now()) @map("linked_at")
 
   user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sessions TelegramSession[]
 
   @@map("telegram_accounts")
-}
-
-model TelegramSession {
-  id          String   @id @default(cuid())
-  tgAccountId String   @map("tg_account_id")
-  sessionData Json     @map("session_data")
-  expiresAt   DateTime @map("expires_at")
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  account TelegramAccount @relation(fields: [tgAccountId], references: [id], onDelete: Cascade)
-
-  @@map("telegram_sessions")
-}
-
-model ChatMessage {
-  id         String          @id @default(cuid())
-  telegramId String          @map("telegram_id")
-  role       ChatMessageRole
-  content    String
-  metadata   Json?
-  createdAt  DateTime        @default(now()) @map("created_at")
-
-  @@index([telegramId, createdAt])
-  @@map("chat_messages")
-}
-
-enum ChatMessageRole {
-  USER
-  ASSISTANT
-  SYSTEM
 }
 
 model Course {
@@ -99,7 +67,6 @@ model Course {
 
   modules      Module[]
   enrollments  Enrollment[]
-  payments     Payment[]
   certificates Certificate[]
 
   @@map("courses")
@@ -232,41 +199,6 @@ enum EnrollmentStatus {
   ACTIVE
   EXPIRED
   REVOKED
-}
-
-model Payment {
-  id                String          @id @default(cuid())
-  userId            String          @map("user_id")
-  courseId          String          @map("course_id")
-  amount            Decimal         @db.Decimal(10, 2)
-  currency          String          @default("RUB")
-  status            PaymentStatus   @default(PENDING)
-  provider          PaymentProvider
-  providerPaymentId String?         @unique @map("provider_payment_id")
-  providerData      Json?           @map("provider_data")
-  receiptUrl        String?         @map("receipt_url")
-  createdAt         DateTime        @default(now()) @map("created_at")
-  confirmedAt       DateTime?       @map("confirmed_at")
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([status])
-  @@map("payments")
-}
-
-enum PaymentStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
-  REFUNDED
-}
-
-enum PaymentProvider {
-  YOOKASSA
-  STRIPE
-  MANUAL
 }
 
 model Notification {
