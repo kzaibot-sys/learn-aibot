@@ -35,14 +35,16 @@ export default function CertificatesPage() {
     queryKey: ['my-certificates'],
     queryFn: () => apiRequest<Certificate[]>('/api/certificates/my', {}, token),
     enabled: !!token,
-    staleTime: 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const { data: progressData = [], isLoading: progressLoading } = useQuery({
     queryKey: ['my-progress'],
     queryFn: () => apiRequest<CourseProgress[]>('/api/courses/my-progress', {}, token),
     enabled: !!token,
-    staleTime: 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const availableCourses = useMemo(() => {

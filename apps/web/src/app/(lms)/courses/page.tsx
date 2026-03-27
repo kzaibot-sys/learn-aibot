@@ -58,6 +58,7 @@ function CoursesPage() {
     queryFn: () => apiRequest<Course[]>('/api/courses', {}, token),
     enabled: !!token,
     staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const { data: progressData = [], isLoading: progressLoading } = useQuery({
@@ -65,6 +66,7 @@ function CoursesPage() {
     queryFn: () => apiRequest<ProgressCourse[]>('/api/courses/my-progress', {}, token),
     enabled: !!token,
     staleTime: 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
   const enrolledIds = useMemo(

@@ -3,34 +3,27 @@ import { config } from '../config';
 
 let redis: Redis | null = null;
 
-function getRedis(): Redis | null {
-  if (redis) return redis;
-  try {
-    redis = new Redis(config.redis.url, {
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
-      retryStrategy: (times) => {
-        if (times > 3) return null;
-        return Math.min(times * 200, 2000);
-      },
-    });
-    redis.on('error', () => {
-      // Silently handle — Redis is optional
-    });
-    redis.connect().catch(() => {
-      redis = null;
-    });
-    return redis;
-  } catch {
-    return null;
-  }
+// Connect eagerly at module load
+try {
+  redis = new Redis(config.redis.url, {
+    maxRetriesPerRequest: 1,
+    connectTimeout: 3000,
+    retryStrategy: (times) => {
+      if (times > 3) return null;
+      return Math.min(times * 500, 2000);
+    },
+  });
+  redis.on('error', () => { /* graceful */ });
+  redis.on('ready', () => console.log('[Redis] Connected'));
+  redis.on('end', () => { redis = null; });
+} catch {
+  redis = null;
 }
 
 export async function cacheGet<T>(key: string): Promise<T | null> {
-  const client = getRedis();
-  if (!client) return null;
+  if (!redis) return null;
   try {
-    const data = await client.get(key);
+    const data = await redis.get(key);
     return data ? JSON.parse(data) : null;
   } catch {
     return null;
@@ -38,34 +31,23 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
 }
 
 export async function cacheSet(key: string, value: unknown, ttlSeconds: number): Promise<void> {
-  const client = getRedis();
-  if (!client) return;
+  if (!redis) return;
   try {
-    await client.setex(key, ttlSeconds, JSON.stringify(value));
-  } catch {
-    // Silently handle
-  }
+    await redis.setex(key, ttlSeconds, JSON.stringify(value));
+  } catch { /* graceful */ }
 }
 
 export async function cacheDelete(key: string): Promise<void> {
-  const client = getRedis();
-  if (!client) return;
+  if (!redis) return;
   try {
-    await client.del(key);
-  } catch {
-    // Silently handle
-  }
+    await redis.del(key);
+  } catch { /* graceful */ }
 }
 
 export async function cacheInvalidatePattern(pattern: string): Promise<void> {
-  const client = getRedis();
-  if (!client) return;
+  if (!redis) return;
   try {
-    const keys = await client.keys(pattern);
-    if (keys.length > 0) {
-      await client.del(...keys);
-    }
-  } catch {
-    // Silently handle
-  }
+    const keys = await redis.keys(pattern);
+    if (keys.length > 0) await redis.del(...keys);
+  } catch { /* graceful */ }
 }
