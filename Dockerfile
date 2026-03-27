@@ -20,6 +20,12 @@ RUN cd packages/shared && npx tsc
 RUN cd packages/database && npx tsc
 RUN cd apps/${APP_NAME} && npx tsc
 
+# Download video for the demo course
+RUN apk add --no-cache python3 py3-pip && \
+    python3 -m pip install --break-system-packages yt-dlp 2>/dev/null && \
+    mkdir -p apps/api/public/videos && \
+    python3 -m yt_dlp -f "best[ext=mp4]" -o "apps/api/public/videos/intro.mp4" "https://youtu.be/PkXjihPOl58" || true
+
 FROM node:20-alpine AS runner
 WORKDIR /app
 ARG APP_NAME=api
