@@ -27,30 +27,12 @@ export const config = {
     miniAppUrl: optionalEnv('TELEGRAM_MINI_APP_URL', ''),
   },
 
-  yookassa: {
-    shopId: optionalEnv('YOOKASSA_SHOP_ID', ''),
-    secretKey: optionalEnv('YOOKASSA_SECRET_KEY', ''),
-  },
-
-  stripe: {
-    secretKey: optionalEnv('STRIPE_SECRET_KEY', ''),
-    webhookSecret: optionalEnv('STRIPE_WEBHOOK_SECRET', ''),
-  },
-
-  s3: {
-    endpoint: optionalEnv('S3_ENDPOINT', ''),
-    accessKey: optionalEnv('S3_ACCESS_KEY', ''),
-    secretKey: optionalEnv('S3_SECRET_KEY', ''),
-    bucket: optionalEnv('S3_BUCKET_NAME', 'lms-media'),
-    publicUrl: optionalEnv('S3_PUBLIC_URL', ''),
-  },
-
   redis: {
     url: optionalEnv('REDIS_URL', 'redis://localhost:6379'),
   },
 
-  payment: {
-    enabled: optionalEnv('PAYMENT_ENABLED', 'false') === 'true',
+  bot: {
+    secret: optionalEnv('BOT_SECRET', ''),
   },
 
   app: {

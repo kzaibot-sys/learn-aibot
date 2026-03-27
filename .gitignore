@@ -10,3 +10,7 @@ Thumbs.db
 *.tsbuildinfo
 .vercel
 .prisma/
+
+# Video files
+apps/api/public/videos/
+*.mp4

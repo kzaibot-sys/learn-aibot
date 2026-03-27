@@ -6,21 +6,12 @@ import { AppError } from '../middleware/errorHandler';
 
 const router = Router();
 
-// POST /api/bot/webhook — Telegram bot webhook endpoint
-// The actual bot logic is in apps/bot, this route just forwards
-router.post('/webhook', asyncHandler(async (req: Request, res: Response) => {
-  // In production, the bot app handles webhooks directly
-  // This endpoint exists as a fallback/proxy if needed
-  console.log('Bot webhook received:', JSON.stringify(req.body).slice(0, 200));
-  res.json({ ok: true });
-}));
-
 // POST /api/bot/grant-access — bot grants course access by telegramId
 router.post('/grant-access', asyncHandler(async (req: Request, res: Response) => {
   const { telegramId, courseSlug, botSecret } = req.body;
 
   // Verify bot secret
-  if (botSecret !== config.telegram.botToken) {
+  if (!config.bot.secret || botSecret !== config.bot.secret) {
     throw new AppError(403, 'FORBIDDEN', 'Invalid bot secret');
   }
 

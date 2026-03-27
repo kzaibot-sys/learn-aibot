@@ -5,7 +5,6 @@ import { authenticate, requireAdmin } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { AppError } from '../middleware/errorHandler';
 import { grantCourseAccess, revokeCourseAccess } from '../services/enrollment';
-import { uploadFile } from '../services/storage';
 import { cacheGet, cacheSet, cacheInvalidatePattern } from '../services/redis';
 
 const videoUpload = multer({
@@ -307,37 +306,6 @@ router.post('/enrollments/revoke', asyncHandler(async (req: Request, res: Respon
   res.json({ success: true });
 }));
 
-// ===== PAYMENTS =====
-
-// GET /api/admin/payments
-router.get('/payments', asyncHandler(async (req: Request, res: Response) => {
-  const page = Math.max(1, Number(req.query.page) || 1);
-  const perPage = Math.min(50, Math.max(1, Number(req.query.perPage) || 20));
-  const status = req.query.status as string | undefined;
-
-  const where = status ? { status: status as 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'REFUNDED' } : {};
-
-  const [payments, total] = await Promise.all([
-    prisma.payment.findMany({
-      where,
-      skip: (page - 1) * perPage,
-      take: perPage,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: { select: { id: true, email: true, firstName: true, lastName: true } },
-        course: { select: { id: true, title: true, slug: true } },
-      },
-    }),
-    prisma.payment.count({ where }),
-  ]);
-
-  res.json({
-    success: true,
-    data: payments.map(p => ({ ...p, amount: p.amount.toString() })),
-    meta: { page, perPage, total, totalPages: Math.ceil(total / perPage) },
-  });
-}));
-
 // ===== NOTIFICATIONS =====
 
 // POST /api/admin/notifications — send notification to all users
@@ -368,48 +336,13 @@ router.post('/notifications', asyncHandler(async (req: Request, res: Response) =
 // ===== FILE UPLOADS =====
 
 // POST /api/admin/lessons/:lessonId/upload-video
-router.post('/lessons/:lessonId/upload-video', videoUpload.single('video'), asyncHandler(async (req: Request, res: Response) => {
-  const { lessonId } = req.params;
-  const file = req.file;
-
-  if (!file) {
-    throw new AppError(400, 'VALIDATION_ERROR', 'Video file is required');
-  }
-
-  const lesson = await prisma.lesson.findUnique({
-    where: { id: lessonId },
-    include: { module: { select: { courseId: true } } },
-  });
-
-  if (!lesson) {
-    throw new AppError(404, 'LESSON_NOT_FOUND', 'Lesson not found');
-  }
-
-  const ext = file.originalname.split('.').pop() || 'mp4';
-  const key = `videos/${lesson.module.courseId}/${lessonId}/${Date.now()}.${ext}`;
-  const videoUrl = await uploadFile(file.buffer, key, file.mimetype);
-
-  const updated = await prisma.lesson.update({
-    where: { id: lessonId },
-    data: { videoUrl, videoKey: key },
-  });
-
-  res.json({ success: true, data: updated });
+router.post('/lessons/:lessonId/upload-video', videoUpload.single('video'), asyncHandler(async (_req: Request, _res: Response) => {
+  throw new AppError(503, 'UPLOAD_NOT_CONFIGURED', 'File upload via S3 is removed. Set videoUrl directly via PATCH /api/admin/lessons/:id');
 }));
 
 // POST /api/admin/upload-image
-router.post('/upload-image', imageUpload.single('image'), asyncHandler(async (req: Request, res: Response) => {
-  const file = req.file;
-
-  if (!file) {
-    throw new AppError(400, 'VALIDATION_ERROR', 'Image file is required');
-  }
-
-  const ext = file.originalname.split('.').pop() || 'jpg';
-  const key = `images/${Date.now()}.${ext}`;
-  const url = await uploadFile(file.buffer, key, file.mimetype);
-
-  res.json({ success: true, data: { url } });
+router.post('/upload-image', imageUpload.single('image'), asyncHandler(async (_req: Request, _res: Response) => {
+  throw new AppError(503, 'UPLOAD_NOT_CONFIGURED', 'File upload via S3 is removed. Set coverUrl directly via PATCH /api/admin/courses/:id');
 }));
 
 // ===== REORDER =====

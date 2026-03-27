@@ -5,7 +5,6 @@ ARG APP_NAME=api
 # Install deps
 COPY package.json package-lock.json ./
 COPY apps/api/package.json ./apps/api/
-COPY apps/bot/package.json ./apps/bot/
 COPY packages/database/package.json ./packages/database/
 COPY packages/shared/package.json ./packages/shared/
 RUN npm ci --ignore-scripts
