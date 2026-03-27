@@ -4,15 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**AiBot** — LMS platform for online courses. Brand: ТОО "AiBot". Full cycle: **Landing -> Telegram Bot (AI sales) -> Payment (disabled, admin grants access) -> LMS Web + Telegram Mini App**.
+**AiBot** — LMS platform for online courses. Brand: ТОО "AiBot". Full cycle: **Landing -> Telegram Bot (AI sales + auto-access) -> LMS Web**.
 
 Language: Russian UI (default), Kazakh (kz) as second language. Code and comments in English.
+
+**Key decisions (2026-03-28):**
+- **Payments REMOVED** entirely from LMS — no payment routes, no stripe/yookassa
+- **Registration DISABLED** — users created only via Telegram bot
+- **Dark theme REMOVED** — only light theme, no dark mode toggle
+- **Gamification REMOVED** — no XP, levels, streaks, achievements, leaderboard
+- **Access via bot**: `POST /api/bot/grant-access` (telegramId + courseSlug + botSecret)
+- **Course covers optional** — gradient placeholder when no coverUrl
+- **Prices/ratings NOT shown** in LMS
+- **Sessions persist**: JWT 7d access, 90d refresh
 
 ## Monorepo Structure
 
 ```
 ├── apps/
-│   ├── web/           # Next.js 14 (App Router) — Landing + LMS student cabinet
+│   ├── web/           # Next.js 16 (App Router) — Landing + LMS student cabinet
 │   ├── api/           # Express — REST API (PORT env or 3001)
 │   ├── bot/           # Telegram Bot (grammy) + AI (Claude API)
 │   └── mini-app/      # Telegram Mini App (React + Vite, base=/mini-app/)
@@ -20,14 +30,11 @@ Language: Russian UI (default), Kazakh (kz) as second language. Code and comment
 │   ├── database/      # Prisma schema + singleton client (@lms/database)
 │   ├── shared/        # Shared TypeScript types and utilities (@lms/shared)
 │   └── ui/            # Shared React components (@lms/ui)
-├── nginx/             # Nginx reverse proxy config (SSL, gzip, WebSocket)
+├── docs/
+│   └── telegram-bot-api.md  # API docs for bot grant-access
 ├── Dockerfile         # Multi-stage build for api and bot (ARG APP_NAME)
-├── Dockerfile.web     # Multi-stage build for Next.js (standalone output, ARG NEXT_PUBLIC_API_URL)
-├── docker-compose.yml # Local dev: PostgreSQL 16 (:5433), Redis 7 (:6380)
-├── docker-compose.prod.yml  # Production: all services + nginx + SSL
-├── railway.toml       # Railway deployment config (API service)
-├── nixpacks.toml      # Nixpacks config (Node 20)
-└── Procfile           # Fallback process definition
+├── Dockerfile.web     # Multi-stage build for Next.js (standalone output)
+└── docker-compose.yml # Local dev: PostgreSQL 16 (:5433), Redis 7 (:6380)
 ```
 
 npm workspaces + Turborepo. Node >=20, npm@11.12.0.
@@ -38,255 +45,171 @@ npm workspaces + Turborepo. Node >=20, npm@11.12.0.
 # Development
 npm run dev                          # Start all apps via Turborepo
 npm run build                        # Build all apps and packages
-npm run lint                         # Lint all apps
-npm run start:api                    # Start API in production mode
-npm run start:web                    # Start Web in production mode
-
-# Per-app dev (from root)
-npx turbo run dev --filter=web
-npx turbo run dev --filter=api
-npx turbo run dev --filter=bot
-npx turbo run dev --filter=mini-app
 
 # Database (from root)
-npm run db:migrate                   # Run Prisma migrations
 npm run db:generate                  # Generate Prisma client
 cd packages/database && npx prisma migrate dev   # Create new migration
-cd packages/database && npx prisma studio        # Visual DB editor
 
-# Local infrastructure
-docker compose up -d                 # PostgreSQL on :5433, Redis on :6380
-
-# Production deploy (Docker Compose)
-docker compose -f docker-compose.prod.yml build
-docker compose -f docker-compose.prod.yml up -d
-
-# Production deploy (Railway) — see Deploy section
+# Deploy to Railway (MANUAL — no auto-deploy)
+railway service api && railway up --detach       # API
+railway service lms-platform && railway up --detach  # Web
 ```
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Next.js 14 (App Router), Tailwind CSS, Zustand, React Query, Framer Motion |
-| Mini App | React + Vite, Telegram WebApp SDK |
+| Frontend | Next.js 16 (App Router), Tailwind CSS, Zustand, Framer Motion |
 | API | Express, JWT (jsonwebtoken), bcryptjs, zod |
 | Bot | grammy, @anthropic-ai/sdk |
-| DB | PostgreSQL 16 + Prisma ORM |
+| DB | PostgreSQL 16 (Neon) + Prisma ORM |
 | Cache | Redis 7 (ioredis, graceful degradation) |
-| Storage | S3-compatible (Cloudflare R2 or AWS S3) |
-| Video | HLS streaming (hls.js on client), custom HTML5 player |
-| Payments | YooKassa + Stripe (disabled via PAYMENT_ENABLED=false, admin grants access manually) |
-| AI | Anthropic Claude (claude-sonnet-4-20250514) |
-| Certificates | PDFKit (server-side PDF generation) |
+| Video | HLS streaming (hls.js), custom VideoPlayer with auto-save position |
+| AI | Anthropic Claude |
+| Certificates | PDFKit (on-the-fly PDF generation, NO S3 upload) |
 | i18n | Custom React context (ru/kz), localStorage persistence |
-| Theming | CSS variables + Tailwind `darkMode: 'class'`, localStorage persistence |
+| Theme | Light only. CSS variables in globals.css `:root` |
 
 ## Architecture & Key Flows
 
-### Auth: Two paths
-1. **Web**: email/password -> JWT access token (15m) + refresh token (30d in httpOnly concept, stored in DB)
+### Auth
+1. **Web**: email/password login only (registration disabled) -> JWT access 7d + refresh 90d
 2. **Telegram Mini App**: `initData` HMAC validation -> JWT tokens
-3. Telegram account can be linked to existing web account via `/api/auth/telegram/link`
-4. Theme loads from localStorage before hydration (inline script in layout.tsx prevents FOUC)
+3. Telegram account can be linked via `/api/auth/telegram/link`
 
-### Access flow (payments disabled)
+### Access flow (via Telegram bot)
 ```
-Admin grants access via /admin/courses/:id/access or /admin/students
-  -> API creates Enrollment (ACTIVE) via grantCourseAccess()
-  -> Creates in-app Notification for user
-  -> Optionally notifies user in Telegram
-```
-
-### Payment flow (when PAYMENT_ENABLED=true)
-```
-User clicks "Buy" -> Bot creates payment (YooKassa/Stripe)
-  -> Provider sends webhook -> API verifies signature (raw body!)
-  -> Updates Payment status to CONFIRMED -> Upserts Enrollment (ACTIVE)
+User pays in Telegram bot
+  -> Bot calls POST /api/bot/grant-access { telegramId, courseSlug, botSecret }
+  -> API finds user by telegramId, upserts Enrollment (ACTIVE)
+  -> Creates Notification for user
 ```
 
-### Bot AI funnel
-- Non-enrolled users get SALES_PROMPT -> AI guides toward purchase
-- Enrolled users get SUPPORT_PROMPT -> AI helps with course material
-- Chat history stored in ChatMessage table, keyed by telegramId
+### Video auto-save
+- VideoPlayer saves position to localStorage every 5s (key: `video-pos-${lessonId}`)
+- Sends watchedSec to server every 10s via PATCH /api/progress/lesson/:id/watchtime
+- On load: restores from localStorage OR server (whichever is greater)
 
-### Webhook raw body requirement
-Express must receive `Buffer` body BEFORE `json()` middleware on `/webhook` routes. Critical for HMAC signature verification.
+### Certificate generation
+- POST /request/:courseId — creates DB record only (no PDF, no S3)
+- GET /:id/download — generates PDF on-the-fly via PDFKit, streams as response
+- **KNOWN BUG**: Font loading crashes in Docker (`Error: Unknown font format`)
+- File: `apps/api/src/services/certificate.ts`
+- Fonts: `apps/api/src/assets/fonts/Roboto-*.ttf` (copied to dist via build script)
 
-### Notification system
-- Backend: CRUD endpoints + admin broadcast to all active users
-- Frontend: Bell icon with badge, 30-second polling, sound on new notifications
-- Types: info, warning, success, course_update
-
-### Theme system
-- CSS variables in globals.css (`:root` for light, `.dark` for dark)
-- Tailwind uses `darkMode: 'class'`
-- All components use semantic tokens (`bg-background`, `text-foreground`, `bg-card`, `border-border`)
-- NO hardcoded gray/dark colors — always use theme tokens
-- Inline `<script>` in layout.tsx reads localStorage before paint to prevent flash
-
-### i18n system
-- `apps/web/src/lib/i18n/translations.ts` — all keys for ru and kz
-- `apps/web/src/lib/i18n/context.tsx` — React context with `t()` function
-- Fallback: always Russian. Stored in localStorage key `lms-locale`
-- All UI text must use `t('key')`, never hardcoded strings
+### Redis caching
+Endpoints cached: courses list (5m), course detail (5m), my-progress (60s), analytics (120s), students (60s), certificates (60s), unread-count (15s). Cache invalidated on mutations.
 
 ## Code Rules
 
-1. **TypeScript strict** — no `any`, no `as unknown`. Root tsconfig: ES2022 target, bundler moduleResolution
-2. **Idempotency** — payments and enrollments use `upsert`, never `create`
-3. **Prisma singleton** — always import from `@lms/database`
-4. **Raw body for webhooks** — Express receives Buffer before json() middleware on `/webhook` routes
-5. **Env validation** — check required env vars at startup, throw if missing
-6. **React components** — named exports, one component per file
-7. **Theme-aware styling** — use `bg-background`, `text-foreground`, `bg-card`, `border-border` etc. Never `bg-gray-900` or `text-white` on non-gradient backgrounds
-8. **i18n everywhere** — use `t('key')` for all user-visible text. Add keys to translations.ts for both ru and kz
-9. **Mobile-first** — use Tailwind responsive prefixes (sm:, md:, lg:). Min touch target 44px
-10. **Sidebar responsive** — hidden on mobile (md:hidden), MobileNav component for mobile
+1. **TypeScript strict** — no `any`
+2. **Prisma singleton** — import from `@lms/database`
+3. **Light theme only** — use `bg-background`, `text-foreground`, `bg-card`, `border-border`. NO `dark:` prefixes
+4. **i18n everywhere** — `t('key')` for all UI text, keys in translations.ts for both ru and kz
+5. **Mobile-first** — Tailwind responsive prefixes (sm:, md:, lg:). Min touch target 44px
+6. **No payments** — no price display, no buy buttons, no payment routes
+7. **No registration** — login page only, no signup link
+8. **Redis caching** — use `cacheGet`/`cacheSet`/`cacheDelete` from `services/redis.ts`
+9. **Select over include** — Prisma queries should use `select` for only needed fields
 
 ## Database Schema
 
 File: `packages/database/prisma/schema.prisma`
 
 Core models:
-- **User** -> TelegramAccount (1:1), Enrollments, Payments, LessonProgress, TaskSubmissions, Certificates, Notifications
-- **Course** -> Modules -> Lessons -> Tasks -> TaskSubmissions
-- **Course** -> Enrollments, Payments
-- **Lesson** -> LessonProgress (unique per [userId, lessonId])
-- **Payment** tracks provider (YOOKASSA/STRIPE/MANUAL), has unique providerPaymentId
-- **Notification** -> User (indexed on userId+isRead)
-- **Certificate** -> User + Course (unique per userId+courseId)
-
-Conventions: snake_case via `@@map()`/`@map()`. IDs: `cuid()`. Prices: `Decimal(10,2)`.
+- **User** (id, email, passwordHash, firstName, lastName, middleName, phone, role, isActive) -> TelegramAccount, Enrollments, LessonProgress, Certificates, Notifications, RefreshTokens
+- **Course** -> Modules -> Lessons -> Tasks
+- **Enrollment** (userId, courseId, status: ACTIVE/EXPIRED/REVOKED)
+- **LessonProgress** (userId, lessonId, completed, watchedSec)
+- **Certificate** (userId, courseId, number, fileUrl nullable)
 
 ## API Routes
 
 ```
-GET  /api/health                     # Health check
-POST /api/auth/register, /login, /refresh, /telegram, /telegram/link
-GET  /api/courses?search=term        # List courses (with optional search)
-GET  /api/courses/:slug              # Course detail
-GET  /api/courses/:slug/lessons/:id  # Lesson detail
+GET  /api/health
+POST /api/auth/login, /refresh, /telegram, /telegram/link
+PATCH /api/auth/profile                  # firstName, lastName, middleName, phone
+
+GET  /api/courses                        # Public list (cached 5m)
+GET  /api/courses/my-progress            # Batch: enrolled courses + progress (auth, cached 60s)
+GET  /api/courses/:slug                  # Course detail (cached 5m)
+GET  /api/courses/:slug/lessons/:id      # Lesson detail (auth)
+
 POST /api/progress/lesson/:id/complete
 PATCH /api/progress/lesson/:id/watchtime
 GET  /api/progress/course/:courseId
-GET  /api/notifications              # User notifications (paginated)
-GET  /api/notifications/unread-count
-PATCH /api/notifications/read-all
-PATCH /api/notifications/:id/read
+
 POST /api/certificates/request/:courseId
 GET  /api/certificates/my
-GET  /api/certificates/verify/:number  # Public
-GET  /api/certificates/:id/download
-POST /api/payments/create             # Gated by PAYMENT_ENABLED
-POST /api/payments/yookassa/webhook
-POST /api/payments/stripe/webhook
+GET  /api/certificates/verify/:number    # Public
+GET  /api/certificates/:id/download      # On-the-fly PDF
+
+GET  /api/notifications, /unread-count
+PATCH /api/notifications/read-all, /:id/read
+
+POST /api/bot/grant-access               # { telegramId, courseSlug, botSecret }
 POST /api/bot/webhook
 
-# Admin (requireAdmin middleware)
+# Admin (requireAdmin)
 GET/POST/PATCH/DELETE /api/admin/courses, /modules, /lessons
-POST /api/admin/lessons/:id/upload-video
-POST /api/admin/upload-image
-PATCH /api/admin/modules/reorder, /lessons/reorder
-GET  /api/admin/students
+GET  /api/admin/analytics                # Stats: students, courses, progress (cached 120s)
+GET  /api/admin/students                 # With search, pagination (cached 60s)
+GET  /api/admin/certificates             # All certificates with search
 POST /api/admin/enrollments/grant, /revoke
-GET  /api/admin/courses/:id/enrollments
-POST /api/admin/notifications         # Broadcast to all users
-GET  /api/admin/payments
+POST /api/admin/notifications
 ```
 
 ## Frontend Pages
 
 ```
-/                           # Landing page (Header, Hero, About, Courses, HowItWorks, Reviews, FAQ, Footer)
-/login                      # Auth
-/dashboard                  # Student dashboard with course progress
-/courses                    # Course catalog with search/filter/sort
-/courses/[slug]             # Course detail with modules/lessons
-/courses/[slug]/lessons/[id] # Lesson player (custom HTML5 video)
-/certificates               # My certificates
-/certificates/request/[id]  # Request certificate (100% completion required)
-/certificates/verify/[num]  # Public verification
-/achievements               # Badges & progress
-/calendar                   # Calendar view
-/settings                   # User preferences (theme, language)
-/profile                    # Edit profile
-/admin/courses              # Admin: manage courses
-/admin/courses/[id]         # Admin: edit course
-/admin/courses/[id]/modules # Admin: manage modules
-/admin/courses/[id]/access  # Admin: manage student access
-/admin/lessons/[id]         # Admin: edit lesson
-/admin/students             # Admin: manage students
-/admin/payments             # Admin: view payments
-/admin/analytics            # Admin: dashboard analytics
+# Landing (independent layout — LandingHeader + LandingFooter)
+/                           # Hero, About, Courses, HowItWorks, Reviews, FAQ
+/privacy, /terms, /offer    # Legal pages
+
+# Auth
+/login                      # Email/password only (no registration)
+
+# LMS (Sidebar layout — AuthGuard)
+/dashboard                  # "День X из Y" per course, stats cards
+/courses                    # Catalog (no prices, no ratings)
+/courses/[slug]             # Course detail
+/courses/[slug]/lessons/[id] # Lesson with VideoPlayer (auto-save)
+/certificates               # My certs + available for request
+/certificates/request/[id]  # Request cert (requires 100% + ФИО)
+/profile                    # ФИО + phone (used for certificates)
+/settings                   # Language toggle only
+
+# Admin
+/admin/courses              # CRUD courses
+/admin/courses/[id]         # Edit course
+/admin/courses/[id]/modules # Manage modules
+/admin/courses/[id]/access  # Manage enrollments
+/admin/lessons/[id]         # Edit lesson + video upload
+/admin/students             # Students with progress per course
+/admin/analytics            # Stats: students, registrations, course progress
+/admin/certificates         # All issued certificates
+
+# Public
+/certificates/verify/[num]  # Certificate verification
 ```
-
-## Environment Variables
-
-See `.env.example` for all required variables. Key groups:
-- `PORT` (Railway sets automatically), `API_PORT` (fallback: 3001)
-- `DATABASE_URL`, `REDIS_URL`
-- `JWT_SECRET`, `JWT_EXPIRES_IN`
-- `PAYMENT_ENABLED` (default: false)
-- `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_URL`, `TELEGRAM_MINI_APP_URL`
-- `ANTHROPIC_API_KEY`
-- `YOOKASSA_SHOP_ID`, `YOOKASSA_SECRET_KEY`
-- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLISHABLE_KEY`
-- `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET_NAME`, `S3_PUBLIC_URL`
-- `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_APP_URL`
 
 ## Deploy
 
-### Railway (recommended)
-Two services in Railway dashboard:
-- **API**: Root dir `/`, uses `Dockerfile`. Set all env vars. Health check at `/api/health`.
-- **Web**: Root dir `/`, uses `Dockerfile.web`. Build arg `NEXT_PUBLIC_API_URL` = API Railway URL.
+### Railway (current production)
+- **API**: https://api-production-d64b.up.railway.app (Dockerfile, PORT=3001)
+- **Web**: https://lms-platform-production-8b12.up.railway.app (Dockerfile.web)
+- **DB**: Neon PostgreSQL (ep-lingering-sun-a4xz7f6z-pooler.us-east-1.aws.neon.tech)
+- **Redis**: redis.railway.internal:6379
+- Deploy is MANUAL: `railway service <name> && railway up --detach`
 
-### Docker Compose (VPS)
-```bash
-docker compose -f docker-compose.prod.yml build
-docker compose -f docker-compose.prod.yml up -d
-# Register Telegram webhook:
-curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook" \
-     -d "url=${TELEGRAM_WEBHOOK_URL}"
-```
+### Test accounts
+- Admin: admin@aibot.kz / admin123456
+- Student: student@aibot.kz / student123456
 
-CI: GitHub Actions — push to `main` triggers build check.
+## Known Issues (as of 2026-03-28)
 
-## API Patterns
-
-### Error handling
-Use `AppError` (from `apps/api/src/utils/errors.ts`) for expected errors and `asyncHandler` wrapper for all async route handlers:
-```ts
-import { AppError } from '../utils/errors';
-import { asyncHandler } from '../middleware/asyncHandler';
-
-router.get('/route', asyncHandler(async (req, res) => {
-  if (!found) throw new AppError('Not found', 404, 'NOT_FOUND');
-  res.json({ success: true, data: result });
-}));
-```
-Error responses shape: `{ success: false, error: { code, message } }`. Success responses shape: `{ success: true, data: ... }`.
-
-### Auth middleware
-- `authenticate` — verifies JWT Bearer token, attaches `req.user` (JwtPayload: `{ userId, email, role }`)
-- `requireAdmin` — must follow `authenticate`; rejects if `role !== 'ADMIN'`
-
-## Frontend Auth Pattern
-
-No Next.js `middleware.ts` — auth is handled entirely client-side via Zustand `useAuthStore`. Protected pages use an `AuthGuard` component (in admin layout) that redirects unauthenticated/unauthorized users. Token refresh happens in the store when a 401 is received.
-
-## Prisma Enums
-
-Defined in `packages/database/prisma/schema.prisma`:
-- `UserRole`: STUDENT, TEACHER, ADMIN
-- `LessonType`: VIDEO, TEXT, QUIZ
-- `TaskType`: TEXT, CODE, FILE
-- `SubmissionStatus`: PENDING, APPROVED, REJECTED
-- `EnrollmentStatus`: ACTIVE, INACTIVE, EXPIRED
-- `PaymentStatus`: PENDING, CONFIRMED, CANCELLED, REFUNDED
-- `PaymentProvider`: YOOKASSA, STRIPE, MANUAL
-- `ChatMessageRole`: USER, ASSISTANT
+1. **Certificate PDF crashes in Docker**: `Error: Unknown font format` — PDFKit can't load Roboto TTF in Docker container. Need to fix font loading in `apps/api/src/services/certificate.ts` (try `fs.readFileSync` Buffer approach)
+2. **Pages load slowly (2-3s)**: Redis caching added but may not be active if REDIS_URL not configured. Neon cold starts add latency. Consider: skeleton loading, React Query staleTime, prefetching.
 
 ## Testing
 
