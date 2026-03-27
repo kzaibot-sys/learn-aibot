@@ -108,10 +108,13 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
       title: true,
       description: true,
       coverUrl: true,
+      _count: {
+        select: { enrollments: true, modules: true },
+      },
       modules: {
+        where: { isPublished: true },
         select: {
-          id: true,
-          lessons: { where: { isPublished: true }, select: { id: true } },
+          _count: { select: { lessons: true } },
         },
       },
     },
@@ -126,8 +129,9 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
       title: c.title,
       description: c.description,
       coverUrl: c.coverUrl,
-      totalLessons: c.modules.reduce((sum, m) => sum + m.lessons.length, 0),
-      totalModules: c.modules.length,
+      totalLessons: c.modules.reduce((sum, m) => sum + m._count.lessons, 0),
+      totalModules: c._count.modules,
+      enrollmentCount: c._count.enrollments,
     })),
   };
 

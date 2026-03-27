@@ -1,8 +1,9 @@
 'use client';
 
-import { Suspense, useEffect, useState, useMemo } from 'react';
+import { Suspense, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   LayoutGrid, Clock, Users, Search, BookOpen, CheckCircle2,
@@ -17,10 +18,19 @@ interface Course {
   title: string;
   slug: string;
   description: string | null;
-  coverImage: string | null;
-  published: boolean;
-  _count?: { enrollments: number; modules: number };
-  modules?: { id: string; lessons: { id: string }[] }[];
+  coverUrl: string | null;
+  totalLessons: number;
+  totalModules: number;
+  enrollmentCount: number;
+}
+
+interface ProgressCourse {
+  id: string;
+  slug: string;
+  title: string;
+  totalLessons: number;
+  completedLessons: number;
+  progressPercent: number;
 }
 
 type SortOption = 'name' | 'popularity';
@@ -38,50 +48,31 @@ function CoursesPage() {
   const { t } = useI18n();
   const searchParams = useSearchParams();
   const searchFromUrl = searchParams.get('search') || '';
+  const queryClient = useQueryClient();
 
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [enrolledIds, setEnrolledIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState(searchFromUrl);
-  const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>('name');
 
-  // Sync search input with URL param changes
-  useEffect(() => {
-    if (searchFromUrl) {
-      setSearch(searchFromUrl);
-    }
-  }, [searchFromUrl]);
+  const { data: courses = [], isLoading: coursesLoading } = useQuery({
+    queryKey: ['courses'],
+    queryFn: () => apiRequest<Course[]>('/api/courses', {}, token),
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    if (!token) return;
+  const { data: progressData = [], isLoading: progressLoading } = useQuery({
+    queryKey: ['my-progress'],
+    queryFn: () => apiRequest<ProgressCourse[]>('/api/courses/my-progress', {}, token),
+    enabled: !!token,
+    staleTime: 60 * 1000,
+  });
 
-    async function load() {
-      try {
-        const data = await apiRequest<Course[]>('/api/courses', {}, token);
-        setCourses(data);
+  const enrolledIds = useMemo(
+    () => new Set(progressData.map(p => p.id)),
+    [progressData],
+  );
 
-        // Check enrollment for each course
-        const enrolled = new Set<string>();
-        await Promise.all(
-          data.map(async (course) => {
-            try {
-              await apiRequest(`/api/progress/course/${course.id}`, {}, token);
-              enrolled.add(course.id);
-            } catch {
-              // Not enrolled
-            }
-          }),
-        );
-        setEnrolledIds(enrolled);
-      } catch {
-        // Failed to load courses
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    load();
-  }, [token]);
+  const loading = coursesLoading || progressLoading;
 
   const filtered = useMemo(() => {
     let result = courses.filter(c =>
@@ -95,16 +86,22 @@ function CoursesPage() {
         result = result.slice().sort((a, b) => a.title.localeCompare(b.title));
         break;
       case 'popularity':
-        result = result.slice().sort((a, b) => (b._count?.enrollments || 0) - (a._count?.enrollments || 0));
+        result = result.slice().sort((a, b) => (b.enrollmentCount || 0) - (a.enrollmentCount || 0));
         break;
     }
 
     return result;
   }, [courses, search, sortBy]);
 
-  const totalLessons = courses.reduce((sum, c) => {
-    return sum + (c.modules?.reduce((ms, m) => ms + (m.lessons?.length || 0), 0) || 0);
-  }, 0);
+  const totalLessons = courses.reduce((sum, c) => sum + (c.totalLessons || 0), 0);
+
+  const handlePrefetch = (slug: string) => {
+    queryClient.prefetchQuery({
+      queryKey: ['course', slug],
+      queryFn: () => apiRequest(`/api/courses/${slug}`, {}, token),
+      staleTime: 5 * 60 * 1000,
+    });
+  };
 
   return (
     <>
@@ -148,7 +145,7 @@ function CoursesPage() {
                 <div className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-5 flex items-center gap-3">
                   <Users className="w-5 h-5 text-primary" />
                   <div>
-                    <p className="text-2xl font-black text-primary">{courses.reduce((s, c) => s + (c._count?.enrollments || 0), 0)}</p>
+                    <p className="text-2xl font-black text-primary">{courses.reduce((s, c) => s + (c.enrollmentCount || 0), 0)}</p>
                     <p className="text-xs text-muted-foreground">{t('courses.enrolled')}</p>
                   </div>
                 </div>
@@ -208,12 +205,13 @@ function CoursesPage() {
                     >
                       <Link
                         href={`/courses/${course.slug}`}
+                        onMouseEnter={() => handlePrefetch(course.slug)}
                         className="block rounded-3xl overflow-hidden border-2 border-border/50 bg-card/50 backdrop-blur-sm hover:border-orange-500/50 hover:shadow-2xl hover:shadow-orange-500/20 transition-all"
                       >
                         {/* Image */}
                         <div className="relative h-48 bg-gradient-to-br from-orange-500/20 via-orange-400/10 to-card overflow-hidden">
-                          {course.coverImage ? (
-                            <img src={course.coverImage} alt={course.title} className="w-full h-full object-cover" />
+                          {course.coverUrl ? (
+                            <img src={course.coverUrl} alt={course.title} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <BookOpen className="w-16 h-16 text-primary/30" />
@@ -237,11 +235,11 @@ function CoursesPage() {
                           <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
                             <span className="flex items-center gap-1">
                               <Clock className="w-3.5 h-3.5" />
-                              {course.modules?.reduce((s, m) => s + (m.lessons?.length || 0), 0) || 0} {t('dashboard.ofLessons')}
+                              {course.totalLessons} {t('dashboard.ofLessons')}
                             </span>
                             <span className="flex items-center gap-1">
                               <Users className="w-3.5 h-3.5" />
-                              {course._count?.enrollments || 0}
+                              {course.enrollmentCount || 0}
                             </span>
                           </div>
 

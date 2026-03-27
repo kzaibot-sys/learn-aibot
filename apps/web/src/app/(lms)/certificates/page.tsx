@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 import { Award, Download, Hash, BookOpen, ArrowRight, UserCircle } from 'lucide-react';
 import { useI18n } from '@/lib/i18n/context';
 import { useAuthStore } from '@/lib/auth';
@@ -29,27 +30,29 @@ export default function CertificatesPage() {
   const { t } = useI18n();
   const token = useAuthStore(s => s.token);
   const user = useAuthStore(s => s.user);
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
-  const [availableCourses, setAvailableCourses] = useState<CourseProgress[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!token) return;
+  const { data: certificates = [], isLoading: certsLoading } = useQuery({
+    queryKey: ['my-certificates'],
+    queryFn: () => apiRequest<Certificate[]>('/api/certificates/my', {}, token),
+    enabled: !!token,
+    staleTime: 60 * 1000,
+  });
 
-    Promise.all([
-      apiRequest<Certificate[]>('/api/certificates/my', {}, token).catch(() => []),
-      apiRequest<CourseProgress[]>('/api/courses/my-progress', {}, token).catch(() => []),
-    ])
-      .then(([certs, progress]) => {
-        setCertificates(certs);
-        const certCourseIds = new Set(certs.map(c => c.courseId));
-        const available = progress.filter(
-          p => p.progressPercent >= 100 && !certCourseIds.has(p.id)
-        );
-        setAvailableCourses(available);
-      })
-      .finally(() => setLoading(false));
-  }, [token]);
+  const { data: progressData = [], isLoading: progressLoading } = useQuery({
+    queryKey: ['my-progress'],
+    queryFn: () => apiRequest<CourseProgress[]>('/api/courses/my-progress', {}, token),
+    enabled: !!token,
+    staleTime: 60 * 1000,
+  });
+
+  const availableCourses = useMemo(() => {
+    const certCourseIds = new Set(certificates.map(c => c.courseId));
+    return progressData.filter(
+      p => p.progressPercent >= 100 && !certCourseIds.has(p.id)
+    );
+  }, [certificates, progressData]);
+
+  const loading = certsLoading || progressLoading;
 
   const handleDownload = (cert: Certificate) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
