@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './swagger';
 import { config } from './config';
 import { errorHandler } from './middleware/errorHandler';
 import { authRouter } from './routes/auth';
@@ -29,6 +31,13 @@ app.use(compression());
 
 // Parse JSON
 app.use(express.json());
+
+// Swagger docs
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'AiBot LMS API Docs',
+}));
+app.get('/api/docs/json', (_req, res) => res.json(swaggerSpec));
 
 // Routes
 app.use('/api/auth', authRouter);

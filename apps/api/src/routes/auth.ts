@@ -64,7 +64,39 @@ function formatUser(user: { id: string; email: string | null; firstName: string 
 // Registration is disabled — users are created via Telegram bot only.
 // POST /api/auth/register route has been removed.
 
-// POST /api/auth/login
+/**
+ * @openapi
+ * /auth/login:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Login with email and password
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email: { type: string, format: email, example: "admin@aibot.kz" }
+ *               password: { type: string, example: "admin123456" }
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user: { $ref: '#/components/schemas/User' }
+ *                     accessToken: { type: string }
+ *                     refreshToken: { type: string }
+ *       401: { description: Invalid credentials }
+ */
 router.post('/login', asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
@@ -90,7 +122,25 @@ router.post('/login', asyncHandler(async (req: Request, res: Response) => {
   });
 }));
 
-// POST /api/auth/refresh — get new token pair using refresh token
+/**
+ * @openapi
+ * /auth/refresh:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Refresh token pair (token rotation)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [refreshToken]
+ *             properties:
+ *               refreshToken: { type: string }
+ *     responses:
+ *       200: { description: New token pair }
+ *       401: { description: Invalid or expired refresh token }
+ */
 router.post('/refresh', asyncHandler(async (req: Request, res: Response) => {
   const { refreshToken } = req.body;
 
@@ -126,7 +176,25 @@ router.post('/refresh', asyncHandler(async (req: Request, res: Response) => {
   });
 }));
 
-// POST /api/auth/telegram — auth via Mini App initData
+/**
+ * @openapi
+ * /auth/telegram:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Authenticate via Telegram Mini App initData
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [initData]
+ *             properties:
+ *               initData: { type: string, description: "Telegram Mini App initData string" }
+ *     responses:
+ *       200: { description: Auth successful, returns user + tokens }
+ *       401: { description: Invalid or expired Telegram data }
+ */
 router.post('/telegram', asyncHandler(async (req: Request, res: Response) => {
   const { initData } = req.body;
   if (!initData) {
@@ -176,7 +244,27 @@ router.post('/telegram', asyncHandler(async (req: Request, res: Response) => {
   });
 }));
 
-// POST /api/auth/telegram/link — link TG to existing account
+/**
+ * @openapi
+ * /auth/telegram/link:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Link Telegram account to existing user
+ *     security: [{ BearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [initData]
+ *             properties:
+ *               initData: { type: string }
+ *     responses:
+ *       200: { description: Telegram account linked }
+ *       401: { description: Invalid Telegram data }
+ *       409: { description: Telegram account already linked to another user }
+ */
 router.post('/telegram/link', authenticate, asyncHandler(async (req: Request, res: Response) => {
   const { initData } = req.body;
   if (!initData) {
@@ -216,7 +304,26 @@ router.post('/telegram/link', authenticate, asyncHandler(async (req: Request, re
   res.json({ success: true, data: { linked: true } });
 }));
 
-// PATCH /api/auth/profile — update user profile
+/**
+ * @openapi
+ * /auth/profile:
+ *   patch:
+ *     tags: [Auth]
+ *     summary: Update user profile (name, phone)
+ *     security: [{ BearerAuth: [] }]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName: { type: string }
+ *               lastName: { type: string }
+ *               middleName: { type: string }
+ *               phone: { type: string }
+ *     responses:
+ *       200: { description: Updated user profile }
+ */
 router.patch('/profile', authenticate, asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
   const { firstName, lastName, middleName, phone } = req.body;

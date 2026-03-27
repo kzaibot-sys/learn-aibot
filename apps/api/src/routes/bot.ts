@@ -11,7 +11,31 @@ const router = Router();
 // All bot routes require X-Bot-Secret header
 router.use(requireBotSecret);
 
-// POST /api/bot/users — create user + TelegramAccount
+/**
+ * @openapi
+ * /bot/users:
+ *   post:
+ *     tags: [Bot API]
+ *     summary: Create user with TelegramAccount
+ *     security: [{ BotSecret: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [telegramId, firstName]
+ *             properties:
+ *               telegramId: { type: string, example: "123456789" }
+ *               firstName: { type: string, example: "John" }
+ *               lastName: { type: string }
+ *               phone: { type: string }
+ *               email: { type: string, format: email }
+ *               password: { type: string }
+ *     responses:
+ *       201: { description: User created }
+ *       200: { description: User already exists }
+ */
 router.post('/users', asyncHandler(async (req: Request, res: Response) => {
   const { telegramId, firstName, lastName, phone, email, password } = req.body;
 
@@ -51,7 +75,22 @@ router.post('/users', asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json({ success: true, data: { user, created: true } });
 }));
 
-// GET /api/bot/users/:telegramId
+/**
+ * @openapi
+ * /bot/users/{telegramId}:
+ *   get:
+ *     tags: [Bot API]
+ *     summary: Get user by Telegram ID
+ *     security: [{ BotSecret: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: telegramId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: User profile }
+ *       404: { description: User not found }
+ */
 router.get('/users/:telegramId', asyncHandler(async (req: Request, res: Response) => {
   const tgAccount = await prisma.telegramAccount.findUnique({
     where: { telegramId: req.params.telegramId },
@@ -69,7 +108,32 @@ router.get('/users/:telegramId', asyncHandler(async (req: Request, res: Response
   res.json({ success: true, data: tgAccount.user });
 }));
 
-// PATCH /api/bot/users/:telegramId
+/**
+ * @openapi
+ * /bot/users/{telegramId}:
+ *   patch:
+ *     tags: [Bot API]
+ *     summary: Update user profile
+ *     security: [{ BotSecret: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: telegramId
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName: { type: string }
+ *               lastName: { type: string }
+ *               middleName: { type: string }
+ *               phone: { type: string }
+ *               email: { type: string }
+ *     responses:
+ *       200: { description: Updated user }
+ */
 router.patch('/users/:telegramId', asyncHandler(async (req: Request, res: Response) => {
   const tgAccount = await prisma.telegramAccount.findUnique({
     where: { telegramId: req.params.telegramId },
@@ -96,7 +160,26 @@ router.patch('/users/:telegramId', asyncHandler(async (req: Request, res: Respon
   res.json({ success: true, data: user });
 }));
 
-// POST /api/bot/grant-access
+/**
+ * @openapi
+ * /bot/grant-access:
+ *   post:
+ *     tags: [Bot API]
+ *     summary: Grant course access to user
+ *     security: [{ BotSecret: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [telegramId, courseSlug]
+ *             properties:
+ *               telegramId: { type: string }
+ *               courseSlug: { type: string }
+ *     responses:
+ *       200: { description: Access granted }
+ */
 router.post('/grant-access', asyncHandler(async (req: Request, res: Response) => {
   const { telegramId, courseSlug } = req.body;
 
@@ -138,7 +221,26 @@ router.post('/grant-access', asyncHandler(async (req: Request, res: Response) =>
   res.json({ success: true, data: { enrollment, userId: tgAccount.user.id } });
 }));
 
-// POST /api/bot/revoke-access
+/**
+ * @openapi
+ * /bot/revoke-access:
+ *   post:
+ *     tags: [Bot API]
+ *     summary: Revoke course access
+ *     security: [{ BotSecret: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [telegramId, courseSlug]
+ *             properties:
+ *               telegramId: { type: string }
+ *               courseSlug: { type: string }
+ *     responses:
+ *       200: { description: Access revoked }
+ */
 router.post('/revoke-access', asyncHandler(async (req: Request, res: Response) => {
   const { telegramId, courseSlug } = req.body;
 
@@ -169,7 +271,21 @@ router.post('/revoke-access', asyncHandler(async (req: Request, res: Response) =
   res.json({ success: true });
 }));
 
-// GET /api/bot/users/:telegramId/enrollments
+/**
+ * @openapi
+ * /bot/users/{telegramId}/enrollments:
+ *   get:
+ *     tags: [Bot API]
+ *     summary: List user enrollments
+ *     security: [{ BotSecret: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: telegramId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Active enrollments }
+ */
 router.get('/users/:telegramId/enrollments', asyncHandler(async (req: Request, res: Response) => {
   const tgAccount = await prisma.telegramAccount.findUnique({
     where: { telegramId: req.params.telegramId },
@@ -189,7 +305,16 @@ router.get('/users/:telegramId/enrollments', asyncHandler(async (req: Request, r
   res.json({ success: true, data: enrollments });
 }));
 
-// GET /api/bot/courses
+/**
+ * @openapi
+ * /bot/courses:
+ *   get:
+ *     tags: [Bot API]
+ *     summary: List published courses
+ *     security: [{ BotSecret: [] }]
+ *     responses:
+ *       200: { description: Course list }
+ */
 router.get('/courses', asyncHandler(async (_req: Request, res: Response) => {
   const courses = await prisma.course.findMany({
     where: { isPublished: true },
@@ -215,7 +340,22 @@ router.get('/courses', asyncHandler(async (_req: Request, res: Response) => {
   });
 }));
 
-// GET /api/bot/courses/:slug
+/**
+ * @openapi
+ * /bot/courses/{slug}:
+ *   get:
+ *     tags: [Bot API]
+ *     summary: Get course details
+ *     security: [{ BotSecret: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Course with modules and lessons }
+ *       404: { description: Course not found }
+ */
 router.get('/courses/:slug', asyncHandler(async (req: Request, res: Response) => {
   const course = await prisma.course.findUnique({
     where: { slug: req.params.slug, isPublished: true },
@@ -243,7 +383,25 @@ router.get('/courses/:slug', asyncHandler(async (req: Request, res: Response) =>
   res.json({ success: true, data: course });
 }));
 
-// GET /api/bot/users/:telegramId/progress/:courseSlug
+/**
+ * @openapi
+ * /bot/users/{telegramId}/progress/{courseSlug}:
+ *   get:
+ *     tags: [Bot API]
+ *     summary: Get user progress in course
+ *     security: [{ BotSecret: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: telegramId
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: courseSlug
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Progress data }
+ */
 router.get('/users/:telegramId/progress/:courseSlug', asyncHandler(async (req: Request, res: Response) => {
   const tgAccount = await prisma.telegramAccount.findUnique({
     where: { telegramId: req.params.telegramId },
@@ -285,7 +443,16 @@ router.get('/users/:telegramId/progress/:courseSlug', asyncHandler(async (req: R
   });
 }));
 
-// GET /api/bot/stats
+/**
+ * @openapi
+ * /bot/stats:
+ *   get:
+ *     tags: [Bot API]
+ *     summary: Platform statistics
+ *     security: [{ BotSecret: [] }]
+ *     responses:
+ *       200: { description: Stats (totalUsers, totalEnrollments, activeCourses) }
+ */
 router.get('/stats', asyncHandler(async (_req: Request, res: Response) => {
   const [totalUsers, totalEnrollments, activeCourses] = await Promise.all([
     prisma.user.count({ where: { role: 'STUDENT' } }),
@@ -296,7 +463,27 @@ router.get('/stats', asyncHandler(async (_req: Request, res: Response) => {
   res.json({ success: true, data: { totalUsers, totalEnrollments, activeCourses } });
 }));
 
-// POST /api/bot/notifications
+/**
+ * @openapi
+ * /bot/notifications:
+ *   post:
+ *     tags: [Bot API]
+ *     summary: Send notification to user
+ *     security: [{ BotSecret: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [telegramId, title, message]
+ *             properties:
+ *               telegramId: { type: string }
+ *               title: { type: string }
+ *               message: { type: string }
+ *     responses:
+ *       200: { description: Notification created }
+ */
 router.post('/notifications', asyncHandler(async (req: Request, res: Response) => {
   const { telegramId, title, message } = req.body;
 
@@ -319,7 +506,21 @@ router.post('/notifications', asyncHandler(async (req: Request, res: Response) =
   res.json({ success: true, data: notification });
 }));
 
-// GET /api/bot/users/:telegramId/certificates
+/**
+ * @openapi
+ * /bot/users/{telegramId}/certificates:
+ *   get:
+ *     tags: [Bot API]
+ *     summary: List user certificates
+ *     security: [{ BotSecret: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: telegramId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Certificates list }
+ */
 router.get('/users/:telegramId/certificates', asyncHandler(async (req: Request, res: Response) => {
   const tgAccount = await prisma.telegramAccount.findUnique({
     where: { telegramId: req.params.telegramId },
@@ -343,7 +544,22 @@ router.get('/users/:telegramId/certificates', asyncHandler(async (req: Request, 
   });
 }));
 
-// GET /api/bot/certificates/verify/:number
+/**
+ * @openapi
+ * /bot/certificates/verify/{number}:
+ *   get:
+ *     tags: [Bot API]
+ *     summary: Verify certificate by number
+ *     security: [{ BotSecret: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: number
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Certificate valid }
+ *       404: { description: Certificate not found }
+ */
 router.get('/certificates/verify/:number', asyncHandler(async (req: Request, res: Response) => {
   const cert = await prisma.certificate.findUnique({
     where: { number: req.params.number },
