@@ -36,3 +36,12 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction): v
   }
   next();
 }
+
+export function requireBotSecret(req: Request, res: Response, next: NextFunction): void {
+  const secret = req.headers['x-bot-secret'] as string;
+  if (!config.bot.secret || secret !== config.bot.secret) {
+    res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Invalid bot secret' } });
+    return;
+  }
+  next();
+}
