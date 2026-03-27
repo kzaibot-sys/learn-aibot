@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Award, Download, Hash } from 'lucide-react';
+import Link from 'next/link';
+import { Award, Download, Hash, BookOpen, ArrowRight, UserCircle } from 'lucide-react';
 import { useI18n } from '@/lib/i18n/context';
 import { useAuthStore } from '@/lib/auth';
 import { apiRequest } from '@/lib/api';
@@ -15,17 +16,38 @@ interface Certificate {
   issuedAt: string;
 }
 
+interface CourseProgress {
+  id: string;
+  slug: string;
+  title: string;
+  totalLessons: number;
+  completedLessons: number;
+  progressPercent: number;
+}
+
 export default function CertificatesPage() {
   const { t } = useI18n();
   const token = useAuthStore(s => s.token);
+  const user = useAuthStore(s => s.user);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [availableCourses, setAvailableCourses] = useState<CourseProgress[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!token) return;
-    apiRequest<Certificate[]>('/api/certificates/my', {}, token)
-      .then(setCertificates)
-      .catch(() => {})
+
+    Promise.all([
+      apiRequest<Certificate[]>('/api/certificates/my', {}, token).catch(() => []),
+      apiRequest<CourseProgress[]>('/api/courses/my-progress', {}, token).catch(() => []),
+    ])
+      .then(([certs, progress]) => {
+        setCertificates(certs);
+        const certCourseIds = new Set(certs.map(c => c.courseId));
+        const available = progress.filter(
+          p => p.progressPercent >= 100 && !certCourseIds.has(p.id)
+        );
+        setAvailableCourses(available);
+      })
       .finally(() => setLoading(false));
   }, [token]);
 
@@ -37,33 +59,42 @@ export default function CertificatesPage() {
     );
   };
 
+  const hasName = Boolean(user?.firstName && user?.lastName);
+
   return (
     <div className="space-y-8 animate-fade-in-up">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-foreground mb-1">
+          {t('certificates.title')}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {t('certificates.subtitle')}
+        </p>
+      </div>
 
-            {/* Header */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-48 skeleton rounded-3xl" />
+          ))}
+        </div>
+      ) : (
+        <>
+          {/* My Certificates Section */}
+          {certificates.length > 0 && (
             <div>
-              <h1 className="text-2xl font-bold text-foreground mb-1">
-                {t('certificates.title')}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {t('certificates.subtitle')}
-              </p>
-            </div>
-
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-40 skeleton rounded-3xl" />
-                ))}
-              </div>
-            ) : certificates.length > 0 ? (
+              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Award className="w-5 h-5 text-primary" />
+                {t('certificates.myCertificates')}
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {certificates.map(cert => (
                   <div
                     key={cert.id}
-                    className="glass-card hover-lift rounded-3xl border border-border/50 p-6 transition-all hover:border-orange-500/30 relative overflow-hidden"
+                    className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 transition-all hover:border-orange-500/30 relative overflow-hidden"
                   >
-                    {/* Gradient border accent */}
+                    {/* Gradient accent */}
                     <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-orange-500/5 via-orange-400/5 to-orange-400/5 pointer-events-none" />
                     <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-3xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400" />
 
@@ -93,7 +124,7 @@ export default function CertificatesPage() {
                     {/* Download button */}
                     <button
                       onClick={() => handleDownload(cert)}
-                      className="hover-lift w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 text-white text-sm font-medium shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all relative"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 text-white text-sm font-medium shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all relative"
                     >
                       <Download className="w-4 h-4" />
                       {t('certificates.download')}
@@ -101,20 +132,92 @@ export default function CertificatesPage() {
                   </div>
                 ))}
               </div>
-            ) : (
-              /* Empty state */
-              <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
-                <div className="p-8 rounded-3xl bg-gradient-to-br from-orange-500/15 via-orange-400/10 to-orange-400/5 border border-orange-500/20 mb-6 shadow-xl shadow-orange-500/10">
-                  <Award className="w-20 h-20 text-primary mx-auto" />
+            </div>
+          )}
+
+          {/* Available for Request Section */}
+          {availableCourses.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-emerald-400" />
+                {t('certificates.availableForRequest')}
+              </h2>
+
+              {/* Name warning */}
+              {!hasName && (
+                <div className="mb-4 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <UserCircle className="w-5 h-5 text-yellow-500 shrink-0" />
+                  <p className="flex-1 text-sm text-foreground">
+                    {t('certificates.fillNameWarning')}
+                  </p>
+                  <Link
+                    href="/profile"
+                    className="text-xs text-primary hover:underline whitespace-nowrap flex items-center gap-1 font-medium"
+                  >
+                    {t('certificates.goToProfile')}
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
                 </div>
-                <h2 className="text-2xl font-bold text-foreground mb-3">
-                  {t('certificates.noCertificates')}
-                </h2>
-                <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-                  Завершите курс на 100% для получения сертификата. Ваши достижения будут доступны здесь.
-                </p>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {availableCourses.map(course => (
+                  <div
+                    key={course.id}
+                    className="rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 transition-all hover:border-emerald-500/30 relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-3xl bg-gradient-to-r from-emerald-500 to-green-400" />
+
+                    <div className="flex items-start gap-4 mb-4 relative">
+                      <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-400 flex items-center justify-center shrink-0">
+                        <BookOpen className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base font-semibold text-foreground mb-1">
+                          {course.title}
+                        </h3>
+                        <p className="text-xs text-emerald-400">
+                          {course.completedLessons}/{course.totalLessons} {t('certificates.lessonsOf')} — 100%
+                        </p>
+                      </div>
+                    </div>
+
+                    {hasName ? (
+                      <Link
+                        href={`/certificates/request/${course.id}`}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-400 text-white text-sm font-medium shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 transition-all"
+                      >
+                        <Award className="w-4 h-4" />
+                        {t('certificates.requestCertificate')}
+                      </Link>
+                    ) : (
+                      <div className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-secondary/50 text-muted-foreground text-sm font-medium cursor-not-allowed">
+                        <Award className="w-4 h-4" />
+                        {t('certificates.requestCertificate')}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {certificates.length === 0 && availableCourses.length === 0 && (
+            <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+              <div className="p-8 rounded-3xl bg-gradient-to-br from-orange-500/15 via-orange-400/10 to-orange-400/5 border border-orange-500/20 mb-6 shadow-xl shadow-orange-500/10">
+                <Award className="w-20 h-20 text-primary mx-auto" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-3">
+                {t('certificates.noCertificates')}
+              </h2>
+              <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+                {t('certificates.emptyDesc')}
+              </p>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

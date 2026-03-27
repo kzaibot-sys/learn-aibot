@@ -8,6 +8,8 @@ interface AuthUser {
   email: string | null;
   firstName: string | null;
   lastName: string | null;
+  middleName?: string | null;
+  phone?: string | null;
   role: string;
 }
 

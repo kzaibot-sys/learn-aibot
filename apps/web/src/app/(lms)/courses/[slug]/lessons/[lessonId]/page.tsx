@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'isomorphic-dompurify';
 import {
   Play,
@@ -14,6 +14,7 @@ import {
   BookOpen,
   Target,
   Zap,
+  X,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
@@ -122,6 +123,9 @@ export default function LessonPage() {
   );
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
+  const [savedPosition, setSavedPosition] = useState(0);
+  const [showResumeBanner, setShowResumeBanner] = useState(false);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
 
   /* flat list of all lessons in order */
   const allLessons = useMemo(() => {
@@ -183,24 +187,53 @@ export default function LessonPage() {
     if (token) load();
   }, [slug, lessonId, token]);
 
-  /* watchtime reporting */
-  const handleTimeUpdate = useCallback(
-    async (currentTime: number) => {
-      try {
-        await apiRequest(
-          `/api/progress/lesson/${lessonId}/watchtime`,
-          {
-            method: 'PATCH',
-            body: JSON.stringify({ watchedSec: currentTime }),
-          },
-          token,
-        );
-      } catch {
-        // Silently fail watchtime updates
+  // Check for saved position in localStorage on mount
+  useEffect(() => {
+    try {
+      const savedStr = localStorage.getItem(`video-pos-${lessonId}`);
+      const savedSec = savedStr ? parseFloat(savedStr) : 0;
+      const serverSec = lesson?.progress?.watchedSec ?? 0;
+      const resumeFrom = Math.max(savedSec, serverSec);
+      if (resumeFrom > 10) {
+        setSavedPosition(resumeFrom);
+        setShowResumeBanner(true);
+        // Auto-dismiss after 8 seconds
+        const timer = setTimeout(() => setShowResumeBanner(false), 8000);
+        return () => clearTimeout(timer);
       }
+    } catch {
+      // localStorage unavailable
+    }
+  }, [lessonId, lesson?.progress?.watchedSec]);
+
+  /* watchtime reporting (debounced — waits 2s after last call) */
+  const handleTimeUpdate = useCallback(
+    (currentTime: number) => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      debounceTimer.current = setTimeout(async () => {
+        try {
+          await apiRequest(
+            `/api/progress/lesson/${lessonId}/watchtime`,
+            {
+              method: 'PATCH',
+              body: JSON.stringify({ watchedSec: currentTime }),
+            },
+            token,
+          );
+        } catch {
+          // Silently fail watchtime updates
+        }
+      }, 2000);
     },
     [lessonId, token],
   );
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, []);
 
   /* complete lesson */
   const handleComplete = useCallback(async () => {
@@ -267,6 +300,31 @@ export default function LessonPage() {
           <div className="flex flex-col lg:flex-row gap-6">
             {/* ====== LEFT COLUMN ====== */}
             <div className="flex-1 min-w-0 lg:flex-[7]">
+              {/* Resume banner */}
+              <AnimatePresence>
+                {showResumeBanner && savedPosition > 10 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="mb-3 flex items-center justify-between bg-primary/10 border border-primary/20 rounded-2xl px-4 py-3"
+                  >
+                    <div className="flex items-center gap-2 text-sm">
+                      <Play className="h-4 w-4 text-primary" />
+                      <span className="text-foreground">
+                        {t('lesson.continueFrom')} {formatDuration(Math.floor(savedPosition))}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setShowResumeBanner(false)}
+                      className="text-muted-foreground hover:text-foreground transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Video area */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
@@ -277,8 +335,10 @@ export default function LessonPage() {
                 {lesson.videoUrl ? (
                   <VideoPlayer
                     src={lesson.videoUrl}
+                    lessonId={lessonId}
                     initialTime={lesson.progress?.watchedSec ?? 0}
                     onTimeUpdate={handleTimeUpdate}
+                    onComplete={handleComplete}
                   />
                 ) : (
                   <div className="w-full aspect-video flex flex-col items-center justify-center bg-secondary text-muted-foreground">

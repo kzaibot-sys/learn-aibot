@@ -245,4 +245,23 @@ router.post('/telegram/link', authenticate, asyncHandler(async (req: Request, re
   res.json({ success: true, data: { linked: true } });
 }));
 
+// PATCH /api/auth/profile — update user profile
+router.patch('/profile', authenticate, asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user!.sub;
+  const { firstName, lastName, middleName, phone } = req.body;
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      ...(firstName !== undefined && { firstName }),
+      ...(lastName !== undefined && { lastName }),
+      ...(middleName !== undefined && { middleName }),
+      ...(phone !== undefined && { phone }),
+    },
+    select: { id: true, email: true, firstName: true, lastName: true, middleName: true, phone: true, role: true },
+  });
+
+  res.json({ success: true, data: user });
+}));
+
 export { router as authRouter };

@@ -13,15 +13,13 @@ model User {
   passwordHash String?   @map("password_hash")
   firstName    String?   @map("first_name")
   lastName     String?   @map("last_name")
+  middleName   String?   @map("middle_name")
+  phone        String?   @map("phone")
   avatarUrl    String?   @map("avatar_url")
   role         UserRole  @default(STUDENT)
   isActive     Boolean   @default(true) @map("is_active")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
-  totalXp      Int       @default(0) @map("total_xp")
-  level        Int       @default(1)
-  streak       Int       @default(0)
-  lastActiveAt DateTime? @map("last_active_at")
 
   telegramAccount TelegramAccount?
   enrollments     Enrollment[]
@@ -31,7 +29,6 @@ model User {
   certificates    Certificate[]
   refreshTokens   RefreshToken[]
   notifications   Notification[]
-  achievements    UserAchievement[]
 
   @@map("users")
 }
@@ -315,15 +312,3 @@ model Certificate {
   @@map("certificates")
 }
 
-model UserAchievement {
-  id            String   @id @default(cuid())
-  userId        String   @map("user_id")
-  achievementId String   @map("achievement_id")
-  earnedAt      DateTime @default(now()) @map("earned_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, achievementId])
-  @@index([userId])
-  @@map("user_achievements")
-}

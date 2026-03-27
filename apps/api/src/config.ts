@@ -16,9 +16,9 @@ export const config = {
 
   jwt: {
     secret: requireEnv('JWT_SECRET'),
-    expiresIn: optionalEnv('JWT_EXPIRES_IN', '15m'),
+    expiresIn: optionalEnv('JWT_EXPIRES_IN', '7d'),
     refreshSecret: optionalEnv('JWT_REFRESH_SECRET', '') || requireEnv('JWT_SECRET'),
-    refreshExpiresIn: optionalEnv('JWT_REFRESH_EXPIRES_IN', '30d'),
+    refreshExpiresIn: optionalEnv('JWT_REFRESH_EXPIRES_IN', '90d'),
   },
 
   telegram: {

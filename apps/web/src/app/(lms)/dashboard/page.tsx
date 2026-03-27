@@ -18,25 +18,18 @@ import { useI18n } from '@/lib/i18n/context';
 
 /* ---------- types ---------- */
 
-interface CourseItem {
+interface CourseProgress {
   id: string;
   slug: string;
   title: string;
-  description: string | null;
   coverUrl: string | null;
-  price: string;
-  isFree: boolean;
-  modulesCount?: number;
-}
-
-interface CourseProgress {
   totalLessons: number;
   completedLessons: number;
   progressPercent: number;
 }
 
-interface DashboardCourse extends CourseItem {
-  progress: CourseProgress | null;
+interface Certificate {
+  id: string;
 }
 
 /* ---------- animation helpers ---------- */
@@ -61,32 +54,32 @@ export default function DashboardPage() {
   const { t } = useI18n();
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
-  const [courses, setCourses] = useState<DashboardCourse[]>([]);
+  const [courses, setCourses] = useState<CourseProgress[]>([]);
+  const [certCount, setCertCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await apiRequest<CourseItem[]>('/api/courses', {}, token);
+        // Load enrolled courses with progress
+        const progressData = await apiRequest<CourseProgress[]>(
+          '/api/courses/my-progress',
+          {},
+          token,
+        ).catch(() => [] as CourseProgress[]);
 
-        const withProgress = await Promise.all(
-          data.map(async (course) => {
-            try {
-              const progress = await apiRequest<CourseProgress>(
-                `/api/progress/course/${course.id}`,
-                {},
-                token,
-              );
-              return { ...course, progress };
-            } catch {
-              return { ...course, progress: null };
-            }
-          }),
-        );
+        setCourses(progressData);
 
-        setCourses(withProgress);
+        // Load certificate count
+        const certs = await apiRequest<Certificate[]>(
+          '/api/certificates/my',
+          {},
+          token,
+        ).catch(() => [] as Certificate[]);
+
+        setCertCount(certs.length);
       } catch (err) {
-        console.error('Failed to load courses:', err);
+        console.error('Failed to load dashboard:', err);
       } finally {
         setLoading(false);
       }
@@ -97,54 +90,46 @@ export default function DashboardPage() {
 
   /* derived stats */
   const stats = useMemo(() => {
-    const activeCourses = courses.filter(
-      (c) => c.progress && c.progress.progressPercent < 100,
-    ).length;
-    const completedLessons = courses.reduce(
-      (sum, c) => sum + (c.progress?.completedLessons ?? 0),
+    const totalCompleted = courses.reduce(
+      (sum, c) => sum + c.completedLessons,
       0,
     );
     const totalLessons = courses.reduce(
-      (sum, c) => sum + (c.progress?.totalLessons ?? 0),
+      (sum, c) => sum + c.totalLessons,
       0,
     );
     // rough estimate: ~5 min per completed lesson -> hours
-    const hours = Math.round((completedLessons * 5) / 60);
-    const badges = courses.filter(
-      (c) => c.progress && c.progress.progressPercent === 100,
-    ).length;
+    const hours = Math.round((totalCompleted * 5) / 60);
 
-    return { activeCourses, completedLessons, totalLessons, hours, badges };
+    return { totalCompleted, totalLessons, hours };
   }, [courses]);
 
   const statCards = [
     {
-      label: t('dashboard.activeCourses'),
-      value: stats.activeCourses,
+      label: t('dashboard.myCourses'),
+      value: courses.length,
       icon: BookOpen,
-      trend: t('dashboard.trendMonth'),
+      trend: t('dashboard.active'),
     },
     {
-      label: t('dashboard.completed'),
-      value: stats.completedLessons,
+      label: t('dashboard.lessonsCompleted'),
+      value: stats.totalCompleted,
       icon: CheckCircle2,
-      trend: `${stats.totalLessons} ${t('dashboard.ofLessons')}`,
+      trend: `${stats.totalLessons} ${t('dashboard.total')}`,
     },
     {
-      label: t('dashboard.hours'),
+      label: t('dashboard.hoursLearned'),
       value: stats.hours,
       icon: Clock,
       trend: t('dashboard.totalTime'),
     },
     {
-      label: t('dashboard.achievements'),
-      value: stats.badges,
+      label: t('dashboard.certificates'),
+      value: certCount,
       icon: Award,
-      trend: t('dashboard.certificates'),
+      trend: t('dashboard.earned'),
     },
   ];
-
-  const enrolledCourses = courses.filter((c) => c.progress !== null);
 
   return (
     <div className="space-y-8">
@@ -258,7 +243,7 @@ export default function DashboardPage() {
                   </Link>
                 </motion.div>
 
-                {enrolledCourses.length === 0 ? (
+                {courses.length === 0 ? (
                   <motion.div
                     variants={fadeUp}
                     custom={1}
@@ -277,17 +262,9 @@ export default function DashboardPage() {
                   </motion.div>
                 ) : (
                   <div className="space-y-3">
-                    {enrolledCourses.map((course, i) => {
-                      const p = course.progress!;
-                      const totalModules = course.modulesCount ?? 0;
-                      const currentModule = Math.max(
-                        1,
-                        Math.ceil(
-                          (p.completedLessons / Math.max(p.totalLessons, 1)) *
-                            (totalModules || 1),
-                        ),
-                      );
-                      const isComplete = p.progressPercent === 100;
+                    {courses.map((course, i) => {
+                      const dayNumber = course.completedLessons + 1;
+                      const isComplete = course.progressPercent === 100;
 
                       return (
                         <motion.div key={course.id} variants={fadeUp} custom={i + 1}>
@@ -306,9 +283,9 @@ export default function DashboardPage() {
                                 {course.title}
                               </h3>
                               <p className="text-xs text-muted-foreground mt-0.5">
-                                {totalModules > 0
-                                  ? `${t('dashboard.chapter')} ${currentModule} ${t('dashboard.of')} ${totalModules}`
-                                  : `${p.completedLessons} ${t('dashboard.of')} ${p.totalLessons} ${t('dashboard.ofLessons')}`}
+                                {isComplete
+                                  ? t('dashboard.completedStatus')
+                                  : `${t('dashboard.day')} ${dayNumber} ${t('dashboard.of')} ${course.totalLessons}`}
                                 {' • '}
                                 {isComplete ? t('dashboard.completedStatus') : t('dashboard.inProgress')}
                               </p>
@@ -318,7 +295,7 @@ export default function DashboardPage() {
                                 <motion.div
                                   className="h-full rounded-full bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400"
                                   initial={{ width: 0 }}
-                                  whileInView={{ width: `${p.progressPercent}%` }}
+                                  whileInView={{ width: `${course.progressPercent}%` }}
                                   viewport={{ once: true }}
                                   transition={{
                                     duration: 0.8,
@@ -331,7 +308,7 @@ export default function DashboardPage() {
 
                             {/* percentage */}
                             <span className="shrink-0 text-sm font-semibold text-foreground">
-                              {p.progressPercent}%
+                              {course.progressPercent}%
                             </span>
 
                             <ChevronRight className="shrink-0 h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />

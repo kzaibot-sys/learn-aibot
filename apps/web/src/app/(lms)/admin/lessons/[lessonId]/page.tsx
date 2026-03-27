@@ -220,7 +220,7 @@ export default function AdminLessonEditPage() {
                   {/* Current video preview */}
                   {lesson.videoUrl && (
                     <div className="rounded-xl overflow-hidden">
-                      <VideoPlayer src={lesson.videoUrl} />
+                      <VideoPlayer src={lesson.videoUrl} lessonId={lessonId} />
                     </div>
                   )}
 

@@ -461,4 +461,126 @@ router.get('/courses/:courseId/enrollments', asyncHandler(async (req: Request, r
   });
 }));
 
+// ===== CERTIFICATES =====
+
+// GET /api/admin/certificates — list all certificates with student and course info
+router.get('/certificates', asyncHandler(async (req: Request, res: Response) => {
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const perPage = Math.min(50, Math.max(1, Number(req.query.perPage) || 20));
+  const search = (req.query.search as string) || '';
+
+  const where = search
+    ? {
+        OR: [
+          { number: { contains: search, mode: 'insensitive' as const } },
+          { user: { firstName: { contains: search, mode: 'insensitive' as const } } },
+          { user: { lastName: { contains: search, mode: 'insensitive' as const } } },
+          { user: { email: { contains: search, mode: 'insensitive' as const } } },
+        ],
+      }
+    : {};
+
+  const [certificates, total] = await Promise.all([
+    prisma.certificate.findMany({
+      where,
+      skip: (page - 1) * perPage,
+      take: perPage,
+      orderBy: { issuedAt: 'desc' },
+      include: {
+        user: { select: { id: true, email: true, firstName: true, lastName: true } },
+        course: { select: { id: true, title: true } },
+      },
+    }),
+    prisma.certificate.count({ where }),
+  ]);
+
+  const data = certificates.map(cert => ({
+    id: cert.id,
+    number: cert.number,
+    studentName: [cert.user.firstName, cert.user.lastName].filter(Boolean).join(' ') || cert.user.email || '—',
+    studentEmail: cert.user.email,
+    courseTitle: cert.course.title,
+    courseId: cert.course.id,
+    issuedAt: cert.issuedAt,
+    fileUrl: cert.fileUrl,
+  }));
+
+  res.json({
+    success: true,
+    data,
+    meta: { page, perPage, total, totalPages: Math.ceil(total / perPage) },
+  });
+}));
+
+// ===== ANALYTICS =====
+
+// GET /api/admin/analytics
+router.get('/analytics', asyncHandler(async (req: Request, res: Response) => {
+  const [totalStudents, totalCourses, courses, recentRegistrations] = await Promise.all([
+    prisma.user.count({ where: { role: 'STUDENT' } }),
+    prisma.course.count(),
+    prisma.course.findMany({
+      where: { isPublished: true },
+      select: {
+        id: true, title: true, slug: true,
+        _count: { select: { enrollments: true } },
+        enrollments: {
+          where: { status: 'ACTIVE' },
+          select: { userId: true },
+        },
+      },
+    }),
+    prisma.user.count({
+      where: {
+        createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        role: 'STUDENT',
+      },
+    }),
+  ]);
+
+  // Calculate progress per course
+  const courseStats = await Promise.all(courses.map(async (course) => {
+    const lessonCount = await prisma.lesson.count({
+      where: { module: { courseId: course.id }, isPublished: true },
+    });
+
+    const enrolledUserIds = course.enrollments.map(e => e.userId);
+    let avgProgress = 0;
+
+    if (enrolledUserIds.length > 0 && lessonCount > 0) {
+      const completedCounts = await prisma.lessonProgress.groupBy({
+        by: ['userId'],
+        where: {
+          userId: { in: enrolledUserIds },
+          lesson: { module: { courseId: course.id } },
+          completed: true,
+        },
+        _count: { _all: true },
+      });
+
+      const totalProgress = completedCounts.reduce((sum, c) => sum + (c._count._all / lessonCount) * 100, 0);
+      avgProgress = Math.round(totalProgress / enrolledUserIds.length);
+    }
+
+    return {
+      id: course.id,
+      title: course.title,
+      slug: course.slug,
+      enrolledCount: course._count.enrollments,
+      avgProgress,
+      totalLessons: lessonCount,
+    };
+  }));
+
+  res.json({
+    success: true,
+    data: {
+      totalStudents,
+      totalCourses,
+      recentRegistrations,
+      courses: courseStats,
+    },
+  });
+}));
+
 export { router as adminRouter };

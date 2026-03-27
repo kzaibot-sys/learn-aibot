@@ -8,25 +8,23 @@ import { useI18n } from '@/lib/i18n/context';
 import { useTheme } from '@/lib/theme';
 import {
   Home, BookOpen, LayoutGrid, Award, User,
-  BookMarked, Users, CreditCard, BarChart3,
-  LogOut, GraduationCap, Sun, Moon, Calendar,
-  Trophy, Settings, Flame, Globe, X, Menu,
+  BookMarked, Users, BarChart3,
+  LogOut, GraduationCap, Sun, Moon,
+  Settings, X, Menu,
 } from 'lucide-react';
 import type { TranslationKey } from '@/lib/i18n/translations';
 
 const navItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[] = [
   { href: '/dashboard', labelKey: 'nav.home', icon: Home },
   { href: '/courses', labelKey: 'nav.courses', icon: LayoutGrid },
-  { href: '/calendar', labelKey: 'nav.calendar', icon: Calendar },
-  { href: '/achievements', labelKey: 'nav.achievements', icon: Trophy },
-  { href: '/leaderboard', labelKey: 'nav.leaderboard', icon: Trophy },
+  { href: '/certificates', labelKey: 'nav.certificates', icon: Award },
+  { href: '/profile', labelKey: 'nav.profile', icon: User },
   { href: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];
 
 const adminItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[] = [
   { href: '/admin/courses', labelKey: 'nav.admin.courses', icon: BookMarked },
   { href: '/admin/students', labelKey: 'nav.admin.students', icon: Users },
-  { href: '/admin/payments', labelKey: 'nav.admin.payments', icon: CreditCard },
   { href: '/admin/analytics', labelKey: 'nav.admin.analytics', icon: BarChart3 },
 ];
 
@@ -96,7 +94,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 h-16 border-b border-border/50 shrink-0">
-          <div className="flex items-center gap-3">
+          <Link href="/dashboard" className="flex items-center gap-3" onClick={onClose}>
             <div className="w-10 h-10 rounded-2xl bg-orange-500 flex items-center justify-center shadow-xl shadow-orange-500/25 shrink-0">
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
@@ -104,7 +102,7 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
               <h1 className="text-sm font-bold text-foreground truncate">AiBot</h1>
               <p className="text-[10px] text-muted-foreground truncate">{t('dashboard.subtitle')}</p>
             </div>
-          </div>
+          </Link>
           <button
             onClick={onClose}
             className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -136,30 +134,6 @@ export function MobileNav({ open, onClose }: { open: boolean; onClose: () => voi
                 </Link>
               );
             })}
-          </div>
-
-          {/* Gamification Widget */}
-          <div className="mx-1 mt-5 mb-2 rounded-2xl bg-card/50 border border-border/50 p-3 space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-xl bg-orange-500/10">
-                <Flame className="w-4 h-4 text-orange-400" />
-              </div>
-              <span className="text-xs font-medium text-foreground">
-                {t('common.streak')} 7 {t('common.days')}
-              </span>
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold text-muted-foreground">{t('common.level')} 5</span>
-                <span className="text-[10px] text-muted-foreground">68% — 320 XP</span>
-              </div>
-              <div className="w-full h-1.5 rounded-full bg-border/50 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-orange-500"
-                  style={{ width: '68%' }}
-                />
-              </div>
-            </div>
           </div>
 
           {isAdmin && (

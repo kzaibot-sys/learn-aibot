@@ -3,10 +3,69 @@ import { prisma } from '@lms/database';
 import { authenticate } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { AppError } from '../middleware/errorHandler';
-import { config } from '../config';
 import { cacheGet, cacheSet } from '../services/redis';
 
 const router = Router();
+
+// GET /api/courses/my-progress — batch: enrolled courses with progress
+router.get('/my-progress', authenticate, asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user!.sub;
+
+  const enrollments = await prisma.enrollment.findMany({
+    where: { userId, status: 'ACTIVE' },
+    include: {
+      course: {
+        select: {
+          id: true, slug: true, title: true, description: true, coverUrl: true,
+          modules: {
+            where: { isPublished: true },
+            select: {
+              id: true, title: true, order: true,
+              lessons: {
+                where: { isPublished: true },
+                select: { id: true },
+                orderBy: { order: 'asc' },
+              },
+            },
+            orderBy: { order: 'asc' },
+          },
+        },
+      },
+    },
+  });
+
+  const allLessonIds = enrollments.flatMap(e =>
+    e.course.modules.flatMap(m => m.lessons.map(l => l.id))
+  );
+
+  const progressRecords = await prisma.lessonProgress.findMany({
+    where: { userId, lessonId: { in: allLessonIds } },
+  });
+
+  const progressMap = new Map(progressRecords.map(p => [p.lessonId, p]));
+
+  const data = enrollments.map(e => {
+    const totalLessons = e.course.modules.reduce((sum, m) => sum + m.lessons.length, 0);
+    const completedLessons = e.course.modules.reduce((sum, m) =>
+      sum + m.lessons.filter(l => progressMap.get(l.id)?.completed).length, 0
+    );
+
+    return {
+      id: e.course.id,
+      slug: e.course.slug,
+      title: e.course.title,
+      description: e.course.description,
+      coverUrl: e.course.coverUrl,
+      totalModules: e.course.modules.length,
+      totalLessons,
+      completedLessons,
+      progressPercent: totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0,
+      enrolledAt: e.enrolledAt,
+    };
+  });
+
+  res.json({ success: true, data });
+}));
 
 // GET /api/courses — published courses list (optional ?search=term)
 router.get('/', asyncHandler(async (req: Request, res: Response) => {
@@ -38,9 +97,6 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
       title: true,
       description: true,
       coverUrl: true,
-      price: true,
-      currency: true,
-      isFree: true,
       modules: {
         select: {
           id: true,
@@ -51,16 +107,16 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  const paymentEnabled = config.payment.enabled;
   const response = {
     success: true,
     data: courses.map(c => ({
-      ...c,
-      price: c.price.toString(),
-      paymentEnabled,
+      id: c.id,
+      slug: c.slug,
+      title: c.title,
+      description: c.description,
+      coverUrl: c.coverUrl,
       totalLessons: c.modules.reduce((sum, m) => sum + m.lessons.length, 0),
       totalModules: c.modules.length,
-      modules: undefined,
     })),
   };
 
@@ -74,8 +130,18 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
 
 // GET /api/courses/:slug — course details with modules and lessons
 router.get('/:slug', asyncHandler(async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const cacheKey = `courses:detail:${slug}`;
+
+  // Try cache first
+  const cached = await cacheGet<unknown>(cacheKey);
+  if (cached) {
+    res.json(cached);
+    return;
+  }
+
   const course = await prisma.course.findUnique({
-    where: { slug: req.params.slug, isPublished: true },
+    where: { slug, isPublished: true },
     include: {
       modules: {
         where: { isPublished: true },
@@ -102,14 +168,18 @@ router.get('/:slug', asyncHandler(async (req: Request, res: Response) => {
     throw new AppError(404, 'COURSE_NOT_FOUND', 'Курс не найден');
   }
 
-  res.json({
+  const response = {
     success: true,
     data: {
       ...course,
       price: course.price.toString(),
-      paymentEnabled: config.payment.enabled,
     },
-  });
+  };
+
+  // Cache for 5 min
+  await cacheSet(cacheKey, response, 300);
+
+  res.json(response);
 }));
 
 // GET /api/courses/:slug/lessons/:lessonId — lesson detail (enrolled only)

@@ -8,25 +8,23 @@ import { useI18n } from '@/lib/i18n/context';
 import { useTheme } from '@/lib/theme';
 import {
   Home, BookOpen, LayoutGrid, Award, User,
-  BookMarked, Users, CreditCard, BarChart3,
+  BookMarked, Users, BarChart3,
   LogOut, ChevronLeft, ChevronRight, GraduationCap,
-  Sun, Moon, Calendar, Trophy, Settings, Globe,
+  Sun, Moon, Settings,
 } from 'lucide-react';
 import type { TranslationKey } from '@/lib/i18n/translations';
 
 const navItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[] = [
   { href: '/dashboard', labelKey: 'nav.home', icon: Home },
   { href: '/courses', labelKey: 'nav.courses', icon: LayoutGrid },
-  { href: '/calendar', labelKey: 'nav.calendar', icon: Calendar },
-  { href: '/achievements', labelKey: 'nav.achievements', icon: Trophy },
-  { href: '/leaderboard', labelKey: 'nav.leaderboard', icon: Trophy },
+  { href: '/certificates', labelKey: 'nav.certificates', icon: Award },
+  { href: '/profile', labelKey: 'nav.profile', icon: User },
   { href: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];
 
 const adminItems: { href: string; labelKey: TranslationKey; icon: typeof Home }[] = [
   { href: '/admin/courses', labelKey: 'nav.admin.courses', icon: BookMarked },
   { href: '/admin/students', labelKey: 'nav.admin.students', icon: Users },
-  { href: '/admin/payments', labelKey: 'nav.admin.payments', icon: CreditCard },
   { href: '/admin/analytics', labelKey: 'nav.admin.analytics', icon: BarChart3 },
 ];
 
@@ -53,15 +51,17 @@ export function Sidebar() {
     <aside className={`fixed left-0 top-0 h-screen bg-background dark:bg-[#14141A] border-r border-border/50 hidden md:flex flex-col transition-all duration-300 z-40 ${collapsed ? 'w-16' : 'w-72'}`}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-border/50 shrink-0">
-        <div className="w-10 h-10 rounded-2xl bg-orange-500 flex items-center justify-center shadow-xl shadow-orange-500/25 shrink-0">
-          <GraduationCap className="w-5 h-5 text-white" />
-        </div>
-        {!collapsed && (
-          <div className="min-w-0">
-            <h1 className="text-sm font-bold text-foreground truncate">AiBot</h1>
-            <p className="text-[10px] text-muted-foreground truncate">{t('dashboard.subtitle')}</p>
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-orange-500 flex items-center justify-center shadow-xl shadow-orange-500/25 shrink-0">
+            <GraduationCap className="w-5 h-5 text-white" />
           </div>
-        )}
+          {!collapsed && (
+            <div className="min-w-0">
+              <h1 className="text-sm font-bold text-foreground truncate">AiBot</h1>
+              <p className="text-[10px] text-muted-foreground truncate">{t('dashboard.subtitle')}</p>
+            </div>
+          )}
+        </Link>
       </div>
 
       {/* Toggle */}
@@ -96,8 +96,6 @@ export function Sidebar() {
             );
           })}
         </div>
-
-        {/* Gamification widget — hidden until real API data is available */}
 
         {isAdmin && (
           <>
