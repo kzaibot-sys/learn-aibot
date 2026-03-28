@@ -10,30 +10,44 @@ interface CertificateData {
   issuedDate: Date;
 }
 
-// Load fonts via Buffer at module level (once, not per PDF)
+// Load fonts and images via Buffer at module level (once, not per PDF)
 let fontMain: Buffer | null = null;
 let fontBold: Buffer | null = null;
-let fontsLoaded = false;
+let stampImage: Buffer | null = null;
+let signatureImage: Buffer | null = null;
+let assetsLoaded = false;
 
-function loadFonts(): void {
-  if (fontsLoaded) return;
-  fontsLoaded = true;
+function loadAssets(): void {
+  if (assetsLoaded) return;
+  assetsLoaded = true;
 
   const candidates = [
-    path.join(__dirname, '../assets/fonts'),
-    path.join(__dirname, '../../src/assets/fonts'),
-    path.resolve('src/assets/fonts'),
-    path.resolve('apps/api/src/assets/fonts'),
-    path.resolve('apps/api/dist/assets/fonts'),
+    path.join(__dirname, '../assets'),
+    path.join(__dirname, '../../src/assets'),
+    path.resolve('src/assets'),
+    path.resolve('apps/api/src/assets'),
+    path.resolve('apps/api/dist/assets'),
   ];
 
   for (const dir of candidates) {
-    const regularPath = path.join(dir, 'Roboto-Regular.ttf');
-    const boldPath = path.join(dir, 'Roboto-Bold.ttf');
+    const regularPath = path.join(dir, 'fonts', 'Roboto-Regular.ttf');
+    const boldPath = path.join(dir, 'fonts', 'Roboto-Bold.ttf');
     if (fs.existsSync(regularPath) && fs.existsSync(boldPath)) {
       fontMain = fs.readFileSync(regularPath);
       fontBold = fs.readFileSync(boldPath);
-      console.log(`[Certificate] Fonts loaded from: ${dir}`);
+      console.log(`[Certificate] Fonts loaded from: ${dir}/fonts`);
+
+      // Load stamp and signature images
+      const stampPath = path.join(dir, 'images', 'stamp.png');
+      const sigPath = path.join(dir, 'images', 'signature.png');
+      if (fs.existsSync(stampPath)) {
+        stampImage = fs.readFileSync(stampPath);
+        console.log(`[Certificate] Stamp loaded`);
+      }
+      if (fs.existsSync(sigPath)) {
+        signatureImage = fs.readFileSync(sigPath);
+        console.log(`[Certificate] Signature loaded`);
+      }
       return;
     }
   }
@@ -41,7 +55,7 @@ function loadFonts(): void {
   console.warn('[Certificate] Roboto fonts not found, falling back to Helvetica');
 }
 
-loadFonts();
+loadAssets();
 
 export async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
   // Generate QR code as PNG buffer
@@ -169,7 +183,7 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
        .text('на образовательной платформе AiBot', 0, 355, { align: 'center', width: W });
 
     // === BOTTOM SECTION ===
-    const bottomY = 420;
+    const bottomY = 415;
 
     // Left — Date
     setFont(false);
@@ -187,25 +201,18 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
        .fillColor(DARK)
        .text(dateStr, 120, bottomY + 16, { width: 200 });
 
-    // === CENTER — Company Stamp (simple double-circle) ===
-    const cx = W / 2;
-    const cy = bottomY + 25;
-    const outerR = 30;
-    const innerR = 24;
-
-    // Double circle border
-    doc.circle(cx, cy, outerR).lineWidth(2).stroke(STAMP_BLUE);
-    doc.circle(cx, cy, innerR).lineWidth(1).stroke(STAMP_BLUE);
-
-    // Center text — "ТОО" on top, "«AiBot»" bold below
-    setFont(false);
-    doc.fontSize(7)
-       .fillColor(STAMP_BLUE)
-       .text('ТОО', cx - 20, cy - 10, { width: 40, align: 'center' });
-    setFont(true);
-    doc.fontSize(9)
-       .fillColor(STAMP_BLUE)
-       .text('«AiBot»', cx - 24, cy + 0, { width: 48, align: 'center' });
+    // === LEFT — Company Stamp (PNG image, below date) ===
+    if (stampImage) {
+      doc.image(stampImage, 130, bottomY + 38, { width: 90, height: 58 });
+    } else {
+      const stampCx = 175;
+      const stampCy = bottomY + 65;
+      doc.circle(stampCx, stampCy, 25).lineWidth(1.5).stroke(STAMP_BLUE);
+      doc.circle(stampCx, stampCy, 20).lineWidth(0.8).stroke(STAMP_BLUE);
+      setFont(true);
+      doc.fontSize(7).fillColor(STAMP_BLUE)
+         .text('AiBot', stampCx - 18, stampCy - 5, { width: 36, align: 'center' });
+    }
 
     // === RIGHT — Director + Signature ===
     const sigX = W - 280;
@@ -219,18 +226,17 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
        .fillColor(GRAY)
        .text('Генеральный директор', sigX, bottomY + 16, { width: 160 });
 
-    // Signature line under director name
-    doc.moveTo(sigX, bottomY + 34).lineTo(sigX + 140, bottomY + 34).lineWidth(0.5).stroke('#CBD5E1');
+    // Signature image
+    if (signatureImage) {
+      doc.image(signatureImage, sigX + 15, bottomY + 30, { width: 110, height: 40 });
+    } else {
+      doc.moveTo(sigX, bottomY + 38).lineTo(sigX + 140, bottomY + 38).lineWidth(0.5).stroke('#CBD5E1');
+    }
 
-    // === CERTIFICATE NUMBER ===
-    setFont(false);
-    doc.fontSize(8)
-       .fillColor(LIGHT_GRAY)
-       .text(data.certificateNumber, 0, H - 78, { align: 'center', width: W });
-
-    // === QR CODE (centered at bottom, replaces text verification URL) ===
-    const qrSize = 80;
-    doc.image(qrBuffer, cx - qrSize / 2, H - 75, { width: qrSize, height: qrSize });
+    // === QR CODE (centered, above bottom border) ===
+    const qrSize = 65;
+    const cx = W / 2;
+    doc.image(qrBuffer, cx - qrSize / 2, H - 100, { width: qrSize, height: qrSize });
 
     doc.end();
   });
