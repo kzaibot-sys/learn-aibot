@@ -31,7 +31,10 @@ export function validateTelegramInitData(initData: string): TelegramUser | null 
     .update(checkString)
     .digest('hex');
 
-  if (expectedHash !== hash) return null;
+  if (expectedHash !== hash) {
+    console.warn('[TG Auth] HMAC mismatch. token_len:', config.telegram.botToken.length, 'hash:', hash?.substring(0, 10), 'expected:', expectedHash.substring(0, 10));
+    return null;
+  }
 
   const authDate = Number(params.get('auth_date'));
   if (Date.now() / 1000 - authDate > 86400) return null;
