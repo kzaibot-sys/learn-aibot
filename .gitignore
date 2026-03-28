@@ -14,3 +14,4 @@ Thumbs.db
 # Video files
 apps/api/public/videos/
 *.mp4
+*.pdf
