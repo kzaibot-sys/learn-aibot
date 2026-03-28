@@ -42,7 +42,10 @@
       "Bash(\"C:/Users/aiman/OneDrive/Desktop/learn-aibot/docker-compose.prod.yml\":*)",
       "Bash(nslookup demo-lms.aibot.kz)",
       "Bash(node -e \":*)",
-      "mcp__playwright__browser_resize"
+      "mcp__playwright__browser_resize",
+      "Bash(rm -rf .playwright-mcp/ \"foni-papik-pro-jmo9-p-kartinki-podpis-sinei-ruchkoi-na-prozrachn-23 \\(1\\).png\" \"foni-papik-pro-jmo9-p-kartinki-podpis-sinei-ruchkoi-na-prozrachn-23.png\" \"печать.png\" logo.svg figma-dark-theme-full.png AIBOT_INSTRUCTIONS.md claude-code-instructions.md TASK_FOR_LMS_AGENT.md tasks/prd-aibot-audit-fix-redesign.md tasks/prd-lms-overhaul-v2.md docs/superpowers/plans/ docs/superpowers/specs/)",
+      "Bash(rmdir docs/superpowers)",
+      "Bash(rmdir tasks:*)"
     ]
   }
 }

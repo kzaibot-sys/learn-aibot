@@ -16,3 +16,4 @@ apps/api/public/videos/
 *.mp4
 *.pdf
 .idea/
+.playwright-mcp/
