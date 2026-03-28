@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Award, Download, Hash, BookOpen, ArrowRight, UserCircle } from 'lucide-react';
@@ -56,12 +56,29 @@ export default function CertificatesPage() {
 
   const loading = certsLoading || progressLoading;
 
-  const handleDownload = (cert: Certificate) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    window.open(
-      `${apiUrl}/api/certificates/${cert.id}/download?token=${encodeURIComponent(token || '')}`,
-      '_blank',
-    );
+  const [sending, setSending] = useState<string | null>(null);
+  const isMiniApp = typeof window !== 'undefined' && !!(window as unknown as { Telegram?: { WebApp?: unknown } }).Telegram?.WebApp;
+
+  const handleDownload = async (cert: Certificate) => {
+    if (isMiniApp) {
+      // In Telegram Mini App — send PDF to user's Telegram chat
+      setSending(cert.id);
+      try {
+        await apiRequest('/api/certificates/' + cert.id + '/send-telegram', { method: 'POST' }, token);
+        alert('Сертификат отправлен в Telegram!');
+      } catch (err) {
+        alert(err instanceof Error ? err.message : 'Ошибка отправки');
+      } finally {
+        setSending(null);
+      }
+    } else {
+      // Regular browser — direct download
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      window.open(
+        `${apiUrl}/api/certificates/${cert.id}/download?token=${encodeURIComponent(token || '')}`,
+        '_blank',
+      );
+    }
   };
 
   const hasName = Boolean(user?.firstName && user?.lastName);
@@ -126,13 +143,14 @@ export default function CertificatesPage() {
                       </span>
                     </div>
 
-                    {/* Download button */}
+                    {/* Download / Send to Telegram button */}
                     <button
                       onClick={() => handleDownload(cert)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 text-white text-sm font-medium shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all relative"
+                      disabled={sending === cert.id}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 text-white text-sm font-medium shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all disabled:opacity-60"
                     >
                       <Download className="w-4 h-4" />
-                      {t('certificates.download')}
+                      {sending === cert.id ? 'Отправляется...' : (isMiniApp ? 'Отправить в Telegram' : t('certificates.download'))}
                     </button>
                   </div>
                 ))}

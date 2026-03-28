@@ -204,4 +204,82 @@ router.get('/:id/download', asyncHandler(async (req: Request, res: Response) => 
   res.send(pdfBuffer);
 }));
 
+// POST /api/certificates/:id/send-telegram — generate PDF and send to user via Telegram bot
+router.post('/:id/send-telegram', authenticate, asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user!.sub;
+
+  const certificate = await prisma.certificate.findUnique({
+    where: { id: req.params.id },
+    include: {
+      course: { select: { title: true } },
+      user: {
+        select: {
+          firstName: true, lastName: true, middleName: true,
+          telegramAccount: { select: { telegramId: true } },
+        },
+      },
+    },
+  });
+
+  if (!certificate || certificate.userId !== userId) {
+    throw new AppError(404, 'CERTIFICATE_NOT_FOUND', 'Certificate not found');
+  }
+
+  const telegramId = certificate.user.telegramAccount?.telegramId;
+  if (!telegramId) {
+    throw new AppError(400, 'NO_TELEGRAM', 'Telegram account not linked');
+  }
+
+  const fullName = certificate.fullName
+    || [certificate.user.lastName, certificate.user.firstName, certificate.user.middleName]
+        .filter(Boolean).join(' ')
+    || 'Студент';
+
+  const pdfBuffer = await generateCertificatePDF({
+    fullName,
+    courseTitle: certificate.course.title,
+    certificateNumber: certificate.number,
+    issuedDate: certificate.issuedAt,
+  });
+
+  // Send PDF via Telegram Bot API
+  const botToken = config.telegram.botToken;
+  if (!botToken) {
+    throw new AppError(503, 'BOT_NOT_CONFIGURED', 'Telegram bot not configured');
+  }
+
+  const FormData = (await import('node:buffer')).Buffer;
+  const boundary = '----FormBoundary' + Date.now().toString(36);
+  const fileName = `certificate-${certificate.number}.pdf`;
+  const caption = `🎓 Сертификат: ${certificate.course.title}\n📋 ${fullName}\n🔢 ${certificate.number}`;
+
+  // Build multipart form data manually
+  const parts: Buffer[] = [];
+  // chat_id
+  parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n${telegramId}\r\n`));
+  // caption
+  parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="caption"\r\n\r\n${caption}\r\n`));
+  // document (PDF file)
+  parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="document"; filename="${fileName}"\r\nContent-Type: application/pdf\r\n\r\n`));
+  parts.push(pdfBuffer);
+  parts.push(Buffer.from(`\r\n--${boundary}--\r\n`));
+
+  const body = Buffer.concat(parts);
+
+  const tgResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendDocument`, {
+    method: 'POST',
+    headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` },
+    body,
+  });
+
+  const tgResult = await tgResponse.json() as { ok: boolean; description?: string };
+
+  if (!tgResult.ok) {
+    console.error('[Certificate] Telegram send failed:', tgResult);
+    throw new AppError(502, 'TELEGRAM_SEND_FAILED', 'Failed to send certificate via Telegram');
+  }
+
+  res.json({ success: true, data: { sent: true, telegramId } });
+}));
+
 export { router as certificatesRouter };
