@@ -187,42 +187,25 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
        .fillColor(DARK)
        .text(dateStr, 120, bottomY + 16, { width: 200 });
 
-    // === CENTER — Company Stamp (round KZ-style stamp) ===
+    // === CENTER — Company Stamp (simple double-circle) ===
     const cx = W / 2;
     const cy = bottomY + 25;
-    const outerR = 38;
-    const innerR = 28;
+    const outerR = 30;
+    const innerR = 24;
 
-    // Outer circle (double border)
-    doc.circle(cx, cy, outerR).lineWidth(2.5).stroke(STAMP_BLUE);
-    doc.circle(cx, cy, outerR - 3).lineWidth(1).stroke(STAMP_BLUE);
-
-    // Inner circle
+    // Double circle border
+    doc.circle(cx, cy, outerR).lineWidth(2).stroke(STAMP_BLUE);
     doc.circle(cx, cy, innerR).lineWidth(1).stroke(STAMP_BLUE);
 
-    // Center text — "ТОО" line 1, "«AiBot»" line 2
+    // Center text — "ТОО" on top, "«AiBot»" bold below
+    setFont(false);
+    doc.fontSize(7)
+       .fillColor(STAMP_BLUE)
+       .text('ТОО', cx - 20, cy - 10, { width: 40, align: 'center' });
     setFont(true);
     doc.fontSize(9)
        .fillColor(STAMP_BLUE)
-       .text('ТОО', cx - 25, cy - 12, { width: 50, align: 'center' });
-    doc.fontSize(11)
-       .fillColor(STAMP_BLUE)
-       .text('«AiBot»', cx - 30, cy + 0, { width: 60, align: 'center' });
-
-    // Ring text between outer and inner circles (top arc)
-    setFont(false);
-    doc.fontSize(5)
-       .fillColor(STAMP_BLUE);
-
-    // Top arc text — simulate by placing characters along the top
-    const topText = 'ТОВАРИЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ';
-    const topTextWidth = doc.widthOfString(topText);
-    doc.text(topText, cx - topTextWidth / 2, cy - outerR + 5, { width: topTextWidth + 10 });
-
-    // Bottom arc text
-    const bottomText = 'БИН 123456789012';
-    const bottomTextWidth = doc.widthOfString(bottomText);
-    doc.text(bottomText, cx - bottomTextWidth / 2, cy + outerR - 12, { width: bottomTextWidth + 10 });
+       .text('«AiBot»', cx - 24, cy + 0, { width: 48, align: 'center' });
 
     // === RIGHT — Director + Signature ===
     const sigX = W - 280;
@@ -236,26 +219,8 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
        .fillColor(GRAY)
        .text('Генеральный директор', sigX, bottomY + 16, { width: 160 });
 
-    // Drawn signature simulation (wavy/curved line as signature)
-    doc.save();
-    doc.lineWidth(1.2).strokeColor('#1a3a6c');
-    const sigStartX = sigX;
-    const sigY = bottomY + 38;
-    doc.moveTo(sigStartX, sigY)
-       .bezierCurveTo(sigStartX + 15, sigY - 8, sigStartX + 25, sigY + 6, sigStartX + 40, sigY - 2)
-       .bezierCurveTo(sigStartX + 50, sigY - 8, sigStartX + 60, sigY + 5, sigStartX + 75, sigY - 3)
-       .bezierCurveTo(sigStartX + 85, sigY - 8, sigStartX + 95, sigY + 4, sigStartX + 110, sigY)
-       .stroke();
-    doc.restore();
-
-    // "подпись" label under signature line
-    setFont(false);
-    doc.fontSize(7)
-       .fillColor(LIGHT_GRAY)
-       .text('подпись', sigX + 30, sigY + 5, { width: 60, align: 'center' });
-
-    // Signature line
-    doc.moveTo(sigX, bottomY + 52).lineTo(sigX + 130, bottomY + 52).lineWidth(0.5).stroke('#CBD5E1');
+    // Signature line under director name
+    doc.moveTo(sigX, bottomY + 34).lineTo(sigX + 140, bottomY + 34).lineWidth(0.5).stroke('#CBD5E1');
 
     // === CERTIFICATE NUMBER ===
     setFont(false);
