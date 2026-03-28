@@ -73,6 +73,14 @@ router.get('/course/:courseId', asyncHandler(async (req: Request, res: Response)
   const userId = req.user!.sub;
   const { courseId } = req.params;
 
+  // Check enrollment
+  const enrollment = await prisma.enrollment.findUnique({
+    where: { userId_courseId: { userId, courseId } },
+  });
+  if (!enrollment || enrollment.status !== 'ACTIVE') {
+    throw new AppError(403, 'NOT_ENROLLED', 'Для доступа к урокам оплатите курс через бота @aibot_learn_bot');
+  }
+
   const course = await prisma.course.findUnique({
     where: { id: courseId },
     select: {
