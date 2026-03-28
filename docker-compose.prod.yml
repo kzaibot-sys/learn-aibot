@@ -52,7 +52,7 @@ services:
       context: .
       dockerfile: Dockerfile.web
       args:
-        NEXT_PUBLIC_API_URL: https://demo-lms.aibot.kz/api
+        NEXT_PUBLIC_API_URL: https://demo-lms.aibot.kz
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"
