@@ -338,14 +338,14 @@ export const translations = {
     'landing.nav.howItWorks': 'Как это работает',
     'landing.nav.reviews': 'Отзывы',
     'landing.nav.faq': 'FAQ',
-    'landing.nav.login': 'Войти',
+    'landing.nav.login': 'Начать в Telegram',
 
     // Landing - Hero
     'landing.hero.badge': 'Новый курс уже доступен',
     'landing.hero.title1': 'Учись с',
     'landing.hero.title2': 'ИИ-помощником',
     'landing.hero.subtitle': 'Онлайн-курсы с персональным AI-наставником, видеоуроками и сертификатами. Учитесь в удобном темпе и получайте поддержку 24/7.',
-    'landing.hero.cta': 'Начать обучение',
+    'landing.hero.cta': 'Начать в Telegram',
     'landing.hero.program': 'Программа курса',
     'landing.hero.stat1Value': '500+',
     'landing.hero.stat1Label': 'студентов',
@@ -357,7 +357,7 @@ export const translations = {
     // Landing - Header (legacy)
     'landing.header.program': 'Программа',
     'landing.header.reviews': 'Отзывы',
-    'landing.header.cta': 'Начать обучение',
+    'landing.header.cta': 'Начать в Telegram',
 
     // Landing - About
     'landing.about.title': 'Почему выбирают нас',
@@ -483,7 +483,7 @@ export const translations = {
     // CTA Section
     'landing.cta.title': 'Готовы начать обучение?',
     'landing.cta.subtitle': 'Присоединяйтесь к нашей платформе и начните свой путь к новым знаниям уже сегодня. ИИ-помощник, видеоуроки и сертификаты ждут вас.',
-    'landing.cta.button': 'Начать сейчас',
+    'landing.cta.button': 'Начать в Telegram',
   },
   kz: {
     // Navigation
@@ -824,14 +824,14 @@ export const translations = {
     'landing.nav.howItWorks': 'Қалай жұмыс істейді',
     'landing.nav.reviews': 'Пікірлер',
     'landing.nav.faq': 'FAQ',
-    'landing.nav.login': 'Кіру',
+    'landing.nav.login': 'Telegram-да бастау',
 
     // Landing - Hero
     'landing.hero.badge': 'Жаңа курс қолжетімді',
     'landing.hero.title1': 'AI-көмекшімен',
     'landing.hero.title2': 'оқы',
     'landing.hero.subtitle': 'Жеке AI-тәлімгері, бейнесабақтары және сертификаттары бар онлайн-курстар. Ыңғайлы қарқынмен оқып, 24/7 қолдау алыңыз.',
-    'landing.hero.cta': 'Оқуды бастау',
+    'landing.hero.cta': 'Telegram-да бастау',
     'landing.hero.program': 'Курс бағдарламасы',
     'landing.hero.stat1Value': '500+',
     'landing.hero.stat1Label': 'студент',
@@ -843,7 +843,7 @@ export const translations = {
     // Landing - Header (legacy)
     'landing.header.program': 'Бағдарлама',
     'landing.header.reviews': 'Пікірлер',
-    'landing.header.cta': 'Оқуды бастау',
+    'landing.header.cta': 'Telegram-да бастау',
 
     // Landing - About
     'landing.about.title': 'Неге бізді таңдайды',
@@ -969,7 +969,7 @@ export const translations = {
     // CTA Section
     'landing.cta.title': 'Оқуды бастауға дайынсыз ба?',
     'landing.cta.subtitle': 'Платформамызға қосылып, жаңа білімге апаратын жолды бүгін бастаңыз. AI-көмекші, бейнесабақтар және сертификаттар сізді күтеді.',
-    'landing.cta.button': 'Қазір бастау',
+    'landing.cta.button': 'Telegram-да бастау',
   },
 } as const;
 

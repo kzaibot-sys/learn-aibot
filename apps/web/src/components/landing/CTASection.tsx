@@ -28,7 +28,9 @@ export function CTASection() {
               {t('landing.cta.subtitle')}
             </p>
             <a
-              href="/login"
+              href="https://t.me/aibot_learn_bot"
+              target="_blank"
+              rel="noopener noreferrer"
               className="hover-lift inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-lg font-bold text-primary shadow-2xl transition-all hover:shadow-white/25 active:scale-95"
             >
               {t('landing.cta.button')}

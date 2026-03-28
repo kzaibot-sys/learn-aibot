@@ -133,6 +133,39 @@
   animation: float 3s ease-in-out infinite;
 }
 
+/* Hero floating shapes — CSS-only, no JS */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(-15px); }
+  50% { transform: translateY(15px); }
+}
+@keyframes float-medium {
+  0%, 100% { transform: translateY(10px); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes float-rotate {
+  0%, 100% { transform: translateY(-8px) rotate(0deg); }
+  50% { transform: translateY(12px) rotate(45deg); }
+}
+@keyframes float-slow-reverse {
+  0%, 100% { transform: translateY(12px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes scroll-dot {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
+.animate-float-medium { animation: float-medium 5s ease-in-out infinite; }
+.animate-float-rotate { animation: float-rotate 7s ease-in-out infinite; }
+.animate-float-slow-reverse { animation: float-slow-reverse 8s ease-in-out infinite; }
+.animate-scroll-dot { animation: scroll-dot 1.5s ease-in-out infinite; }
+.animate-fade-in { animation: fade-in 0.5s ease-out both; }
+
 /* === Glass & Card Styles === */
 .glass-card {
   background: rgba(255, 255, 255, 0.05);

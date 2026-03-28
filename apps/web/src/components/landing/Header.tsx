@@ -34,22 +34,26 @@ export function Header() {
           >
             {t('landing.header.reviews')}
           </a>
-          <Link
-            href="/login"
+          <a
+            href="https://t.me/aibot_learn_bot"
+            target="_blank"
+            rel="noopener noreferrer"
             className="rounded-2xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 transition-all"
           >
             {t('landing.header.cta')}
-          </Link>
+          </a>
         </nav>
 
         {/* Mobile: CTA + burger */}
         <div className="flex items-center gap-2 sm:hidden">
-          <Link
-            href="/login"
+          <a
+            href="https://t.me/aibot_learn_bot"
+            target="_blank"
+            rel="noopener noreferrer"
             className="rounded-2xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-orange-500/30"
           >
             {t('landing.header.cta')}
-          </Link>
+          </a>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
