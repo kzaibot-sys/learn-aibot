@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AiBot — Авторизация</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script data-cfasync="false" src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -93,7 +93,7 @@
     <button class="retry-btn" id="retryBtn" onclick="authenticate()">Попробовать снова</button>
   </div>
 
-  <script>
+  <script data-cfasync="false">
     const API_URL = window.location.origin;
 
     function showError(msg) {
