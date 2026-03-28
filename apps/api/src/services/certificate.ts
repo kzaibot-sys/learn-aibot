@@ -1,6 +1,7 @@
 import PDFDocument from 'pdfkit';
 import path from 'path';
 import fs from 'fs';
+import QRCode from 'qrcode';
 
 interface CertificateData {
   fullName: string;
@@ -42,7 +43,16 @@ function loadFonts(): void {
 
 loadFonts();
 
-export function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
+export async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
+  // Generate QR code as PNG buffer
+  const verifyUrl = `https://demo-lms.aibot.kz/certificates/verify/${data.certificateNumber}`;
+  const qrBuffer = await QRCode.toBuffer(verifyUrl, {
+    type: 'png',
+    width: 160,
+    margin: 1,
+    color: { dark: '#1a3a6c', light: '#FAFBFC' },
+  });
+
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: 'A4',
@@ -80,6 +90,7 @@ export function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
     const GRAY = '#64748B';       // slate-500
     const LIGHT_GRAY = '#94A3B8'; // slate-400
     const BG = '#FAFBFC';
+    const STAMP_BLUE = '#1a3a6c'; // dark blue for stamp
 
     // === BACKGROUND ===
     doc.rect(0, 0, W, H).fill(BG);
@@ -176,21 +187,44 @@ export function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
        .fillColor(DARK)
        .text(dateStr, 120, bottomY + 16, { width: 200 });
 
-    // Center — Logo seal (circle with "A" icon)
+    // === CENTER — Company Stamp (round KZ-style stamp) ===
     const cx = W / 2;
-    const cy = bottomY + 20;
-    doc.circle(cx, cy, 28).lineWidth(2.5).stroke(BRAND);
-    doc.circle(cx, cy, 22).lineWidth(1).stroke(BRAND);
+    const cy = bottomY + 25;
+    const outerR = 38;
+    const innerR = 28;
+
+    // Outer circle (double border)
+    doc.circle(cx, cy, outerR).lineWidth(2.5).stroke(STAMP_BLUE);
+    doc.circle(cx, cy, outerR - 3).lineWidth(1).stroke(STAMP_BLUE);
+
+    // Inner circle
+    doc.circle(cx, cy, innerR).lineWidth(1).stroke(STAMP_BLUE);
+
+    // Center text — "ТОО" line 1, "«AiBot»" line 2
     setFont(true);
-    doc.fontSize(20).fillColor(BRAND);
-    doc.text('A', cx - 10, cy - 10, { width: 20, align: 'center' });
+    doc.fontSize(9)
+       .fillColor(STAMP_BLUE)
+       .text('ТОО', cx - 25, cy - 12, { width: 50, align: 'center' });
+    doc.fontSize(11)
+       .fillColor(STAMP_BLUE)
+       .text('«AiBot»', cx - 30, cy + 0, { width: 60, align: 'center' });
 
+    // Ring text between outer and inner circles (top arc)
     setFont(false);
-    doc.fontSize(8)
-       .fillColor(GRAY)
-       .text('ТОО «AiBot»', cx - 40, cy + 35, { width: 80, align: 'center' });
+    doc.fontSize(5)
+       .fillColor(STAMP_BLUE);
 
-    // Right — Director
+    // Top arc text — simulate by placing characters along the top
+    const topText = 'ТОВАРИЩЕСТВО С ОГРАНИЧЕННОЙ ОТВЕТСТВЕННОСТЬЮ';
+    const topTextWidth = doc.widthOfString(topText);
+    doc.text(topText, cx - topTextWidth / 2, cy - outerR + 5, { width: topTextWidth + 10 });
+
+    // Bottom arc text
+    const bottomText = 'БИН 123456789012';
+    const bottomTextWidth = doc.widthOfString(bottomText);
+    doc.text(bottomText, cx - bottomTextWidth / 2, cy + outerR - 12, { width: bottomTextWidth + 10 });
+
+    // === RIGHT — Director + Signature ===
     const sigX = W - 280;
     setFont(true);
     doc.fontSize(11)
@@ -202,20 +236,36 @@ export function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
        .fillColor(GRAY)
        .text('Генеральный директор', sigX, bottomY + 16, { width: 160 });
 
+    // Drawn signature simulation (wavy/curved line as signature)
+    doc.save();
+    doc.lineWidth(1.2).strokeColor('#1a3a6c');
+    const sigStartX = sigX;
+    const sigY = bottomY + 38;
+    doc.moveTo(sigStartX, sigY)
+       .bezierCurveTo(sigStartX + 15, sigY - 8, sigStartX + 25, sigY + 6, sigStartX + 40, sigY - 2)
+       .bezierCurveTo(sigStartX + 50, sigY - 8, sigStartX + 60, sigY + 5, sigStartX + 75, sigY - 3)
+       .bezierCurveTo(sigStartX + 85, sigY - 8, sigStartX + 95, sigY + 4, sigStartX + 110, sigY)
+       .stroke();
+    doc.restore();
+
+    // "подпись" label under signature line
+    setFont(false);
+    doc.fontSize(7)
+       .fillColor(LIGHT_GRAY)
+       .text('подпись', sigX + 30, sigY + 5, { width: 60, align: 'center' });
+
     // Signature line
-    doc.moveTo(sigX, bottomY + 40).lineTo(sigX + 130, bottomY + 40).lineWidth(0.5).stroke('#CBD5E1');
+    doc.moveTo(sigX, bottomY + 52).lineTo(sigX + 130, bottomY + 52).lineWidth(0.5).stroke('#CBD5E1');
 
     // === CERTIFICATE NUMBER ===
     setFont(false);
     doc.fontSize(8)
        .fillColor(LIGHT_GRAY)
-       .text(data.certificateNumber, 0, H - 70, { align: 'center', width: W });
+       .text(data.certificateNumber, 0, H - 78, { align: 'center', width: W });
 
-    // === VERIFICATION URL ===
-    setFont(false);
-    doc.fontSize(7)
-       .fillColor(LIGHT_GRAY)
-       .text('Проверить подлинность: aibot.kz/certificates/verify/' + data.certificateNumber, 0, H - 58, { align: 'center', width: W });
+    // === QR CODE (centered at bottom, replaces text verification URL) ===
+    const qrSize = 80;
+    doc.image(qrBuffer, cx - qrSize / 2, H - 75, { width: qrSize, height: qrSize });
 
     doc.end();
   });

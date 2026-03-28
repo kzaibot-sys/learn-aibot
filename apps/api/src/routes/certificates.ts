@@ -16,25 +16,19 @@ const router = Router();
 router.post('/request/:courseId', authenticate, asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
   const { courseId } = req.params;
-  const { firstName, lastName } = req.body;
-
-  if (!firstName || !lastName) {
-    throw new AppError(400, 'VALIDATION_ERROR', 'firstName and lastName are required');
-  }
 
   // Check course exists
-  const course = await prisma.course.findUnique({ where: { id: courseId } });
+  const course = await prisma.course.findUnique({ where: { id: courseId }, select: { id: true } });
   if (!course) {
     throw new AppError(404, 'COURSE_NOT_FOUND', 'Course not found');
   }
 
-  // Check if certificate already exists
+  // Check if certificate already exists — once created, it cannot be regenerated
   const existing = await prisma.certificate.findUnique({
     where: { userId_courseId: { userId, courseId } },
   });
   if (existing) {
-    res.json({ success: true, data: existing });
-    return;
+    throw new AppError(409, 'CERTIFICATE_EXISTS', 'Certificate already exists');
   }
 
   // Verify 100% completion
@@ -55,6 +49,14 @@ router.post('/request/:courseId', authenticate, asyncHandler(async (req: Request
     throw new AppError(403, 'COURSE_NOT_COMPLETED', `Course not completed. ${completedCount}/${lessons.length} lessons done.`);
   }
 
+  // Get user profile for fullName (locked at certificate creation time)
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { lastName: true, firstName: true, middleName: true },
+  });
+  const fullName = [user?.lastName, user?.firstName, user?.middleName]
+    .filter(Boolean).join(' ') || 'Студент';
+
   // Generate certificate number: AIBOT-XXXXX-XXXX (uppercase alphanumeric)
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   const randomSegment = (len: number) =>
@@ -62,14 +64,14 @@ router.post('/request/:courseId', authenticate, asyncHandler(async (req: Request
       .map(b => charset[b % charset.length])
       .join('');
   const number = `AIBOT-${randomSegment(5)}-${randomSegment(4)}`;
-  const now = new Date();
 
-  // Save to DB (PDF is generated on-the-fly at download time)
+  // Save to DB with locked fullName (PDF is generated on-the-fly at download time)
   const certificate = await prisma.certificate.create({
     data: {
       userId,
       courseId,
       number,
+      fullName,
       fileUrl: null,
     },
   });
@@ -121,7 +123,8 @@ router.get('/verify/:number', asyncHandler(async (req: Request, res: Response) =
   const certificate = await prisma.certificate.findUnique({
     where: { number },
     include: {
-      user: { select: { firstName: true, lastName: true } },
+      user: { select: { firstName: true, lastName: true, middleName: true } },
+      course: { select: { title: true } },
     },
   });
 
@@ -129,17 +132,18 @@ router.get('/verify/:number', asyncHandler(async (req: Request, res: Response) =
     throw new AppError(404, 'CERTIFICATE_NOT_FOUND', 'Certificate not found');
   }
 
-  const course = await prisma.course.findUnique({
-    where: { id: certificate.courseId },
-    select: { title: true },
-  });
+  // Use locked fullName; fall back to user profile for legacy certs
+  const fullName = certificate.fullName
+    || [certificate.user.lastName, certificate.user.firstName, certificate.user.middleName]
+        .filter(Boolean).join(' ')
+    || 'Студент';
 
   res.json({
     success: true,
     data: {
       number: certificate.number,
-      fullName: `${certificate.user.firstName || ''} ${certificate.user.lastName || ''}`.trim(),
-      courseTitle: course?.title || 'Unknown',
+      fullName,
+      courseTitle: certificate.course?.title || 'Unknown',
       issuedAt: certificate.issuedAt,
     },
   });
@@ -182,8 +186,11 @@ router.get('/:id/download', asyncHandler(async (req: Request, res: Response) => 
     throw new AppError(404, 'CERTIFICATE_NOT_FOUND', 'Certificate not found');
   }
 
-  const fullName = [certificate.user.firstName, certificate.user.middleName, certificate.user.lastName]
-    .filter(Boolean).join(' ') || 'Студент';
+  // Use locked fullName from certificate record; fall back to user profile for legacy certs
+  const fullName = certificate.fullName
+    || [certificate.user.lastName, certificate.user.firstName, certificate.user.middleName]
+        .filter(Boolean).join(' ')
+    || 'Студент';
 
   const pdfBuffer = await generateCertificatePDF({
     fullName,

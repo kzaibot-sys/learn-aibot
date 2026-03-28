@@ -577,7 +577,7 @@ router.get('/certificates/verify/:number', asyncHandler(async (req: Request, res
     success: true,
     data: {
       number: cert.number,
-      fullName: [cert.user.lastName, cert.user.firstName, cert.user.middleName].filter(Boolean).join(' '),
+      fullName: cert.fullName || [cert.user.lastName, cert.user.firstName, cert.user.middleName].filter(Boolean).join(' '),
       courseTitle: cert.course.title,
       issuedAt: cert.issuedAt,
     },

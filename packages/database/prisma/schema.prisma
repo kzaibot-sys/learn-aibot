@@ -234,6 +234,7 @@ model Certificate {
   userId   String   @map("user_id")
   courseId String   @map("course_id")
   number   String   @unique
+  fullName String?  @map("full_name")
   fileUrl  String?  @map("file_url")
   issuedAt DateTime @default(now()) @map("issued_at")
 
