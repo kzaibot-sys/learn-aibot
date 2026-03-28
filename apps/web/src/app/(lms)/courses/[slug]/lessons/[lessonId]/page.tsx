@@ -122,6 +122,7 @@ export default function LessonPage() {
     new Set(),
   );
   const [loading, setLoading] = useState(true);
+  const [notEnrolled, setNotEnrolled] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [savedPosition, setSavedPosition] = useState(0);
   const [showResumeBanner, setShowResumeBanner] = useState(false);
@@ -178,7 +179,10 @@ export default function LessonPage() {
           // No progress yet
         }
       } catch (err) {
-        console.error('Failed to load lesson:', err);
+        const msg = err instanceof Error ? err.message : '';
+        if (msg.includes('оплатите') || msg.includes('NOT_ENROLLED') || msg.includes('нет доступа')) {
+          setNotEnrolled(true);
+        }
       } finally {
         setLoading(false);
       }
@@ -273,6 +277,34 @@ export default function LessonPage() {
 
   if (loading) {
     return <div className="flex items-center justify-center py-20"><div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" /></div>;
+  }
+
+  if (notEnrolled) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+        <div className="p-6 rounded-3xl bg-orange-500/10 border border-orange-500/20 mb-6">
+          <svg className="w-16 h-16 text-orange-500 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-foreground mb-3">Доступ закрыт</h2>
+        <p className="text-muted-foreground mb-6 max-w-md">
+          Для доступа к урокам курса оплатите его через нашего Telegram-бота
+        </p>
+        <a
+          href="https://t.me/aibot_learn_bot"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 px-8 py-3 text-white font-semibold shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all"
+        >
+          Купить в Telegram-боте
+        </a>
+        <Link href={`/courses/${slug}`} className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          ← Вернуться к курсу
+        </Link>
+      </div>
+    );
   }
 
   if (!lesson) {

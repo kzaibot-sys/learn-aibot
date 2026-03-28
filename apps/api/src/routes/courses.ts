@@ -227,15 +227,13 @@ router.get('/:slug/lessons/:lessonId', authenticate, asyncHandler(async (req: Re
     throw new AppError(404, 'COURSE_NOT_FOUND', 'Курс не найден');
   }
 
-  // Check enrollment (unless course is free)
-  if (!course.isFree) {
-    const enrollment = await prisma.enrollment.findUnique({
-      where: { userId_courseId: { userId, courseId: course.id } },
-    });
+  // Check enrollment — always required (access granted via bot after payment)
+  const enrollment = await prisma.enrollment.findUnique({
+    where: { userId_courseId: { userId, courseId: course.id } },
+  });
 
-    if (!enrollment || enrollment.status !== 'ACTIVE') {
-      throw new AppError(403, 'NOT_ENROLLED', 'У вас нет доступа к этому курсу');
-    }
+  if (!enrollment || enrollment.status !== 'ACTIVE') {
+    throw new AppError(403, 'NOT_ENROLLED', 'Для доступа к урокам оплатите курс через бота @aibot_learn_bot');
   }
 
   const lesson = await prisma.lesson.findUnique({
