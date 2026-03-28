@@ -203,12 +203,12 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
 
     // === LEFT — Company Stamp (PNG image, below date) ===
     if (stampImage) {
-      doc.image(stampImage, 130, bottomY + 38, { width: 90, height: 58 });
+      doc.image(stampImage, 120, bottomY + 32, { width: 95, height: 95 });
     } else {
-      const stampCx = 175;
-      const stampCy = bottomY + 65;
-      doc.circle(stampCx, stampCy, 25).lineWidth(1.5).stroke(STAMP_BLUE);
-      doc.circle(stampCx, stampCy, 20).lineWidth(0.8).stroke(STAMP_BLUE);
+      const stampCx = 167;
+      const stampCy = bottomY + 75;
+      doc.circle(stampCx, stampCy, 30).lineWidth(1.5).stroke(STAMP_BLUE);
+      doc.circle(stampCx, stampCy, 24).lineWidth(0.8).stroke(STAMP_BLUE);
       setFont(true);
       doc.fontSize(7).fillColor(STAMP_BLUE)
          .text('AiBot', stampCx - 18, stampCy - 5, { width: 36, align: 'center' });
@@ -226,11 +226,11 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
        .fillColor(GRAY)
        .text('Генеральный директор', sigX, bottomY + 16, { width: 160 });
 
-    // Signature image
+    // Signature image (1.5x larger)
     if (signatureImage) {
-      doc.image(signatureImage, sigX + 15, bottomY + 30, { width: 110, height: 40 });
+      doc.image(signatureImage, sigX, bottomY + 28, { width: 165, height: 55 });
     } else {
-      doc.moveTo(sigX, bottomY + 38).lineTo(sigX + 140, bottomY + 38).lineWidth(0.5).stroke('#CBD5E1');
+      doc.moveTo(sigX, bottomY + 45).lineTo(sigX + 150, bottomY + 45).lineWidth(0.5).stroke('#CBD5E1');
     }
 
     // === QR CODE (centered, above bottom border) ===
