@@ -39,7 +39,8 @@
       "Bash(sshpass:*)",
       "Bash(ssh:*)",
       "Bash(expect:*)",
-      "Bash(\"C:/Users/aiman/OneDrive/Desktop/learn-aibot/docker-compose.prod.yml\":*)"
+      "Bash(\"C:/Users/aiman/OneDrive/Desktop/learn-aibot/docker-compose.prod.yml\":*)",
+      "Bash(nslookup demo-lms.aibot.kz)"
     ]
   }
 }

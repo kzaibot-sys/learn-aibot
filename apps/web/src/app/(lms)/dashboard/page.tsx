@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   BookOpen,
@@ -54,39 +55,25 @@ export default function DashboardPage() {
   const { t } = useI18n();
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
-  const [courses, setCourses] = useState<CourseProgress[]>([]);
-  const [certCount, setCertCount] = useState(0);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        // Load enrolled courses with progress
-        const progressData = await apiRequest<CourseProgress[]>(
-          '/api/courses/my-progress',
-          {},
-          token,
-        ).catch(() => [] as CourseProgress[]);
+  const { data: courses = [], isLoading: coursesLoading } = useQuery({
+    queryKey: ['my-progress'],
+    queryFn: () => apiRequest<CourseProgress[]>('/api/courses/my-progress', {}, token),
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
 
-        setCourses(progressData);
+  const { data: certs = [], isLoading: certsLoading } = useQuery({
+    queryKey: ['my-certificates'],
+    queryFn: () => apiRequest<Certificate[]>('/api/certificates/my', {}, token),
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
 
-        // Load certificate count
-        const certs = await apiRequest<Certificate[]>(
-          '/api/certificates/my',
-          {},
-          token,
-        ).catch(() => [] as Certificate[]);
-
-        setCertCount(certs.length);
-      } catch (err) {
-        console.error('Failed to load dashboard:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (token) load();
-  }, [token]);
+  const certCount = certs.length;
+  const loading = coursesLoading || certsLoading;
 
   /* derived stats */
   const stats = useMemo(() => {
