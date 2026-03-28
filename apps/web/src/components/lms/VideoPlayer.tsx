@@ -343,11 +343,40 @@ export function VideoPlayer({
 
   function toggleFullscreen() {
     const container = containerRef.current;
+    const video = videoRef.current;
     if (!container) return;
+
     if (document.fullscreenElement) {
-      document.exitFullscreen();
+      document.exitFullscreen().catch(() => {});
     } else {
-      container.requestFullscreen();
+      // Try container fullscreen first (shows custom controls)
+      if (container.requestFullscreen) {
+        container.requestFullscreen().catch(() => {
+          // Fallback: try video native fullscreen (iOS/WebView)
+          if (video) {
+            const v = video as HTMLVideoElement & {
+              webkitEnterFullscreen?: () => void;
+              webkitRequestFullscreen?: () => void;
+            };
+            if (v.webkitEnterFullscreen) {
+              v.webkitEnterFullscreen();
+            } else if (v.webkitRequestFullscreen) {
+              v.webkitRequestFullscreen();
+            }
+          }
+        });
+      } else if (video) {
+        // No container fullscreen support (Mini App / iOS)
+        const v = video as HTMLVideoElement & {
+          webkitEnterFullscreen?: () => void;
+          webkitRequestFullscreen?: () => void;
+        };
+        if (v.webkitEnterFullscreen) {
+          v.webkitEnterFullscreen();
+        } else if (v.webkitRequestFullscreen) {
+          v.webkitRequestFullscreen();
+        }
+      }
     }
   }
 
