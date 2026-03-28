@@ -84,7 +84,11 @@ export default function TgAuthPage() {
       localStorage.setItem('lms-auth', JSON.stringify(authData));
 
       setStatus('success');
-      window.location.replace('/dashboard');
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get('redirect') || '/dashboard';
+      // Only allow internal redirects (must start with /)
+      const safePath = redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/dashboard';
+      window.location.replace(safePath);
     } catch {
       setError('Ошибка соединения');
       setStatus('error');

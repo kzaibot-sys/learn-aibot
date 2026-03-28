@@ -176,7 +176,11 @@
         localStorage.setItem('lms-auth', JSON.stringify(authData));
 
         // Redirect to dashboard
-        window.location.replace('/dashboard');
+        // Support ?redirect= parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect') || '/dashboard';
+        const safePath = redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/dashboard';
+        window.location.replace(safePath);
 
       } catch (err) {
         showError('Ошибка соединения. Проверьте интернет.');
