@@ -113,10 +113,25 @@
       document.getElementById('retryBtn').style.display = 'none';
 
       try {
-        // Initialize Telegram WebApp
         const tg = window.Telegram && window.Telegram.WebApp;
+
+        // DEBUG: show what the page sees
+        const debug = {
+          hasTelegram: !!window.Telegram,
+          hasWebApp: !!(window.Telegram && window.Telegram.WebApp),
+          initData: tg ? tg.initData : 'N/A',
+          initDataLength: tg ? tg.initData.length : 0,
+          platform: tg ? tg.platform : 'N/A',
+          version: tg ? tg.version : 'N/A',
+          colorScheme: tg ? tg.colorScheme : 'N/A',
+        };
+
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('error').style.color = '#666';
+        document.getElementById('error').textContent = 'DEBUG: ' + JSON.stringify(debug);
+
         if (!tg) {
-          showError('Откройте через Telegram');
+          showError('Telegram WebApp SDK не загружен. DEBUG: ' + JSON.stringify(debug));
           return;
         }
 
@@ -125,7 +140,7 @@
 
         const initData = tg.initData;
         if (!initData) {
-          showError('Не удалось получить данные Telegram');
+          showError('initData пуст. platform=' + tg.platform + ' version=' + tg.version + ' initDataUnsafe=' + JSON.stringify(tg.initDataUnsafe));
           return;
         }
 
