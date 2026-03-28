@@ -236,16 +236,29 @@ export default function DashboardPage() {
                     custom={1}
                     className="rounded-3xl bg-card/50 backdrop-blur-sm border border-border/50 p-8 text-center"
                   >
-                    <p className="text-muted-foreground mb-4">
-                      {t('dashboard.noCourses')}
+                    <p className="text-muted-foreground mb-2">
+                      У вас пока нет курсов.
                     </p>
-                    <Link
-                      href="/courses"
-                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-shadow"
-                    >
-                      {t('dashboard.goToCatalog')}
-                      <ChevronRight className="h-4 w-4" />
-                    </Link>
+                    <p className="text-sm text-muted-foreground mb-5">
+                      Выберите и оплатите курс через нашего Telegram-бота.
+                    </p>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                      <a
+                        href="https://t.me/aibot_learn_bot"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-shadow"
+                      >
+                        Перейти в бот
+                        <ChevronRight className="h-4 w-4" />
+                      </a>
+                      <Link
+                        href="/courses"
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Каталог курсов
+                      </Link>
+                    </div>
                   </motion.div>
                 ) : (
                   <div className="space-y-3">
