@@ -61,8 +61,65 @@ function formatUser(user: { id: string; email: string | null; firstName: string 
   return { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, middleName: user.middleName ?? null, phone: user.phone ?? null, role: user.role };
 }
 
-// Registration is disabled — users are created via Telegram bot only.
-// POST /api/auth/register route has been removed.
+/**
+ * @openapi
+ * /auth/register:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Register new user (for mobile apps)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password, firstName]
+ *             properties:
+ *               email: { type: string, format: email }
+ *               password: { type: string, minLength: 6 }
+ *               firstName: { type: string }
+ *               lastName: { type: string }
+ *               phone: { type: string }
+ *     responses:
+ *       201: { description: User created, returns tokens }
+ *       409: { description: Email already exists }
+ */
+router.post('/register', asyncHandler(async (req: Request, res: Response) => {
+  const { email, password, firstName, lastName, phone } = req.body;
+
+  if (!email || !password || !firstName) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'email, password, and firstName are required');
+  }
+
+  if (password.length < 6) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'Password must be at least 6 characters');
+  }
+
+  // Check if user exists
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) {
+    throw new AppError(409, 'EMAIL_EXISTS', 'User with this email already exists');
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12);
+
+  const user = await prisma.user.create({
+    data: {
+      email,
+      passwordHash,
+      firstName,
+      lastName: lastName || null,
+      phone: phone || null,
+    },
+  });
+
+  const tokens = await generateTokens(user);
+
+  res.status(201).json({
+    success: true,
+    data: { user: formatUser(user), ...tokens },
+  });
+}));
 
 /**
  * @openapi
@@ -340,6 +397,55 @@ router.patch('/profile', authenticate, asyncHandler(async (req: Request, res: Re
   });
 
   res.json({ success: true, data: user });
+}));
+
+/**
+ * @openapi
+ * /auth/change-password:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Change password
+ *     security: [{ BearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [currentPassword, newPassword]
+ *             properties:
+ *               currentPassword: { type: string }
+ *               newPassword: { type: string, minLength: 6 }
+ *     responses:
+ *       200: { description: Password changed }
+ *       401: { description: Current password incorrect }
+ */
+router.post('/change-password', authenticate, asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user!.sub;
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'currentPassword and newPassword are required');
+  }
+
+  if (newPassword.length < 6) {
+    throw new AppError(400, 'VALIDATION_ERROR', 'New password must be at least 6 characters');
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user || !user.passwordHash) {
+    throw new AppError(400, 'NO_PASSWORD', 'No password set for this account');
+  }
+
+  const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!valid) {
+    throw new AppError(401, 'INVALID_PASSWORD', 'Current password is incorrect');
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 12);
+  await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+
+  res.json({ success: true });
 }));
 
 export { router as authRouter };

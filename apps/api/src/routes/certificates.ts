@@ -12,7 +12,25 @@ import type { JwtPayload } from '@lms/shared';
 
 const router = Router();
 
-// POST /api/certificates/request/:courseId — request certificate (authenticated)
+/**
+ * @openapi
+ * /certificates/request/{courseId}:
+ *   post:
+ *     tags: [Certificates]
+ *     summary: Request certificate for completed course
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema: { type: string }
+ *         description: Course ID
+ *     responses:
+ *       201: { description: Certificate created }
+ *       403: { description: Course not fully completed }
+ *       404: { description: Course not found }
+ *       409: { description: Certificate already exists }
+ */
 router.post('/request/:courseId', authenticate, asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
   const { courseId } = req.params;
@@ -82,7 +100,16 @@ router.post('/request/:courseId', authenticate, asyncHandler(async (req: Request
   res.status(201).json({ success: true, data: certificate });
 }));
 
-// GET /api/certificates/my — list user's certificates (authenticated)
+/**
+ * @openapi
+ * /certificates/my:
+ *   get:
+ *     tags: [Certificates]
+ *     summary: List current user's certificates
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200: { description: List of user certificates }
+ */
 router.get('/my', authenticate, asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
 
@@ -116,7 +143,22 @@ router.get('/my', authenticate, asyncHandler(async (req: Request, res: Response)
   res.json(certsResponse);
 }));
 
-// GET /api/certificates/verify/:number — public verification (no auth)
+/**
+ * @openapi
+ * /certificates/verify/{number}:
+ *   get:
+ *     tags: [Certificates]
+ *     summary: Verify certificate by number (public, no auth)
+ *     parameters:
+ *       - in: path
+ *         name: number
+ *         required: true
+ *         schema: { type: string }
+ *         description: Certificate number (e.g. AIBOT-XXXXX-XXXX)
+ *     responses:
+ *       200: { description: Certificate verification details }
+ *       404: { description: Certificate not found }
+ */
 router.get('/verify/:number', asyncHandler(async (req: Request, res: Response) => {
   const { number } = req.params;
 
@@ -149,7 +191,31 @@ router.get('/verify/:number', asyncHandler(async (req: Request, res: Response) =
   });
 }));
 
-// GET /api/certificates/:id/download — generate PDF on-the-fly and stream to client
+/**
+ * @openapi
+ * /certificates/{id}/download:
+ *   get:
+ *     tags: [Certificates]
+ *     summary: Download certificate as PDF
+ *     description: Supports Bearer token in header or token query parameter for direct browser downloads
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: Certificate ID
+ *       - in: query
+ *         name: token
+ *         schema: { type: string }
+ *         description: JWT token (alternative to Bearer header for browser downloads)
+ *     responses:
+ *       200:
+ *         description: PDF file
+ *         content:
+ *           application/pdf: {}
+ *       401: { description: Authentication required }
+ *       404: { description: Certificate not found }
+ */
 router.get('/:id/download', asyncHandler(async (req: Request, res: Response) => {
   // Support token via query param for direct browser downloads
   let userId: string;
@@ -204,7 +270,26 @@ router.get('/:id/download', asyncHandler(async (req: Request, res: Response) => 
   res.send(pdfBuffer);
 }));
 
-// POST /api/certificates/:id/send-telegram — generate PDF and send to user via Telegram bot
+/**
+ * @openapi
+ * /certificates/{id}/send-telegram:
+ *   post:
+ *     tags: [Certificates]
+ *     summary: Generate certificate PDF and send via Telegram
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: Certificate ID
+ *     responses:
+ *       200: { description: Certificate sent to Telegram }
+ *       400: { description: Telegram account not linked }
+ *       404: { description: Certificate not found }
+ *       502: { description: Failed to send via Telegram }
+ *       503: { description: Telegram bot not configured }
+ */
 router.post('/:id/send-telegram', authenticate, asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
 

@@ -9,7 +9,25 @@ const router = Router();
 // All routes require authentication
 router.use(authenticate);
 
-// GET /api/notifications — list user notifications (newest first)
+/**
+ * @openapi
+ * /notifications:
+ *   get:
+ *     tags: [Notifications]
+ *     summary: List user notifications (newest first)
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *         description: Page number
+ *       - in: query
+ *         name: perPage
+ *         schema: { type: integer, default: 20, maximum: 50 }
+ *         description: Items per page
+ *     responses:
+ *       200: { description: Paginated list of notifications }
+ */
 router.get('/', asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
   const page = Math.max(1, Number(req.query.page) || 1);
@@ -31,7 +49,27 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
   });
 }));
 
-// GET /api/notifications/unread-count
+/**
+ * @openapi
+ * /notifications/unread-count:
+ *   get:
+ *     tags: [Notifications]
+ *     summary: Get unread notifications count
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Unread count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     count: { type: integer }
+ */
 router.get('/unread-count', asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
 
@@ -52,7 +90,16 @@ router.get('/unread-count', asyncHandler(async (req: Request, res: Response) => 
   res.json(unreadResponse);
 }));
 
-// PATCH /api/notifications/read-all — mark all as read
+/**
+ * @openapi
+ * /notifications/read-all:
+ *   patch:
+ *     tags: [Notifications]
+ *     summary: Mark all notifications as read
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200: { description: All notifications marked as read }
+ */
 router.patch('/read-all', asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
   await prisma.notification.updateMany({
@@ -64,7 +111,22 @@ router.patch('/read-all', asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data: { ok: true } });
 }));
 
-// PATCH /api/notifications/:id/read — mark single as read
+/**
+ * @openapi
+ * /notifications/{id}/read:
+ *   patch:
+ *     tags: [Notifications]
+ *     summary: Mark single notification as read
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *         description: Notification ID
+ *     responses:
+ *       200: { description: Notification marked as read }
+ */
 router.patch('/:id/read', asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
   const { id } = req.params;

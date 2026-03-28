@@ -7,7 +7,38 @@ import { cacheGet, cacheSet } from '../services/redis';
 
 const router = Router();
 
-// GET /api/courses/my-progress — batch: enrolled courses with progress
+/**
+ * @openapi
+ * /courses/my-progress:
+ *   get:
+ *     tags: [Courses]
+ *     summary: Get enrolled courses with progress summary
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: List of enrolled courses with progress percentages
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id: { type: string }
+ *                       slug: { type: string }
+ *                       title: { type: string }
+ *                       description: { type: string }
+ *                       coverUrl: { type: string, nullable: true }
+ *                       totalModules: { type: integer }
+ *                       totalLessons: { type: integer }
+ *                       completedLessons: { type: integer }
+ *                       progressPercent: { type: integer }
+ *                       enrolledAt: { type: string, format: date-time }
+ */
 router.get('/my-progress', authenticate, asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
 
@@ -78,7 +109,40 @@ router.get('/my-progress', authenticate, asyncHandler(async (req: Request, res: 
   res.json(response);
 }));
 
-// GET /api/courses — published courses list (optional ?search=term)
+/**
+ * @openapi
+ * /courses:
+ *   get:
+ *     tags: [Courses]
+ *     summary: List published courses
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *         description: Optional search term to filter courses by title or description
+ *     responses:
+ *       200:
+ *         description: List of published courses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id: { type: string }
+ *                       slug: { type: string }
+ *                       title: { type: string }
+ *                       description: { type: string }
+ *                       coverUrl: { type: string, nullable: true }
+ *                       totalLessons: { type: integer }
+ *                       totalModules: { type: integer }
+ *                       enrollmentCount: { type: integer }
+ */
 router.get('/', asyncHandler(async (req: Request, res: Response) => {
   const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
 
@@ -143,7 +207,22 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
   res.json(response);
 }));
 
-// GET /api/courses/:slug — course details with modules and lessons
+/**
+ * @openapi
+ * /courses/{slug}:
+ *   get:
+ *     tags: [Courses]
+ *     summary: Get course details with modules and lessons
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *         description: Course slug
+ *     responses:
+ *       200: { description: Course details with modules and lessons }
+ *       404: { description: Course not found }
+ */
 router.get('/:slug', asyncHandler(async (req: Request, res: Response) => {
   const { slug } = req.params;
   const cacheKey = `courses:detail:${slug}`;
@@ -213,7 +292,29 @@ router.get('/:slug', asyncHandler(async (req: Request, res: Response) => {
   res.json(response);
 }));
 
-// GET /api/courses/:slug/lessons/:lessonId — lesson detail (enrolled only)
+/**
+ * @openapi
+ * /courses/{slug}/lessons/{lessonId}:
+ *   get:
+ *     tags: [Courses]
+ *     summary: Get lesson detail (enrolled users only)
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *         description: Course slug
+ *       - in: path
+ *         name: lessonId
+ *         required: true
+ *         schema: { type: string }
+ *         description: Lesson ID
+ *     responses:
+ *       200: { description: Lesson detail with progress }
+ *       403: { description: Not enrolled in course }
+ *       404: { description: Course or lesson not found }
+ */
 router.get('/:slug/lessons/:lessonId', authenticate, asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.sub;
   const { slug, lessonId } = req.params;
